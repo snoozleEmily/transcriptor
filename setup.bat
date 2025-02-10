@@ -15,7 +15,8 @@ if %errorlevel% neq 0 (
     echo 4. Add the following path to the "Path" variable under "System Variables":
     echo    C:\ffmpeg\bin
     echo 5. Click OK, close the window, and restart your terminal.
-    echo 6. Rerun this script after completing the steps.
+    echo 6. Rerun this script after compl
+    eting the steps.
     echo -------------------------------------------
 
     :: Open FFmpeg download page
