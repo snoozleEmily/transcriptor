@@ -1,86 +1,97 @@
 import os
-import ffmpeg 
-import whisper
-from fpdf import FPDF
-from enum import Enum
+import subprocess
+import textwrap
+import speech_recognition as sr
 
-class Status(Enum):
-    SUCCESS = "Process completed successfully."
-    AUDIO_FAIL = "Audio extraction failed. Exiting."
-    TRANSCRIPTION_FAIL = "Transcription failed."
-    PDF_FAIL = "Failed to save transcription to PDF."
-
-def extract_audio(video_path, audio_path):
-    """Extracts and saves audio from a video file using ffmpeg-python with error handling."""
-    try:
-        stream = ffmpeg.input(video_path)
-        stream = ffmpeg.output(stream, audio_path, format='mp3', acodec='mp3')
-        ffmpeg.run(stream, overwrite_output=True)
-        return {"success": True, "message": f"Audio extracted and saved to {audio_path}"}
-    except ffmpeg.Error as e:
-        print("FFmpeg Error:", e.stderr.decode())
-        return {"success": False, "message": f"Error extracting audio: {e.stderr.decode()}"}
+from util.status import Status
+from util.errors import (
+    FfmpegMissingError, AudioExtractionError, TranscriptionError,
+    FileSaveError, transcription_error_handler, handle_error
+)
 
 
-def transcribe_audio(audio_path, model_name="base"):
+
+def check_ffmpeg() -> None:
     """
-    Transcribes an audio file to text using OpenAI's Whisper.
+    Verify that ffmpeg is available in the system PATH.
+    Raises:
+        FfmpegMissingError: If ffmpeg is not found.
     """
+    result = subprocess.run(
+        ["ffmpeg", "-version"],
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+    if result.returncode != 0:
+        raise FfmpegMissingError()
+
+def extract_audio(video_path: str, audio_path: str) -> None:
+    """
+    Extract audio from the given video using ffmpeg.
+    Raises:
+        AudioExtractionError: If ffmpeg fails to extract audio.
+    """
+    cmd = Status.get_ffmpeg_command(video_path, audio_path)
+    result = subprocess.run(cmd, check=False, stderr=subprocess.PIPE)
+    if result.returncode != 0:
+        raise AudioExtractionError(f"ffmpeg error: {result.stderr.decode()[:100]}")
+
+@transcription_error_handler
+def transcribe_audio(audio_path: str) -> str:
+    """
+    Transcribe audio using Google's Speech Recognition.
+    
+    This function is decorated with transcription_error_handler, which 
+    converts specific errors into a TranscriptionError.
+    
+    Returns:
+        str: The transcribed text.
+    """
+    recognizer = sr.Recognizer()
+    with sr.AudioFile(audio_path) as source:
+        audio = recognizer.record(source)
+        return recognizer.recognize_google(audio)
+
+def save_transcription(text: str, output_path: str, line_width: int = 80) -> None:
+    """
+    Save the transcribed text to a file with text wrapping.
+    
+    Raises:
+        FileSaveError: If the transcription cannot be saved.
+    """
+    wrapped_text = textwrap.fill(text, width=line_width)
     try:
-        model = whisper.load_model(model_name)
-        print(f"Loaded Whisper model: {model_name}")
-        result = model.transcribe(audio_path)
-        print("Transcription completed.")
-        return result["text"]
+        with open(output_path, "w", encoding="utf-8") as f:
+            f.write(wrapped_text)
     except Exception as e:
-        print(f"Error transcribing audio with Whisper: {e}")
-        return ""
+        raise FileSaveError(f"File save error: {str(e)}")
 
-def save_to_pdf(text, output_pdf_path):
+def process_media(video_path: str, output_txt_path: str) -> str:
     """
-    Saves the transcribed text to a PDF file.
+    Process the media file by extracting audio, transcribing it, and saving the transcription.
+    
+    Returns:
+        str: A success message if the process completes, or an error message from errors module.
     """
     try:
-        pdf = FPDF()
-        pdf.set_auto_page_break(auto=True, margin=15)
-        pdf.add_page()
-        pdf.set_font("Arial", size=14)
-        
-        lines = text.splitlines()
-        for line in lines:
-            pdf.multi_cell(0, 10, line)
+        check_ffmpeg()
+        audio_path = "temp_audio.wav"
+        extract_audio(video_path, audio_path)
+        transcription = transcribe_audio(audio_path)
+        save_transcription(transcription, output_txt_path)
 
-        pdf.output(output_pdf_path)
-        print(f"Transcription saved to PDF: {output_pdf_path}")
-        return True
-    except Exception as e:
-        print(f"Error saving transcription to PDF: {e}")
-        return False
+        # Clean up temporary audio file
+        if os.path.exists(audio_path):
+            os.remove(audio_path)
 
-def process_transcription(video_path, audio_path, output_pdf_path):
-    audio_result = extract_audio(video_path, audio_path)
-    if not audio_result["success"]:
-        return audio_result["message"]
+        return Status.SUCCESS.value
 
-    transcription = transcribe_audio(audio_path, model_name="base")
-    if not transcription:
-        return Status.TRANSCRIPTION_FAIL.value
-
-    if not save_to_pdf(transcription, output_pdf_path):
-        return Status.PDF_FAIL.value
-
-    return Status.SUCCESS.value
+    except (FfmpegMissingError, AudioExtractionError, TranscriptionError, FileSaveError) as e:
+        # Delegate exception handling to the centralized handler
+        return handle_error(e)
 
 if __name__ == "__main__":
-    video_path = input("Enter the path to the video file: ").strip()
-    audio_path = "extracted_audio.mp3"
-    output_pdf_path = "transcription.pdf"
-    
-    print(process_transcription(video_path, audio_path, output_pdf_path))
-    
-    if os.path.exists(audio_path):
-        try:
-            os.remove(audio_path)
-            print(f"Temporary audio file {audio_path} deleted.")
-        except Exception as e:
-            print(f"Error deleting temporary audio file: {e}")
+    video_path = input("Enter video file path: ").strip()
+    output_path = "transcription.txt"
+    result_message = process_media(video_path, output_path)
+    print(result_message)

@@ -1,3 +1,0 @@
-fpdf
-ffmpeg 
-whisper
