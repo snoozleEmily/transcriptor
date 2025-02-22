@@ -7,7 +7,7 @@ This project contains a simple Python script for transcribing video into text.
 
 Run the script with the following command:
 ```sh
-python transcriptor.py
+python main.py
 ```
 
 ## License
