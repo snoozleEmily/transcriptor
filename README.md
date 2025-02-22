@@ -12,4 +12,4 @@ python transcriptor.py
 
 ## License
 
-This project is licensed under the ??? License.
+This project is licensed under the GNU General Public License. This means you are free to build upon the current code to develop the game further, but you **must credit the original author** and distribute any modifications under the **same license**. For more details, see the [license file](\LICENSE).

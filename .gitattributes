@@ -1,2 +1,26 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+
+# Python virtual environment
+venv/
+.env
+
+# Build artifacts
+dist/
+build/
+*.egg-info/
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# IDE-specific files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Localization files (if using gettext)
+*.mo
