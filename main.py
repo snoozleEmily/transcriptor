@@ -1,37 +1,43 @@
-import textwrap
-
-from utils.audio_processor import check_ffmpeg, extract_audio
 from utils.transcriber import Transcriber
-from utils import errors, status
-
+from utils.file_handler import save_transcription
+from utils.audio_processor import check_ffmpeg, extract_audio
+from errors.handlers import catch_errors, format_error
 
 # For devs to copy and  ctrl -v: 
 # .\venv\Scripts\Activate
 # deactivate
 
+@catch_errors
+def process_audio(video_path: str):
+    """Process audio from video file"""
+    check_ffmpeg()
+    return extract_audio(video_path)
 
-def save_transcription(text: str, output_path: str):
-    """Save formatted transcription"""
-    try:
-        wrapped = textwrap.fill(text, width=80)
-        with open(output_path, "w", encoding="utf-8") as f:
-            f.write(wrapped)
-        return status.Status.SUCCESS.value
-    except Exception as e:
-        raise errors.FileSaveError(str(e))
 
-def process_media(video_path: str, output_path: str) -> str:
-    """Main processing pipeline"""
+@catch_errors
+def transcribe(audio) -> str:
+    """Transcribe audio using Whisper"""
+    transcriber = Transcriber(model_size="tiny")
+    return transcriber.transcribe(audio)
+
+
+def main():
+    video_path = input("Enter video path: ").strip().strip('"').strip("'")
     try:
-        check_ffmpeg()
-        audio = extract_audio(video_path)
-        transcriber = Transcriber(model_size="tiny")
-        text = transcriber.transcribe(audio)
-        return save_transcription(text, output_path)
+        # Step 1: Extract and clean audio
+        audio = process_audio(video_path)
+        
+        # Step 2: Transcribe audio
+        text = transcribe(audio)
+        
+        # Step 3: Save transcription
+        save_transcription(text, "transcription.txt")
+        print("✅ Transcription saved successfully!")
+    
     except Exception as e:
-        return errors.handle_error(e)
+        error_info = format_error(e)
+        print(f"❌ Error {error_info['code']}: {error_info['message']}")
+
 
 if __name__ == "__main__":
-    video_path = input("Enter video path: ").strip()
-    result = process_media(video_path, "transcription.txt")
-    print(result)
+    main()
