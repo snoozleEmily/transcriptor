@@ -4,6 +4,8 @@ import threading
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
+
+
 class TranscriptorApp:
     def __init__(self, root):
         self.root = root
