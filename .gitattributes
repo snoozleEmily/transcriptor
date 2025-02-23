@@ -5,6 +5,7 @@
 venv/
 .env
 
+
 # Ignore line endings for specific files/dirs
 venv/** -text
 .gitattributes -text
