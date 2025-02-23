@@ -6,51 +6,70 @@ class TranscriptorApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Transcriptor")
-        self.root.geometry("500x250")
-        self.root.configure(bg="#2b2b2b")  # Dark background color
-        
+        self.root.geometry("550x300")  # Increased screen size
+        self.root.configure(bg="#1a1a2f")  # Deep navy blue background
+        self.root.resizable(False, False)
+
         # Configure styles
         self.style = ttk.Style()
         self.style.theme_use('alt')
-        self.style.configure('TLabel', background="#2b2b2b", foreground="white")
-        self.style.configure('TButton', background="#3a3a3a", foreground="white", bordercolor="#4a4a4a")
-        self.style.map('TButton', 
-                      background=[('active', '#4a4a4a'), ('pressed', '#5a5a5a')])
         
+        # Configure colors and fonts
+        self.style.configure('TLabel', 
+                           background="#1a1a2f", 
+                           foreground="white",
+                           font=("Arial", 10))
+        
+        self.style.configure('TButton', 
+                           background="#2a2a4a", 
+                           foreground="white",
+                           borderwidth=0,
+                           focuscolor="#1a1a2f",
+                           font=("Arial", 10, "bold"),
+                           relief="flat")
+        
+        self.style.map('TButton', 
+                     background=[('active', '#3a3a6a'), ('pressed', '#4a4a8a')],
+                     foreground=[('active', 'white')])
+
         # Main container
-        main_frame = ttk.Frame(self.root)
-        main_frame.pack(expand=True, fill='both', padx=20, pady=20)
+        main_frame = tk.Frame(self.root, bg="#1a1a2f")
+        main_frame.pack(expand=True, fill='both', padx=40, pady=30)
         
         # Title Label
-        title_label = ttk.Label(
+        title_label = tk.Label(
             main_frame,
             text="Emily's Transcriptor",
-            font=("Helvetica", 12)
+            font=("Arial", 16, "bold"),
+            bg="#1a1a2f",
+            fg="white"
         )
-        title_label.pack(pady=(0, 10))
+        title_label.pack(pady=(0, 20))
         
-        # Emoji Label
-        emoji_label = ttk.Label(
+        # Emoji Label (white icon with transparent background)
+        emoji_label = tk.Label(
             main_frame,
             text="🎥",
-            font=("Helvetica", 40)
+            font=("Segoe UI Emoji", 64),  # Larger emoji size
+            bg="#1a1a2f",
+            fg="white"  # Set emoji color to white
         )
-        emoji_label.pack(pady=(0, 20))
+        emoji_label.pack(pady=(0, 25))
         
         # Select Video Button
         select_button = ttk.Button(
             main_frame,
-            text="Select Video",
-            width=18,
+            text="SELECT VIDEO",
+            width=20,
             command=self.select_video
         )
-        select_button.pack(pady=(0, 10))
+        select_button.pack(pady=(0, 15))
         
         # GitHub Button
         github_button = ttk.Button(
             main_frame,
-            text="See Github Repo",
-            width=14,
+            text="GITHUB REPO",
+            width=16,
             command=self.open_github
         )
         github_button.pack(pady=(0, 10))
