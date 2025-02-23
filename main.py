@@ -6,6 +6,7 @@ from errors.handlers import catch_errors, format_error
 # For devs to copy and  ctrl -v: 
 # .\venv\Scripts\Activate
 # deactivate
+# pip install -r requirements.txt
 
 @catch_errors
 def process_audio(video_path: str):

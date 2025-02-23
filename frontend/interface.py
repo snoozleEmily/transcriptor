@@ -44,7 +44,7 @@ class TranscriptorApp:
             bg="#1a1a2f",
             fg="white"
         )
-        title_label.pack(pady=(0, 20))
+        title_label.pack(pady=(0, 5))
         
         # Emoji Label (white icon with transparent background)
         emoji_label = tk.Label(
@@ -54,25 +54,26 @@ class TranscriptorApp:
             bg="#1a1a2f",
             fg="white"  # Set emoji color to white
         )
-        emoji_label.pack(pady=(0, 25))
+        emoji_label.pack(pady=(0, 15))
         
         # Select Video Button
         select_button = ttk.Button(
             main_frame,
             text="SELECT VIDEO",
-            width=20,
+            width=30,  
             command=self.select_video
         )
-        select_button.pack(pady=(0, 15))
-        
+        select_button.pack(pady=(0, 15))  
+
         # GitHub Button
         github_button = ttk.Button(
             main_frame,
             text="GITHUB REPO",
-            width=16,
+            width=30,  # Adjusted width
             command=self.open_github
         )
-        github_button.pack(pady=(0, 10))
+        github_button.pack(pady=(0, 15))  # Adjusted pady to keep spacing reasonable
+
 
     def select_video(self):
         file_path = filedialog.askopenfilename(
