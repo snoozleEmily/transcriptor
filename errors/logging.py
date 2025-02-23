@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+
 def configure_logging(
     log_level: int = logging.INFO,
     log_file: Optional[Path] = None

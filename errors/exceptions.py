@@ -5,6 +5,7 @@ class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
     INVALID_INPUT = "invalid_input"
+    FILE_ERROR = "file_error"
     FFMPEG_ERROR = "ffmpeg_error"
     UNKNOWN_ERROR = "unknown_error"
     UNEXPECTED_ERROR = "unexpected_error"
@@ -23,6 +24,17 @@ class AppError(Exception):
         self.context = context or {}
         super().__init__(message)
 
+class FileError(AppError):
+    """File operation errors"""
+    
+    @classmethod
+    def save_failed(cls, error: Exception) -> "FileError":
+        return cls(
+            code=ErrorCode.FILE_ERROR,
+            message="Failed to save file",
+            context={"original_error": str(error)}
+        )
+    
 class FFmpegError(AppError):
     """FFmpeg-related operation errors"""
     
