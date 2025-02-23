@@ -1,71 +1,73 @@
 import numpy as np
 import whisper
 from pydub import AudioSegment
+from typing import Optional, Callable
+
 
 from errors.exceptions import TranscriptionError
 
 
 
 class Transcriber:
-    """Handles audio transcription using OpenAI's Whisper model"""
+    """Handle audio transcription using Whisper"""
     
     def __init__(self, model_size: str = "tiny"):
-        """
-        Initialize Whisper model
-        Args:
-            model_size: Whisper model size (tiny, base, small, medium, large)
-        """
-        try:
-            self.model = whisper.load_model(model_size)
-            self.sample_rate = 16000  # Whisper's expected sample rate
-        except Exception as e:
-            raise TranscriptionError.service_error(
-                f"Failed to load model: {str(e)}"
-            ) from e
+        self.model = self._load_model(model_size)
+        self.sample_rate = 16000
 
-    def transcribe(self, audio: AudioSegment) -> str:
-        """
-        Transcribe audio using Whisper
-        Args:
-            audio: Input audio segment
-        Returns:
-            str: Transcribed text
-        Raises:
-            TranscriptionError: For any transcription failure
-        """
-        try:
-            # Convert to Whisper-compatible format
-            audio = self._preprocess_audio(audio)
-            result = self.model.transcribe(audio)
-            
-            if not result.get("text"):
-                raise TranscriptionError.no_speech()
-                
-            return result["text"]
-            
-        except TranscriptionError:
-            raise  # Re-raise already handled errors
+    def transcribe(self, audio_path: str, 
+                 progress_cb: Optional[Callable[[int], None]] = None) -> str:
+        """Transcribe audio file with progress updates"""
+        audio = self._load_audio(audio_path)
+        audio_array = self._preprocess_audio(audio)
         
+        self._update_progress(progress_cb, 10)
+        
+        result = self.model.transcribe(
+            audio_array,
+            progress_callback=lambda p: self._handle_progress(p, progress_cb)
+        )
+        
+        self._update_progress(progress_cb, 100)
+        
+        if not result.get("text"):
+            raise TranscriptionError.no_speech()
+            
+        return result["text"]
+
+    def _load_model(self, model_size: str):
+        """Load Whisper model with validation"""
+        valid_sizes = ["tiny", "base", "small", "medium", "large"]
+        if model_size not in valid_sizes:
+            raise TranscriptionError.invalid_model()
+            
+        try:
+            return whisper.load_model(model_size)
         except Exception as e:
-            raise TranscriptionError.generic_error(
-                f"Transcription failed: {str(e)}"
-            ) from e
+            raise TranscriptionError.load_failed() from e
+
+    def _load_audio(self, path: str) -> AudioSegment:
+        """Load and validate audio file"""
+        try:
+            audio = AudioSegment.from_file(path)
+            if len(audio) == 0:
+                raise TranscriptionError.empty_audio()
+            return audio
+        except Exception as e:
+            raise TranscriptionError.load_failed() from e
 
     def _preprocess_audio(self, audio: AudioSegment) -> np.ndarray:
-        """Convert AudioSegment to Whisper-compatible numpy array"""
+        """Convert audio to Whisper-compatible format"""
         try:
-            # Convert to mono and resample if needed
-            audio = audio.set_channels(1)
-            if audio.frame_rate != self.sample_rate:
-                audio = audio.set_frame_rate(self.sample_rate)
-                
-            # Convert to numpy array of float32
-            return np.frombuffer(
-                audio.raw_data, 
-                dtype=np.int16
-            ).astype(np.float32) / 32768.0
-            
+            audio = audio.set_channels(1).set_frame_rate(self.sample_rate)
+            return np.frombuffer(audio.raw_data, np.int16).astype(np.float32) / 32768.0
         except Exception as e:
-            raise TranscriptionError.generic_error(
-                f"Audio preprocessing failed: {str(e)}"
-            ) from e
+            raise TranscriptionError.preprocessing_failed() from e
+
+    def _handle_progress(self, progress: float, callback: Optional[Callable[[int], None]]):
+        if callback:
+            callback(min(100, int(progress * 100)))
+
+    def _update_progress(self, callback: Optional[Callable[[int], None]], value: int):
+        if callback:
+            callback(value)

@@ -1,43 +1,19 @@
-from utils.transcriber import Transcriber
-from utils.file_handler import save_transcription
-from utils.audio_processor import check_ffmpeg, extract_audio
-from errors.handlers import catch_errors, format_error
+import sys
+import tkinter as tk
 
-# For devs to copy and  ctrl -v: 
-# .\venv\Scripts\Activate
-# deactivate
-
-@catch_errors
-def process_audio(video_path: str):
-    """Process audio from video file"""
-    check_ffmpeg()
-    return extract_audio(video_path)
-
-
-@catch_errors
-def transcribe(audio) -> str:
-    """Transcribe audio using Whisper"""
-    transcriber = Transcriber(model_size="tiny")
-    return transcriber.transcribe(audio)
-
+try:
+    from app.gui import TranscriptorApp
+    from app.controller import ProcessingController
+except ImportError as e:
+    print(f"Error: {e}")
+    print("Please ensure all dependencies are installed. Run: pip install -r requirements.txt")
+    sys.exit(1)
 
 def main():
-    video_path = input("Enter video path: ").strip().strip('"').strip("'")
-    try:
-        # Step 1: Extract and clean audio
-        audio = process_audio(video_path)
-        
-        # Step 2: Transcribe audio
-        text = transcribe(audio)
-        
-        # Step 3: Save transcription
-        save_transcription(text, "transcription.txt")
-        print("✅ Transcription saved successfully!")
-    
-    except Exception as e:
-        error_info = format_error(e)
-        print(f"❌ Error {error_info['code']}: {error_info['message']}")
-
+    root = tk.Tk()
+    controller = ProcessingController()
+    TranscriptorApp(root, controller)
+    root.mainloop()
 
 if __name__ == "__main__":
     main()

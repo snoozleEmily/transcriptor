@@ -1,45 +1,46 @@
-class Errors(Exception):
-    """Base exception for all transcriptor errors"""
-    def __init__(self, code: str, message: str, cause: Exception = None):
-        super().__init__(message)
-        self.code = code
-        self.cause = cause
-        self.message = f"{message} [Code: {code}]"
-        if cause:
-            self.message += f"\nCause: {str(cause)}"
+from enum import Enum
+from typing import Optional, Dict, Any
 
-    def __str__(self):
-        return self.message
+class ErrorCode(Enum):
+    NO_SPEECH = "no_speech_detected"
+    SERVICE_UNAVAILABLE = "service_unavailable"
+    INVALID_INPUT = "invalid_input"
+    FFMPEG_ERROR = "ffmpeg_error"
+    UNKNOWN_ERROR = "unknown_error"
+    UNEXPECTED_ERROR = "unexpected_error"
 
-# FFmpeg-related exceptions
-class FFmpegError(Errors):
-    @classmethod
-    def missing(cls):
-        return cls("FFMPEG_MISSING", "FFmpeg not installed")
-
-    @classmethod
-    def extraction_failed(cls, cause: Exception):
-        return cls("AUDIO_EXTRACTION", "Audio extraction failed", cause)
-    @classmethod
-    def generic_error(cls, cause: Exception):
-        return cls("FFMPEG_ERROR", "FFmpeg encountered an error", cause)
+class AppError(Exception):
+    """Base application exception type"""
     
-# Transcription-related exceptions
-class TranscriptionError(Errors):
-    @classmethod
-    def no_speech(cls):
-        return cls("NO_SPEECH", "No speech detected")
+    def __init__(
+        self,
+        code: ErrorCode,
+        message: str,
+        context: Optional[Dict[str, Any]] = None
+    ):
+        self.code = code
+        self.message = message
+        self.context = context or {}
+        super().__init__(message)
 
+class FFmpegError(AppError):
+    """FFmpeg-related operation errors"""
+    
     @classmethod
-    def service_error(cls, cause: Exception):
-        return cls("SERVICE_ERROR", "Transcription service failed", cause)
+    def from_ffmpeg_output(cls, output: str) -> "FFmpegError":
+        return cls(
+            code=ErrorCode.FFMPEG_ERROR,
+            message="FFmpeg processing failed",
+            context={"ffmpeg_output": output}
+        )
 
+class TranscriptionError(AppError):
+    """Transcription service errors"""
+    
     @classmethod
-    def generic_error(cls, cause: Exception):
-        return cls("TRANSCRIPTION_FAIL", "Transcription failed", cause)
-
-# File-related exceptions
-class FileError(Errors):
-    @classmethod
-    def save_failed(cls, cause: Exception):
-        return cls("FILE_SAVE", "Failed to save file", cause)
+    def from_whisper_error(cls, error: Exception) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.SERVICE_UNAVAILABLE,
+            message="Transcription service error",
+            context={"original_error": str(error)}
+        )

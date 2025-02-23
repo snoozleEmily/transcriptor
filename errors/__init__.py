@@ -1,13 +1,13 @@
 from .exceptions import (
-    Errors,
+    AppError,
     FFmpegError,
     TranscriptionError,
-    FileError
+    FileError,
+    ErrorCode
 )
 
 from .handlers import (
-    catch_errors,
-    transcribe_errors,
+    error_handler,
     format_error
 )
 
@@ -17,8 +17,20 @@ from .logging import (
 )
 
 __all__ = [
-    "Errors",
+    # Error Types
+    "AppError",
     "FFmpegError",
     "TranscriptionError",
-    "FileError"
+    "FileError",
+    
+    # Error Codes
+    "ErrorCode",
+    
+    # Handlers
+    "error_handler",
+    "format_error",
+    
+    # Logging
+    "configure_logging",
+    "log_unexpected_error"
 ]

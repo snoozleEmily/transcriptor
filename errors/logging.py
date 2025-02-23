@@ -1,17 +1,34 @@
 import logging
-import traceback
+import sys
+from pathlib import Path
+from typing import Optional
 
+def configure_logging(
+    log_level: int = logging.INFO,
+    log_file: Optional[Path] = None
+) -> None:
+    """Configure centralized logging with rotation"""
+    handlers = [logging.StreamHandler(sys.stdout)]
+    
+    if log_file:
+        handlers.append(
+            logging.FileHandler(
+                filename=log_file,
+                encoding='utf-8'
+            )
+        )
 
-
-def configure_logging():
-    """Configure basic logging setup"""
     logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s - %(levelname)s - %(message)s',
-        handlers=[logging.StreamHandler()]
+        level=log_level,
+        format='%(asctime)s | %(levelname)-8s | %(name)s | %(message)s',
+        datefmt='%Y-%m-%d %H:%M:%S',
+        handlers=handlers
     )
 
-def log_unexpected_error(error: Exception):
-    """Log unexpected errors with traceback"""
-    logging.error(f"Unexpected error: {str(error)}")
-    logging.debug(f"Traceback:\n{traceback.format_exc()}")
+def log_unexpected_error(error: Exception) -> None:
+    """Log unexpected exceptions with full context"""
+    logging.error(
+        "Unexpected error occurred: %s",
+        str(error),
+        exc_info=True
+    )

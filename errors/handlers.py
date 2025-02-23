@@ -1,54 +1,59 @@
-from typing import Callable, Dict, Any
+from typing import Callable, Type, Any
+import functools
 import speech_recognition as sr
 
-
 from .logging import log_unexpected_error
-from .exceptions import Errors, FFmpegError
+from .exceptions import (
+    AppError,
+    FFmpegError,
+    TranscriptionError,
+    ErrorCode
+)
 
+def error_handler(*error_types: Type[BaseException]) -> Callable:
+    """Flexible error handling decorator factory"""
+    def decorator(func: Callable) -> Callable:
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs) -> Any:
+            try:
+                return func(*args, **kwargs)
+            
+            except error_types as e:
+                raise  # Reraise already handled errors
+                
+            except sr.UnknownValueError as e:
+                raise TranscriptionError(
+                    code=ErrorCode.NO_SPEECH,
+                    message="No speech detected in audio"
+                ) from e
+                
+            except sr.RequestError as e:
+                raise TranscriptionError(
+                    code=ErrorCode.SERVICE_UNAVAILABLE,
+                    message="Speech service unavailable"
+                ) from e
+                
+            except Exception as e:
+                log_unexpected_error(e)
+                raise AppError(
+                    code=ErrorCode.UNEXPECTED_ERROR,
+                    message=f"Unexpected error: {str(e)}"
+                ) from e
 
-
-
-def catch_errors(func: Callable) -> Callable:
-    """Global error catching decorator"""
-    def wrapper(*args, **kwargs) -> Any:
-        try:
-            return func(*args, **kwargs)
-        
-        except Errors as e:
-            raise  # Already handled errors
-
-        except Exception as e:
-            log_unexpected_error(e)
-            raise FFmpegError.generic_error(e)
-        
-    return wrapper
-
-def transcribe_errors(func: Callable) -> Callable:
-    """Handle transcription-specific errors"""
-    def wrapper(*args, **kwargs) -> Any:
-        try:
-            return func(*args, **kwargs)
-        
-        except sr.UnknownValueError as e:
-            raise Errors.no_speech(e) from e
-        
-        except sr.RequestError as e:
-            raise Errors.service_error(e) from e
-        
-        except Exception as e:
-            raise Errors.generic_error(e) from e
-        
-    return wrapper
+        return wrapper
+    return decorator
 
 def format_error(error: Exception) -> dict:
-    """Format error for display"""
-    if isinstance(error, Errors):
+    """Serialize error for API/client consumption"""
+    if isinstance(error, AppError):
         return {
-            "code": error.code,
-            "message": str(error)
+            "code": error.code.value,
+            "message": error.message,
+            "context": error.context
         }
-    else:
-        return {
-            "code": "UNKNOWN_ERROR",
-            "message": str(error)
-        }
+        
+    return {
+        "code": ErrorCode.UNKNOWN_ERROR.value,
+        "message": "An unknown error occurred",
+        "context": str(error)
+    }
