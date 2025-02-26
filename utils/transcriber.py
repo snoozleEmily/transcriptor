@@ -15,18 +15,18 @@ class Transcriber:
         self.model = self._load_model(model_size)
         self.sample_rate = 16000
 
-    def transcribe(self, audio_path: str, 
-                 progress_cb: Optional[Callable[[int], None]] = None) -> str:
-        """Transcribe audio file with progress updates"""
-        audio = self._load_audio(audio_path)
+    def transcribe(self, audio_input, progress_cb: Optional[Callable[[int], None]] = None) -> str:
+        # If the input is already an AudioSegment, use it directly.
+        if isinstance(audio_input, AudioSegment):
+            audio = audio_input
+        else:
+            audio = self._load_audio(audio_input)
+        
         audio_array = self._preprocess_audio(audio)
         
         self._update_progress(progress_cb, 10)
         
-        result = self.model.transcribe(
-            audio_array,
-            progress_callback=lambda p: self._handle_progress(p, progress_cb)
-        )
+        result = self.model.transcribe(audio_array)
         
         self._update_progress(progress_cb, 100)
         
@@ -34,6 +34,7 @@ class Transcriber:
             raise TranscriptionError.no_speech()
             
         return result["text"]
+
 
     def _load_model(self, model_size: str):
         """Load Whisper model with validation"""

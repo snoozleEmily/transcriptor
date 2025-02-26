@@ -1,7 +1,7 @@
 import tkinter as tk
 
 
-from app.gui import TranscriptorApp
+from app.gui import Interface
 from app.controller import ProcessingController
 
 
@@ -10,7 +10,7 @@ from app.controller import ProcessingController
 def main():
     root = tk.Tk()
     controller = ProcessingController()
-    TranscriptorApp(root, controller)
+    Interface(controller)
     root.mainloop()
 
 if __name__ == "__main__":

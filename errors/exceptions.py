@@ -56,3 +56,43 @@ class TranscriptionError(AppError):
             message="Transcription service error",
             context={"original_error": str(error)}
         )
+    
+    @classmethod
+    def load_failed(cls, error: Exception = None) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.SERVICE_UNAVAILABLE,
+            message="Failed to load audio file",
+            context={"original_error": str(error) if error else ""}
+        )
+    
+    @classmethod
+    def empty_audio(cls) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.INVALID_INPUT,
+            message="Empty audio file",
+            context={}
+        )
+    
+    @classmethod
+    def preprocessing_failed(cls, error: Exception = None) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Audio preprocessing failed",
+            context={"original_error": str(error) if error else ""}
+        )
+    
+    @classmethod
+    def invalid_model(cls) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.INVALID_INPUT,
+            message="Invalid model size",
+            context={}
+        )
+    
+    @classmethod
+    def no_speech(cls) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.NO_SPEECH,
+            message="No speech detected in the audio",
+            context={}
+        )

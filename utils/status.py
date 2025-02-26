@@ -1,26 +1,9 @@
 from enum import Enum
 
 class Status(Enum):
-    """Enumeration for various status messages."""
-    SUCCESS = "✅ Process completed successfully!"
-    FFMPEG_MISSING = "❌ ffmpeg not found. Install from https://ffmpeg.org/"
-    AUDIO_FAIL = "❌ Audio extraction failed"
-    TRANSCRIPTION_FAIL = "❌ Transcription failed"
-    FILE_SAVE_FAIL = "❌ Failed to save transcription"
-    
-    @staticmethod
-    def get_ffmpeg_command(video_path: str) -> list:
-        """
-        Generate the ffmpeg command to extract audio from a video file.
-        
-        Args:
-            video_path (str): The path to the video file.
-        
-        Returns:
-            List[str]: The ffmpeg command as a list of strings.
-        """
-        return [
-            "ffmpeg", "-y", "-i", video_path,
-            "-vn", "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
-            "-f", "wav", "pipe:1"  # Output to stdout
-        ]
+    PROCESSING = "⏳ Processing..."
+    EXTRACTING = "🔊 Extracting audio"
+    CLEANING = "🎧 Cleaning audio"
+    TRANSCRIBING = "📝 Transcribing"
+    SUCCESS = "✅ Success"
+    FAILED = "❌ Failed"
