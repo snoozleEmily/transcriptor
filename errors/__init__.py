@@ -7,7 +7,7 @@ from .exceptions import (
 )
 
 from .handlers import (
-    error_handler,
+    catch_errors,
     format_error
 )
 
@@ -27,7 +27,7 @@ __all__ = [
     "ErrorCode",
     
     # Handlers
-    "error_handler",
+    "catch_errors",
     "format_error",
     
     # Logging

@@ -2,8 +2,8 @@ import threading
 import webbrowser
 from tkinter import messagebox, filedialog
 
-import constants
-from views import MainWindow
+from .views import MainWindow
+from frontend import constants
 from utils.transcriber import Transcriber
 from utils.file_handler import save_transcription
 from utils.audio_processor import check_ffmpeg, extract_audio

@@ -1,7 +1,7 @@
-from .gui import TranscriptorApp
+from .gui import Interface
 from .controller import ProcessingController
 
 __all__ = [
-    "TranscriptorApp",
+    "Interface",
     "ProcessingController"
 ]

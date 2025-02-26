@@ -10,38 +10,33 @@ from .exceptions import (
     ErrorCode
 )
 
-def error_handler(*error_types: Type[BaseException]) -> Callable:
-    """Flexible error handling decorator factory"""
-    def decorator(func: Callable) -> Callable:
-        @functools.wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            try:
-                return func(*args, **kwargs)
+def catch_errors(func: Callable) -> Callable:  # Remove factory pattern
+    """Error handling decorator for controller methods"""
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs) -> Any:  # Add 'self' parameter
+        try:
+            return func(self, *args, **kwargs)
             
-            except error_types as e:
-                raise  # Reraise already handled errors
-                
-            except sr.UnknownValueError as e:
-                raise TranscriptionError(
-                    code=ErrorCode.NO_SPEECH,
-                    message="No speech detected in audio"
-                ) from e
-                
-            except sr.RequestError as e:
-                raise TranscriptionError(
-                    code=ErrorCode.SERVICE_UNAVAILABLE,
-                    message="Speech service unavailable"
-                ) from e
-                
-            except Exception as e:
-                log_unexpected_error(e)
-                raise AppError(
-                    code=ErrorCode.UNEXPECTED_ERROR,
-                    message=f"Unexpected error: {str(e)}"
-                ) from e
+        except sr.UnknownValueError as e:
+            raise TranscriptionError(
+                code=ErrorCode.NO_SPEECH,
+                message="No speech detected in audio"
+            ) from e
+            
+        except sr.RequestError as e:
+            raise TranscriptionError(
+                code=ErrorCode.SERVICE_UNAVAILABLE,
+                message="Speech service unavailable"
+            ) from e
+            
+        except Exception as e:
+            log_unexpected_error(e)
+            raise AppError(
+                code=ErrorCode.UNEXPECTED_ERROR,
+                message=f"Unexpected error: {str(e)}"
+            ) from e
 
-        return wrapper
-    return decorator
+    return wrapper
 
 def format_error(error: Exception) -> dict:
     """Serialize error for API/client consumption"""

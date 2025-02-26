@@ -1,7 +1,8 @@
-import logging
 import sys
+import logging
 from pathlib import Path
 from typing import Optional
+
 
 def configure_logging(
     log_level: int = logging.INFO,
