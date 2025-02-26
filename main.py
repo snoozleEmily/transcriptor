@@ -1,17 +1,13 @@
-import tkinter as tk
-
-
-from app.gui import Interface
-from app.controller import ProcessingController
+from core.gui import Interface
+from core.controller import ProcessingController
 
 
 #.\venv\Scripts\activate
 
 def main():
-    root = tk.Tk()
     controller = ProcessingController()
-    Interface(controller)
-    root.mainloop()
+    app = Interface(controller)
+    app.mainloop()
 
 if __name__ == "__main__":
     main()

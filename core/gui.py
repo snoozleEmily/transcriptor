@@ -4,11 +4,15 @@ from queue import Queue, Empty
 from tkinter import ttk, filedialog, messagebox
 
 
+from frontend.constants import COLOR_SCHEME, FONTS
+
+
 
 class Interface(tk.Tk):
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
+        self.configure(bg=COLOR_SCHEME["bg"])
         self._setup_ui()
         self._configure_widgets()
         self.running = False
@@ -22,6 +26,21 @@ class Interface(tk.Tk):
         self.geometry("550x350")
         self.resizable(False, False)
         
+        # Theme and color configuration
+        style = ttk.Style(self)
+        style.theme_use('clam')
+        style.configure("TFrame", background=COLOR_SCHEME["bg"])
+        style.configure("TLabel", background=COLOR_SCHEME["bg"], foreground=COLOR_SCHEME["fg"], font=FONTS["default"])
+        style.configure("TButton",
+                        background=COLOR_SCHEME["button_bg"],
+                        foreground=COLOR_SCHEME["fg"],
+                        font=FONTS["default"],
+                        borderwidth=0)
+        style.map("TButton",
+                  background=[("active", COLOR_SCHEME["active_bg"])],
+                  foreground=[("active", COLOR_SCHEME["active_fg"])])
+        style.configure("TProgressbar", background=COLOR_SCHEME["progress_bg"], troughcolor=COLOR_SCHEME["trough"])
+
         main_frame = ttk.Frame(self)
         main_frame.pack(expand=True, fill='both', padx=40, pady=50)
         
@@ -34,14 +53,14 @@ class Interface(tk.Tk):
         self.select_button = ttk.Button(buttons_frame, text="SELECT VIDEO")
         self.github_button = ttk.Button(buttons_frame, text="GITHUB REPO")
         
-        self.select_button.pack(side=tk.LEFT, padx=5)
-        self.github_button.pack(side=tk.LEFT, padx=5)
+        self.select_button.pack(side=tk.LEFT, padx=8)
+        self.github_button.pack(side=tk.LEFT, padx=8)
         
         self.progress_frame = ttk.Frame(main_frame)
         self.progress_label = ttk.Label(self.progress_frame, text="Ready")
         self.progress_bar = ttk.Progressbar(self.progress_frame, orient='horizontal', length=300)
         
-        self.progress_label.pack(pady=5)
+        self.progress_label.pack(pady=8)
         self.progress_bar.pack()
 
     def _configure_widgets(self):

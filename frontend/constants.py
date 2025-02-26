@@ -1,11 +1,11 @@
 # Theme and style constants
 COLOR_SCHEME = {
-    "bg": "#1a1a2f",
+    "bg": "#0d1b2a",
     "fg": "white",
-    "button_bg": "#2a2a4a",
+    "button_bg": "#2A495B",
     "progress_bg": "#3a3a6a",
     "trough": "#1a1a2f",
-    "active_bg": "#ffd700",
+    "active_bg": "#95A4AD",
     "active_fg": "black"
 }
 

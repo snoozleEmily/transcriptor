@@ -1,7 +1,7 @@
 from tkinter import filedialog
 from typing import Callable
 
-from errors.handlers import error_handler
+from errors.handlers import catch_errors
 from errors.exceptions import ErrorCode, FileError, AppError
 from utils import Transcriber, extract_audio, clean_audio, save_transcription
 
@@ -10,7 +10,7 @@ class ProcessingController:
     def __init__(self):
         self.transcriber = Transcriber()
 
-    @error_handler
+    @catch_errors
     def process_video(self, video_path: str, progress_cb: Callable[[int, str], None]):
         """Process video through transcription pipeline"""
         progress_cb(10, "Extracting audio...")
