@@ -36,7 +36,7 @@ If you're working on a different operating system, follow these steps:
 3. **Clone the Repository**:
    Copy the repository to your machine:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/snoozleEmily/transcriptor
    ```
 
 4. **Set Up the Virtual Environment**:
