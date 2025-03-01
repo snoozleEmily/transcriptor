@@ -10,7 +10,7 @@ if not defined DEBUG (
 )
 
 :: Set colors (green text on black background)
-color 0A
+color 0A 
 
 :: Initial credits message
 echo.
@@ -94,7 +94,7 @@ if %errorlevel% equ 0 (
 call :display "Step 2/5: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% equ 0 (
-    call :display "FFmpeg is already installed :)"
+    call :display "FFmpeg is already installed :D"
 ) else (
     if exist ".ffmpeg\bin\ffmpeg.exe" (
         call :display "Found local FFmpeg installation."
