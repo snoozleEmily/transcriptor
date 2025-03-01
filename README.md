@@ -1,4 +1,4 @@
-# Transcriptor
+# Transcriptor [WIP]
 
 Do you need to turn a video into text? This app does that for you!
 
@@ -11,7 +11,7 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 ---
 
 ### **For Non-Techies**
-(Add instructions here)
+(The instructions will still be added here - I work a lot so please be patient, tysm!)
 
 ---
 
@@ -55,6 +55,7 @@ If you're working on a different operating system, follow these steps:
    ```bash
    pip install -r requirements.txt
    ```
+   [there is another step to add for V2]
 
 6. **Run the Script**:
    You're ready to go! Run the script with:
