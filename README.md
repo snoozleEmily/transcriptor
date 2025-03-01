@@ -1,17 +1,20 @@
-# Transcriptor [WIP]
+# Emily's Transcriptor [WIP]
 
-Do you need to turn a video into text? This app does that for you!
+Do you need to turn a video into text or want to get organized notes from a lengthy video? This app does that for you absolutely for free!
 
 ---
-
+> Oieee! Precisa dessas explicações em ptBR? Me chama que te ajudo :D
+---
 ## Usage
 
-The goal of this app is to make it easy and fun for everyone to use, even if you have absolutely no technical background.
+The goal of this app is to make it easy and fun for everyone to use, even if you have no technical background.
 
 ---
 
-### **For Non-Techies**
-(The instructions will still be added here - I work a lot so please be patient, tysm!)
+### **For Non-Techies** 
+1. Download the project files from github.
+2. Open the folder and click on the file that ends with `.exe`. [WIP]
+3. [WIP]
 
 ---
 
@@ -47,6 +50,8 @@ If you're working on a different operating system, follow these steps:
    - Activate the virtual environment:
      ```bash
      venv\Scripts\activate.bat  # Windows
+     ```
+     ```bash
      source venv/bin/activate   # macOS/Linux
      ```
 
@@ -55,21 +60,20 @@ If you're working on a different operating system, follow these steps:
    ```bash
    pip install -r requirements.txt
    ```
-   [there is another step to add for V2]
+  
+6.  [there is another step to add for version 2 - how to setup pydub]
 
-6. **Run the Script**:
+7. **Run the Script**:
    You're ready to go! Run the script with:
    ```bash
    python main.py
    ```
-
 ---
 
-### **Run the Script**
-To start the application, use the following command:
-```bash
-python main.py
-```
+## Contributing
+
+**Contributions are welcome!** Below are some guidelines to help you get started:
+[WIP]
 
 ---
 
