@@ -4,9 +4,13 @@ Do you need to turn a video into text or want to get organized notes from a leng
 
 ---
 > 🇧🇷 Oieee! Precisa dessas explicações em pt-BR? Me chama que te ajudo! 📚✨
+
 > 🇪🇸 ¡Holaa! ¿Necesitas esta explicación en español? ¡Llámame! 🔥📖
+
 > 🇮🇹 Ciao! Hai bisogno di questa spiegazione in ITA? Chiamami! 🍕📜
+
 > 🇫🇷 Coucou! Vous voulez cette explication en français? Appelez-moi! 🥖📚
+
 > 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
 ---
 ## Usage
