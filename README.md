@@ -3,7 +3,11 @@
 Do you need to turn a video into text or want to get organized notes from a lengthy video? This app does that for you absolutely for free!
 
 ---
-> Oieee! Precisa dessas explicações em ptBR? Me chama que te ajudo :D
+> 🇧🇷 Oieee! Precisa dessas explicações em pt-BR? Me chama que te ajudo! 📚✨
+> 🇪🇸 ¡Holaa! ¿Necesitas esta explicación en español? ¡Llámame! 🔥📖
+> 🇮🇹 Ciao! Hai bisogno di questa spiegazione in ITA? Chiamami! 🍕📜
+> 🇫🇷 Coucou! Vous voulez cette explication en français? Appelez-moi! 🥖📚
+> 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
 ---
 ## Usage
 
@@ -13,8 +17,8 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 
 ### **For Non-Techies** 
 1. Download the project files from github.
-2. Open the folder and click on the file that ends with `.exe`. [WIP]
-3. [WIP]
+2. Open the folder and click on the file that ends with `.exe`. 
+3. Click on the button `Select Video` and choose the one you'd like.
 
 ---
 
