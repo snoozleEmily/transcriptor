@@ -34,7 +34,7 @@ If you're on Windows, simply run `setup.bat`. The script will handle all the too
 ---
 
 #### **Other Operating Systems**
-If you're working on a different operating system, follow these steps:
+If you're working on a different operating system `or want to manually arrange your setup`, follow these steps:
 
 1. **Install Python and Git**:
    - [Python](https://www.python.org/downloads/)
@@ -57,10 +57,10 @@ If you're working on a different operating system, follow these steps:
      ```
    - Activate the virtual environment:
      ```bash
-     venv\Scripts\activate.bat  # Windows
+     source venv/bin/activate   # macOS/Linux
      ```
      ```bash
-     source venv/bin/activate   # macOS/Linux
+     venv\Scripts\activate.bat  # Windows
      ```
 
 5. **Install Dependencies**:
