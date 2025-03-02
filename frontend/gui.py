@@ -4,7 +4,7 @@ from queue import Queue, Empty
 from tkinter import ttk, filedialog, messagebox
 
 
-from frontend.constants import COLOR_SCHEME, FONTS
+from .constants import COLOR_SCHEME, FONTS
 
 
 

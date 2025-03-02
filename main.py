@@ -1,5 +1,5 @@
-from core.gui import Interface
-from core.controller import ProcessingController
+from frontend.gui import Interface
+from frontend.controller import ProcessingController
 
 
 #.\venv\Scripts\activate

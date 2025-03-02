@@ -54,6 +54,7 @@ class Transcriber:
             if len(audio) == 0:
                 raise TranscriptionError.empty_audio()
             return audio
+        
         except Exception as e:
             raise TranscriptionError.load_failed() from e
 
