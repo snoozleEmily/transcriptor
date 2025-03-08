@@ -1,7 +1,6 @@
 import numpy as np
 import whisper
 from pydub import AudioSegment
-from typing import Optional, Callable
 
 
 from errors.exceptions import TranscriptionError
@@ -15,29 +14,29 @@ class Transcriber:
         self.model = self._load_model(model_size)
         self.sample_rate = 16000
 
-    def transcribe(self, audio_input = None) -> str:
-        # If the input is already an AudioSegment, use it directly.
+    def transcribe(self, audio_input=None) -> str:
+        """Execute full transcription pipeline"""
+        # Audio input handling
         if isinstance(audio_input, AudioSegment):
             audio = audio_input
         else:
             audio = self._load_audio(audio_input)
         
+        # Audio processing
         audio_array = self._preprocess_audio(audio)
         
-        self._update_progress(10)
-        
+        # Core transcription
         result = self.model.transcribe(audio_array)
         
-        self._update_progress(100)
-        
+        # Result validation
         if not result.get("text"):
             raise TranscriptionError.no_speech()
             
         return result["text"]
 
-
+    # --------------------- Core Components ---------------------
     def _load_model(self, model_size: str):
-        """Load Whisper model with validation"""
+        """Initialize Whisper model with validation"""
         valid_sizes = ["tiny", "base", "small", "medium", "large"]
         if model_size not in valid_sizes:
             raise TranscriptionError.invalid_model()
@@ -47,6 +46,7 @@ class Transcriber:
         except Exception as e:
             raise TranscriptionError.load_failed() from e
 
+    # --------------------- Audio Processing ---------------------
     def _load_audio(self, path: str) -> AudioSegment:
         """Load and validate audio file"""
         try:
@@ -54,7 +54,6 @@ class Transcriber:
             if len(audio) == 0:
                 raise TranscriptionError.empty_audio()
             return audio
-        
         except Exception as e:
             raise TranscriptionError.load_failed() from e
 
@@ -62,14 +61,9 @@ class Transcriber:
         """Convert audio to Whisper-compatible format"""
         try:
             audio = audio.set_channels(1).set_frame_rate(self.sample_rate)
-            return np.frombuffer(audio.raw_data, np.int16).astype(np.float32) / 32768.0
+            return np.frombuffer(
+                audio.raw_data, 
+                np.int16
+            ).astype(np.float32) / 32768.0
         except Exception as e:
             raise TranscriptionError.preprocessing_failed() from e
-
-    def _handle_progress(self, progress: float, callback: Optional[Callable[[int], None]]):
-        if callback:
-            callback(min(100, int(progress * 100)))
-
-    def _update_progress(self, callback: Optional[Callable[[int], None]], value: int):
-        if callback:
-            callback(value)
