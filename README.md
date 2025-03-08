@@ -14,7 +14,7 @@ Do you need to turn a video into text or want to get organized notes from a leng
 > 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
 ---
 
-[NOTE: I am yet to finish this, alright?! Patience is key.]
+`NOTE: I am yet to finish this, alright?! Patience is key.`
 
 ## Usage
 
