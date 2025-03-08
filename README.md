@@ -13,6 +13,9 @@ Do you need to turn a video into text or want to get organized notes from a leng
 
 > 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
 ---
+
+[NOTE: I am yet to finish this, alright?! Patience is key.]
+
 ## Usage
 
 The goal of this app is to make it easy and fun for everyone to use, even if you have no technical background.
