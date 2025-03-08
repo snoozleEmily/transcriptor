@@ -15,7 +15,7 @@ class Transcriber:
         self.model = self._load_model(model_size)
         self.sample_rate = 16000
 
-    def transcribe(self, audio_input, progress_cb: Optional[Callable[[int], None]] = None) -> str:
+    def transcribe(self, audio_input = None) -> str:
         # If the input is already an AudioSegment, use it directly.
         if isinstance(audio_input, AudioSegment):
             audio = audio_input
@@ -24,11 +24,11 @@ class Transcriber:
         
         audio_array = self._preprocess_audio(audio)
         
-        self._update_progress(progress_cb, 10)
+        self._update_progress(10)
         
         result = self.model.transcribe(audio_array)
         
-        self._update_progress(progress_cb, 100)
+        self._update_progress(100)
         
         if not result.get("text"):
             raise TranscriptionError.no_speech()
@@ -54,6 +54,7 @@ class Transcriber:
             if len(audio) == 0:
                 raise TranscriptionError.empty_audio()
             return audio
+        
         except Exception as e:
             raise TranscriptionError.load_failed() from e
 

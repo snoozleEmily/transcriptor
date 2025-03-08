@@ -1,5 +1,7 @@
 from enum import Enum
 
+
+
 class Status(Enum):
     PROCESSING = "⏳ Processing..."
     EXTRACTING = "🔊 Extracting audio"

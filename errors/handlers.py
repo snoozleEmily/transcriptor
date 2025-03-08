@@ -1,11 +1,10 @@
-from typing import Callable, Type, Any
+from typing import Callable, Any
 import functools
 import speech_recognition as sr
 
 from .logging import log_unexpected_error
 from .exceptions import (
     AppError,
-    FFmpegError,
     TranscriptionError,
     ErrorCode
 )

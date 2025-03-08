@@ -2,7 +2,11 @@ import os
 import textwrap
 import datetime
 from pathlib import Path
+
+
 from errors.exceptions import FileError
+
+
 
 def save_transcription(text: str, save_path: str = None) -> str:
     """Save transcription text to file with fallback naming"""

@@ -1,6 +1,6 @@
+import subprocess
 import numpy as np
 import noisereduce as nr
-import subprocess
 from io import BytesIO
 from pydub import AudioSegment
 from pydub.silence import split_on_silence
@@ -8,7 +8,6 @@ from pydub.exceptions import CouldntDecodeError
 
 
 from errors.exceptions import FFmpegError, TranscriptionError
-from .status import Status
 
 
 
