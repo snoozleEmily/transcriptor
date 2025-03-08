@@ -18,7 +18,7 @@ build/
 
 # Python cache files
 __pycache__/
-*.pyc
+*.pyc 
 *.pyo
 *.pyd
 
