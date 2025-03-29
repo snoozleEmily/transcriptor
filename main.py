@@ -1,4 +1,4 @@
-from frontend.gui import Interface
+from frontend.interface import Interface
 from frontend.controller import ProcessingController
 
 

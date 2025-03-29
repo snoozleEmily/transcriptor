@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 
 
-from .constants import COLOR_SCHEME, FONTS
+from .constants import THEMES, FONTS
 
 
 
@@ -23,7 +23,7 @@ class MainWindow:
         """Configure main window properties"""
         self.root.title("Emily's Transcriptor")
         self.root.geometry("550x350")
-        self.root.configure(bg=COLOR_SCHEME["bg"])
+        self.root.configure(bg=THEMES["bg"])
         self.root.resizable(False, False)
 
     def setup_styles(self):
@@ -33,15 +33,15 @@ class MainWindow:
 
         self.style.configure(
             'TLabel',
-            background=COLOR_SCHEME["bg"],
-            foreground=COLOR_SCHEME["fg"],
+            background=THEMES["bg"],
+            foreground=THEMES["fg"],
             font=FONTS["default"]
         )
         
         self.style.configure(
             'TButton',
-            background=COLOR_SCHEME["button_bg"],
-            foreground=COLOR_SCHEME["fg"],
+            background=THEMES["button_bg"],
+            foreground=THEMES["fg"],
             borderwidth=0,
             font=FONTS["default"],
             width=20
@@ -49,21 +49,21 @@ class MainWindow:
         
         self.style.map(
             'TButton',
-            background=[('active', COLOR_SCHEME["active_bg"])],
-            foreground=[('active', COLOR_SCHEME["active_fg"])]
+            background=[('active', THEMES["active_bg"])],
+            foreground=[('active', THEMES["active_fg"])]
         )
 
         self.style.configure(
             "Horizontal.TProgressbar",
-            background=COLOR_SCHEME["progress_bg"],
-            troughcolor=COLOR_SCHEME["trough"],
+            background=THEMES["progress_bg"],
+            troughcolor=THEMES["trough"],
             thickness=10
         )
 
     # --------------------- Widget Construction ---------------------
     def create_widgets(self):
         """Build primary interface components"""
-        self.main_frame = tk.Frame(self.root, bg=COLOR_SCHEME["bg"])
+        self.main_frame = tk.Frame(self.root, bg=THEMES["bg"])
         self.main_frame.pack(expand=True, fill='both', padx=40, pady=50)
 
         # Branding elements
@@ -71,21 +71,21 @@ class MainWindow:
             self.main_frame,
             text="EMILY'S TRANSCRIPTOR",
             font=FONTS["title"],
-            bg=COLOR_SCHEME["bg"],
-            fg=COLOR_SCHEME["fg"]
+            bg=THEMES["bg"],
+            fg=THEMES["fg"]
         ).pack(pady=(0, 5))
 
         tk.Label(
             self.main_frame,
             text="🎥",
             font=FONTS["emoji"],
-            bg=COLOR_SCHEME["bg"]
+            bg=THEMES["bg"]
         ).pack(pady=(0, 35))
 
         # Interactive controls
         self.buttons_frame = tk.Frame(
             self.main_frame,
-            bg=COLOR_SCHEME["bg"]
+            bg=THEMES["bg"]
         )
         self.buttons_frame.pack(pady=(0, 15))
         
@@ -107,7 +107,7 @@ class MainWindow:
         """Create progress tracking components"""
         self.progress_frame = tk.Frame(
             self.main_frame,
-            bg=COLOR_SCHEME["bg"]
+            bg=THEMES["bg"]
         )
         self.progress_label = ttk.Label(
             self.progress_frame,
