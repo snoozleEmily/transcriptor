@@ -1,12 +1,19 @@
 # Theme and style constants
-COLOR_SCHEME = {
-    "bg": "#0d1b2a",
-    "fg": "white",
-    "button_bg": "#2A495B",
-    "progress_bg": "#3a3a6a",
-    "trough": "#1a1a2f",
-    "active_bg": "#95A4AD",
-    "active_fg": "black"
+THEMES = {
+    "default": {
+        "bg": "#2E3B4E",  # Dark blue
+        "fg": "#FFFFFF",
+        "button_bg": "#3C8DBC",
+        "active_bg": "#367FA6",
+        "active_fg": "#FFFFFF"
+    },
+    "dark": {
+        "bg": "#1A1A1A",
+        "fg": "#E0E0E0",
+        "button_bg": "#333333",
+        "active_bg": "#4D4D4D",
+        "active_fg": "#FFFFFF"
+    }
 }
 
 FONTS = {
