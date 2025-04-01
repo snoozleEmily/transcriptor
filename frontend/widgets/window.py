@@ -3,9 +3,10 @@ import tkinter as tk
 
 from ..styles_manager import StyleManager
 from ..progress_handler import ProgressHandler
-from ..branding import create_branding
-from .buttons_panel import ButtonsPanel
 from ..constants import THEMES
+from .branding import create_branding
+from .buttons_panel import ButtonsPanel
+
 
 
 
