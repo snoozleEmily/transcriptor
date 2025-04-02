@@ -1,6 +1,5 @@
 from tkinter import messagebox
 from threading import Thread
-from queue import Queue
 
 
 
@@ -14,8 +13,10 @@ class AsyncTaskManager:
             try:
                 controller.process_video(path)
                 self.gui_queue.put(lambda: self._show_success())
+
             except Exception as e:
                 self.gui_queue.put(lambda: self._show_error(e))
+                
             finally:
                 completion_callback()
         

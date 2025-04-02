@@ -4,7 +4,7 @@ from tkinter import messagebox, filedialog
 
 
 from frontend import constants
-from .widgets.window import MainWindow
+from ..widgets.window import MainWindow
 from utils.transcriber import Transcriber
 from utils.file_handler import save_transcription
 from utils.audio_processor import check_ffmpeg, extract_audio

@@ -9,8 +9,6 @@ from .buttons_panel import ButtonsPanel
 
 
 
-
-
 class MainWindow:
     """Handles GUI setup and visual components"""
     def __init__(self, root):

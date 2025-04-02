@@ -1,6 +1,8 @@
 from tkinter import ttk
 from .constants import THEMES, FONTS
 
+
+
 class StyleManager:
     """Handles all visual styling standards for the application"""
     def __init__(self):

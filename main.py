@@ -1,7 +1,7 @@
 from frontend.interface import Interface
 from frontend.controller import ProcessingController
 
-
+# Activate virtual environment
 #.\venv\Scripts\activate
 
 def main():

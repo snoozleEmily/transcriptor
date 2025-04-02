@@ -1,7 +1,7 @@
-# interface.py
 import tkinter as tk
 from tkinter import ttk, filedialog
 from queue import Empty, Queue
+
 
 from .theme import configure_theme
 from .widgets.header import Header

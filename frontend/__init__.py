@@ -1,5 +1,4 @@
 from .constants import THEMES, FONTS
-from .app_logic import TranscriptorController
 from .interface import Interface
 from .theme import configure_theme
 from .async_processor import AsyncTaskManager
@@ -12,7 +11,6 @@ __all__ = [
     "Interface",
     "ProcessingController",
     "MainWindow",
-    "TranscriptorController",
     "COLOR_SCHEME",
     "FONTS"
     "configure_theme",
