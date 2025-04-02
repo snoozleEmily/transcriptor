@@ -2,7 +2,6 @@ import tkinter as tk
 
 
 from ..styles_manager import StyleManager
-from ..progress_handler import ProgressHandler
 from ..constants import THEMES
 from .branding import create_branding
 from .buttons_panel import ButtonsPanel
@@ -45,4 +44,4 @@ class MainWindow:
         self.button_panel.frame.pack(pady=(0, 15))
 
         # Progress system
-        self.progress = ProgressHandler(self.main_frame, THEMES)
+        # Show progress bar and status label here

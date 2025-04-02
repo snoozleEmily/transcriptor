@@ -4,7 +4,6 @@ from .theme import configure_theme
 from .async_processor import AsyncTaskManager
 from .controller import ProcessingController
 from .styles_manager import StyleManager
-from .progress_handler import ProgressHandler
 from .widgets import Header, ButtonsPanel, MainWindow
 
 __all__ = [
@@ -17,7 +16,6 @@ __all__ = [
     "AsyncTaskManager",
     "Header",
     "ButtonsPanel",
-    "ProgressHandler",
     "StyleManager",
     "create_branding",
 ]
