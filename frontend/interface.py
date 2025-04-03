@@ -13,14 +13,15 @@ from .constants import THEMES, URLS
 
 
 class Interface(tk.Tk):
-    def __init__(self, controller):
+    def __init__(self, control, finish):
         super().__init__()
-        self.controller = controller
+        self.control = control
+        self.finish = finish
         self.running = False
         self._alive = True
         self.gui_queue = Queue()
         self.current_theme = "default"
-        self.async_mgr = AsyncTaskManager(self.gui_queue)
+        self.async_mgr = AsyncTaskManager(self.gui_queue, self.control, self.finish)
 
         # Initialization sequence
         self._configure_window()
@@ -78,11 +79,7 @@ class Interface(tk.Tk):
         )
         if path:
             self.running = True
-            self.async_mgr.process_video(
-                path,
-                self.controller,
-                self._complete_processing
-            )
+            self.async_mgr.process_video(path)
 
     def _complete_processing(self):
         """Cleanup after processing completes"""

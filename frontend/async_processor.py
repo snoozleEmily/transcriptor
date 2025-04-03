@@ -4,8 +4,10 @@ from threading import Thread
 
 
 class AsyncTaskManager:
-    def __init__(self, gui_queue):
+    def __init__(self, gui_queue, control, finish):
         self.gui_queue = gui_queue
+        self.control = control
+        self.finish = finish
     
     def process_video(self, path):
         """Execute video processing in background thread"""
@@ -15,7 +17,7 @@ class AsyncTaskManager:
                     # Send progress updates to the GUI queue
                     self.gui_queue.put(lambda: self._update_progress(percentage))
                 
-                control.process_video(path, progress)
+                control.process_video(path)
                 self.gui_queue.put(lambda: self._show_success())
 
             except Exception as e:
@@ -25,7 +27,7 @@ class AsyncTaskManager:
             finally:
                 finish()
         
-        Thread(target=task, daemon=True).start()
+        Thread(target=task, args=(self.control, self.finish), daemon=True).start()
     
     def _update_progress(self, percentage):
         print(f"Progress: {percentage}%")
@@ -38,15 +40,16 @@ class AsyncTaskManager:
 
 # ------------------ TESTING ------------------
 if __name__ == "__main__":
+   '''
     import queue
     import time 
 
     # Simulated control class with a process_video method
     class Control:
-        def process_video(self, path, progress_callback):
+        def process_video(self, path):
             # Simulating progress from 0% to 100%
             for i in range(101):  
-                progress_callback(i)
+                #progress_callback(i)
                 time.sleep(0.1)  # Simulate processing delay
 
     # Simulated finish callback
@@ -70,3 +73,6 @@ if __name__ == "__main__":
             task()  # Execute the task
         except queue.Empty:
             break
+    '''
+   # Might delete this testing code later
+   raise NotImplementedError("The name/main or testing code block should be changed, the current one is buggy.")

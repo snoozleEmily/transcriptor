@@ -13,6 +13,7 @@ def catch_errors(func: Callable) -> Callable:
     """Error handling decorator for controller methods"""
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> Any: 
+        print(f"Calling {func.__name__} with args: {args}, kwargs: {kwargs}") # Debug
         try:
             return func(self, *args, **kwargs)
             
