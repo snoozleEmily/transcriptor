@@ -3,12 +3,12 @@ from tkinter import ttk, filedialog
 from queue import Empty, Queue
 
 
+from .utils import open_browser
 from .theme import configure_theme
+from .constants import THEMES, URLS
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
-from .utils import open_browser
-from .constants import THEMES, URLS
 
 
 
