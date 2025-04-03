@@ -58,14 +58,14 @@ class Interface(tk.Tk):
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
-        main_frame.pack(expand=True, fill='both', padx=40, pady=50)
+        main_frame.pack(expand=True, fill="both", padx=40, pady=50)
 
         Header(main_frame).pack()
         ButtonsPanel(
             main_frame,
             self._start_processing,
             lambda: open_browser(URLS),
-            self._toggle_theme
+            self._toggle_theme,
         ).pack(pady=(0, 15))
 
     # --------------------- Core Functionality ---------------------
@@ -98,6 +98,7 @@ class Interface(tk.Tk):
                 self.gui_queue.get_nowait()()
             except Empty:
                 break
+
         if self._alive:
             self.after(100, self._monitor_gui_queue)
 
