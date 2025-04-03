@@ -9,10 +9,10 @@ from .exceptions import (
     ErrorCode
 )
 
-def catch_errors(func: Callable) -> Callable:  # Remove factory pattern
+def catch_errors(func: Callable) -> Callable:
     """Error handling decorator for controller methods"""
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs) -> Any:  # Add 'self' parameter
+    def wrapper(self, *args, **kwargs) -> Any: 
         try:
             return func(self, *args, **kwargs)
             

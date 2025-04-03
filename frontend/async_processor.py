@@ -7,9 +7,9 @@ class AsyncTaskManager:
     def __init__(self, gui_queue):
         self.gui_queue = gui_queue
     
-    def process_video(self, path, control, finish):
+    def process_video(self, path):
         """Execute video processing in background thread"""
-        def task():
+        def task(control, finish):
             try:
                 def progress(percentage):
                     # Send progress updates to the GUI queue
