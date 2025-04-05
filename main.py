@@ -6,11 +6,10 @@ from frontend.controller import ProcessingController
 # Activate virtual environment
 #.\venv\Scripts\activate
 
-def main(finish):
+def main():
     controller = ProcessingController()
-    app = Interface(controller, finish)
+    app = Interface(controller)
     app.mainloop()
 
 if __name__ == "__main__":
-    # You should treat this function somewhere else
-    main(finish=lambda: print("Finished processing."))
+    main()

@@ -13,15 +13,14 @@ from .async_processor import AsyncTaskManager
 
 
 class Interface(tk.Tk):
-    def __init__(self, control, finish):
-        super().__init__()
-        self.control = control
-        self.finish = finish
+    def __init__(self, controller):
+        super().__init__()  # Initialize the main window
+        self.controller = controller
         self.running = False
         self._alive = True
         self.gui_queue = Queue()
         self.current_theme = "default"
-        self.async_mgr = AsyncTaskManager(self.gui_queue, self.control, self.finish)
+        self.async_mgr = AsyncTaskManager(self.gui_queue, controller, self._complete_processing)
 
         # Initialization sequence
         self._configure_window()
@@ -79,7 +78,7 @@ class Interface(tk.Tk):
         )
         if path:
             self.running = True
-            self.async_mgr.process_video(path)
+            self.async_mgr.get_busy(path)
 
     def _complete_processing(self):
         """Cleanup after processing completes"""

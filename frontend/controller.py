@@ -18,7 +18,6 @@ class ProcessingController:
     def process_video(self, video_path: str):
         """Process video through transcription pipeline"""
         audio = extract_audio(video_path)
-
         cleaned = clean_audio(audio)
 
         text = self.transcriber.transcribe(cleaned)

@@ -9,13 +9,13 @@ class AsyncTaskManager:
         self.control = control
         self.finish = finish
     
-    def process_video(self, path):
+    def get_busy(self, path):
         """Execute video processing in background thread"""
         def task(control, finish):
             try:
-                def progress(percentage):
+                #def progress(percentage):
                     # Send progress updates to the GUI queue
-                    self.gui_queue.put(lambda: self._update_progress(percentage))
+                #    self.gui_queue.put(lambda: self._update_progress(percentage))
                 
                 control.process_video(path)
                 self.gui_queue.put(lambda: self._show_success())
@@ -29,8 +29,8 @@ class AsyncTaskManager:
         
         Thread(target=task, args=(self.control, self.finish), daemon=True).start()
     
-    def _update_progress(self, percentage):
-        print(f"Progress: {percentage}%")
+    #def _update_progress(self, percentage):
+    #    print(f"Progress: {percentage}%")
 
     def _show_success(self):
         messagebox.showinfo("Success", "Transcription saved successfully!")
