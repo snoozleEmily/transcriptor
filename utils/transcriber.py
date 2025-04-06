@@ -24,7 +24,7 @@ class Transcriber:
         with tqdm(
             total=100,
             desc="Transcribing",
-            bar_format="{l_bar}{bar}| {n:.0f}% [{elapsed}<{remaining}]",
+            bar_format="{l_bar}{bar}| {n:.0f}%",
             miniters=1,
             mininterval=0,
             maxinterval=1
@@ -48,6 +48,7 @@ class Transcriber:
             # Fallback to basic transcription if progress fails
             return self.model.transcribe(audio_buffer)
 
+    # --------------------- Progress Handling ---------------------
     def _transcribe_with_progress(self, audio_buffer, progress_callback):
         """Universal progress tracking for all Whisper versions"""
         # Get audio duration in seconds
@@ -104,14 +105,6 @@ class Transcriber:
         # TODO: Need to implement interface loading bar    
         if external_handler:
             external_handler(percent)
-    
-    # --------------------- Progress Handling ---------------------
-    def _update_progress(self, percent, tqdm_bar, external_handler):
-        """Update both console and GUI progress with delta calculation"""
-        # Calculate incremental progress since last update
-        delta = percent - tqdm_bar.n
-        if delta > 0:
-            tqdm_bar.update(delta)
 
     # --------------------- Audio Processing ---------------------
     def _convert_audio_format(self, audio: AudioSegment) -> np.ndarray:
