@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional, Dict, Any
 
+
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
@@ -48,6 +49,14 @@ class FFmpegError(AppError):
 
 class TranscriptionError(AppError):
     """Transcription service errors"""
+
+    @classmethod
+    def generic_error(cls, message: str, error: Exception) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message=message,
+            context={"original_error": str(error)}
+        )
     
     @classmethod
     def from_whisper_error(cls, error: Exception) -> "TranscriptionError":
@@ -94,5 +103,21 @@ class TranscriptionError(AppError):
         return cls(
             code=ErrorCode.NO_SPEECH,
             message="No speech detected in the audio",
+            context={}
+        )
+    
+    @classmethod
+    def no_result(cls) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.NO_SPEECH,
+            message="No transcription results returned",
+            context={}
+        )
+
+    @classmethod
+    def invalid_format(cls) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Invalid result format from transcription service",
             context={}
         )
