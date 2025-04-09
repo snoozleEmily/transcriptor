@@ -1,3 +1,4 @@
+:: OUTDATED -> Needs to be updated
 @echo off
 setlocal enabledelayedexpansion
 title Emily's Transcriptor - Setup
