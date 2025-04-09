@@ -3,7 +3,10 @@ from tkinter import filedialog
 
 from errors.handlers import catch_errors
 from errors.exceptions import ErrorCode, FileError
-from utils import Transcriber, extract_audio, clean_audio, save_transcription
+from utils.transcriber import Transcriber
+from utils.file_handler import save_transcription
+from utils.audio_cleaner import clean_audio
+from utils.audio_processor import extract_audio
 
 
 
@@ -15,7 +18,6 @@ class ProcessingController:
     def process_video(self, video_path: str):
         """Process video through transcription pipeline"""
         audio = extract_audio(video_path)
-
         cleaned = clean_audio(audio)
 
         text = self.transcriber.transcribe(cleaned)

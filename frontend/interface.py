@@ -1,26 +1,26 @@
-# interface.py
 import tkinter as tk
 from tkinter import ttk, filedialog
 from queue import Empty, Queue
 
+
+from .utils import open_browser
 from .theme import configure_theme
+from .constants import THEMES, URLS
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
-from .utils import open_browser
-from .constants import THEMES, URLS
 
 
 
 class Interface(tk.Tk):
     def __init__(self, controller):
-        super().__init__()
+        super().__init__()  # Initialize the main window
         self.controller = controller
         self.running = False
         self._alive = True
         self.gui_queue = Queue()
         self.current_theme = "default"
-        self.async_mgr = AsyncTaskManager(self.gui_queue)
+        self.async_mgr = AsyncTaskManager(self.gui_queue, controller, self._complete_processing)
 
         # Initialization sequence
         self._configure_window()
@@ -57,14 +57,14 @@ class Interface(tk.Tk):
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
-        main_frame.pack(expand=True, fill='both', padx=40, pady=50)
+        main_frame.pack(expand=True, fill="both", padx=40, pady=50)
 
         Header(main_frame).pack()
         ButtonsPanel(
             main_frame,
             self._start_processing,
             lambda: open_browser(URLS),
-            self._toggle_theme
+            self._toggle_theme,
         ).pack(pady=(0, 15))
 
     # --------------------- Core Functionality ---------------------
@@ -78,11 +78,7 @@ class Interface(tk.Tk):
         )
         if path:
             self.running = True
-            self.async_mgr.process_video(
-                path,
-                self.controller,
-                self._complete_processing
-            )
+            self.async_mgr.get_busy(path)
 
     def _complete_processing(self):
         """Cleanup after processing completes"""
@@ -101,6 +97,7 @@ class Interface(tk.Tk):
                 self.gui_queue.get_nowait()()
             except Empty:
                 break
+
         if self._alive:
             self.after(100, self._monitor_gui_queue)
 

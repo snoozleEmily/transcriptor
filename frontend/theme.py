@@ -2,6 +2,7 @@ from tkinter import ttk
 from .constants import THEMES, FONTS
 
 
+
 def configure_theme(root, theme_name="default"):
     """Configures ttk styles for a given theme"""
     style = ttk.Style(root)
