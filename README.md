@@ -31,7 +31,8 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 
 ### **For Developers**
 
-#### **Windows Users**
+#### **Windows Users** 
+[This setup script seems to be a little buggy and it is outdated, if you do need it ASAP, please let me know]
 If you're on Windows, simply run `setup.bat`. The script will handle all the tools and setup configurations required. Yes, I did more work so you would not have to. You're welcome!
 
 ---
