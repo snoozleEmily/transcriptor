@@ -1,7 +1,7 @@
+# interface.py
 import tkinter as tk
 from tkinter import ttk, filedialog
 from queue import Empty, Queue
-
 
 from .utils import open_browser
 from .theme import configure_theme
@@ -10,22 +10,22 @@ from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 
-
-
 class Interface(tk.Tk):
     def __init__(self, controller):
-        super().__init__()  # Initialize the main window
+        super().__init__()
         self.controller = controller
         self.running = False
         self._alive = True
+
         self.gui_queue = Queue()
-        self.current_theme = "default"
         self.async_mgr = AsyncTaskManager(self.gui_queue, controller, self._complete_processing)
+        
+        self.current_theme = "default"
 
         # Initialization sequence
         self._configure_window()
-        self._setup_theme()
         self._create_layout()
+        self._create_theme_toggle()
         self._bind_cleanup()
 
     # --------------------- Window Configuration ---------------------
@@ -41,17 +41,26 @@ class Interface(tk.Tk):
         self.configure(bg=THEMES[self.current_theme]["bg"])
 
     # --------------------- Theme Management ---------------------
-    def _setup_theme(self):
-        """Initialize theme configuration"""
-        configure_theme(self, self.current_theme)
-        self._update_root_theme()
+    def _create_theme_toggle(self):
+        """Create theme toggle emoji in top-right corner"""
+        self.theme_emoji = ttk.Label(
+            self,
+            text="🌙" if self.current_theme == "dark" else "☀️",
+            font=("Arial", 14),
+            background=THEMES[self.current_theme]["bg"]
+        )
+        self.theme_emoji.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=10)
+        self.theme_emoji.bind("<Button-1>", lambda e: self._toggle_theme())
 
     def _toggle_theme(self):
-        """Switch between available color themes"""
+        """Handle theme toggle"""
         self.current_theme = "dark" if self.current_theme == "default" else "default"
+        self.theme_emoji.config(
+            text="🌙" if self.current_theme == "dark" else "☀️",
+            background=THEMES[self.current_theme]["bg"]
+        )
         configure_theme(self, self.current_theme)
         self._update_root_theme()
-        self.update_idletasks()  # Force UI refresh
 
     # --------------------- Layout Management ---------------------
     def _create_layout(self):
@@ -60,12 +69,13 @@ class Interface(tk.Tk):
         main_frame.pack(expand=True, fill="both", padx=40, pady=50)
 
         Header(main_frame).pack()
-        ButtonsPanel(
+
+        self.buttons_panel = ButtonsPanel(
             main_frame,
             self._start_processing,
-            lambda: open_browser(URLS),
-            self._toggle_theme,
-        ).pack(pady=(0, 15))
+            lambda: open_browser(URLS)
+        )
+        self.buttons_panel.pack(pady=(0, 15))
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
