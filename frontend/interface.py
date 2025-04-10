@@ -1,7 +1,7 @@
-# interface.py
 import tkinter as tk
 from tkinter import ttk, filedialog
 from queue import Empty, Queue
+
 
 from .utils import open_browser
 from .theme import configure_theme
@@ -9,6 +9,8 @@ from .constants import THEMES, URLS
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
+
+
 
 class Interface(tk.Tk):
     def __init__(self, controller):
@@ -24,6 +26,7 @@ class Interface(tk.Tk):
 
         # Initialization sequence
         self._configure_window()
+        self._setup_theme()
         self._create_layout()
         self._create_theme_toggle()
         self._bind_cleanup()
@@ -41,6 +44,11 @@ class Interface(tk.Tk):
         self.configure(bg=THEMES[self.current_theme]["bg"])
 
     # --------------------- Theme Management ---------------------
+    def _setup_theme(self):
+        """Initialize theme configuration"""
+        configure_theme(self, self.current_theme)
+        self._update_root_theme()
+
     def _create_theme_toggle(self):
         """Create theme toggle emoji in top-right corner"""
         self.theme_emoji = ttk.Label(

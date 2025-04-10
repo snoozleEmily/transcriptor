@@ -1,6 +1,7 @@
-# widgets/buttons_panel.py
 import tkinter as tk
 from tkinter import ttk
+
+
 
 class ButtonsPanel(ttk.Frame):
     """Interactive controls container"""
