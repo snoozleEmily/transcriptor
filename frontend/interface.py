@@ -18,11 +18,14 @@ class Interface(tk.Tk):
         self.controller = controller
         self.running = False
         self._alive = True
-
-        self.gui_queue = Queue()
-        self.async_mgr = AsyncTaskManager(self.gui_queue, controller, self._complete_processing)
-        
         self.current_theme = "default"
+        self.gui_queue = Queue()
+        self.async_mgr = AsyncTaskManager(
+                    self.gui_queue,
+                    self,
+                    self._complete_processing
+                )        
+        
 
         # Initialization sequence
         self._configure_window()
@@ -30,6 +33,8 @@ class Interface(tk.Tk):
         self._create_layout()
         self._create_theme_toggle()
         self._bind_cleanup()
+
+        
 
     # --------------------- Window Configuration ---------------------
     def _configure_window(self):
@@ -78,12 +83,23 @@ class Interface(tk.Tk):
 
         Header(main_frame).pack()
 
+        # Buttons panel
         self.buttons_panel = ButtonsPanel(
             main_frame,
             self._start_processing,
             lambda: open_browser(URLS)
         )
         self.buttons_panel.pack(pady=(0, 15))
+
+        # Progress bar
+        self.progress_bar = ttk.Progressbar(
+            main_frame,
+            orient="horizontal",
+            mode="determinate",
+            length=400
+        )
+        self.progress_bar.pack(pady=10)
+        self.progress_bar.pack_forget()  # Hide initially
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
@@ -96,11 +112,25 @@ class Interface(tk.Tk):
         )
         if path:
             self.running = True
-            self.async_mgr.get_busy(path)
+            self.progress_bar.pack(pady=10)
+            
+            def update_progress(p):
+                """Update progress bar from transcription logs"""
+                self.progress_bar['value'] = p
+                if p >= 100:
+                    self.progress_bar.pack_forget()
+                    
+            self.async_mgr.get_busy(
+                path,
+                progress_handler=lambda p: self.gui_queue.put(
+                    lambda: update_progress(p)
+                )
+            )
 
     def _complete_processing(self):
         """Cleanup after processing completes"""
         self.running = False
+        self.gui_queue.put(lambda: self.progress_bar.pack_forget())
 
     # --------------------- System Operations ---------------------
     def _bind_cleanup(self):
@@ -118,6 +148,19 @@ class Interface(tk.Tk):
 
         if self._alive:
             self.after(100, self._monitor_gui_queue)
+
+    def show_error(self, message):
+            """Display error message to user"""
+            self.running = False
+            self.progress_bar.pack_forget()
+            error_label = ttk.Label(
+                self,
+                text=f"Error: {message}",
+                foreground="red"
+            )
+            error_label.place(relx=0.5, rely=0.9, anchor='center')
+            self.after(3000, error_label.destroy)
+            
 
     def _safe_exit(self):
         """Ensure clean application termination"""
