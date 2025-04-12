@@ -11,7 +11,6 @@ from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 
 
-
 class Interface(tk.Tk):
     def __init__(self, controller):
         super().__init__()
@@ -91,16 +90,6 @@ class Interface(tk.Tk):
         )
         self.buttons_panel.pack(pady=(0, 15))
 
-        # Progress bar
-        self.progress_bar = ttk.Progressbar(
-            main_frame,
-            orient="horizontal",
-            mode="determinate",
-            length=400
-        )
-        self.progress_bar.pack(pady=10)
-        self.progress_bar.pack_forget()  # Hide initially
-
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
         """Initiate video processing workflow"""
@@ -112,25 +101,11 @@ class Interface(tk.Tk):
         )
         if path:
             self.running = True
-            self.progress_bar.pack(pady=10)
-            
-            def update_progress(p):
-                """Update progress bar from transcription logs"""
-                self.progress_bar['value'] = p
-                if p >= 100:
-                    self.progress_bar.pack_forget()
-                    
-            self.async_mgr.get_busy(
-                path,
-                progress_handler=lambda p: self.gui_queue.put(
-                    lambda: update_progress(p)
-                )
-            )
+            self.async_mgr.get_busy(path)
 
     def _complete_processing(self):
         """Cleanup after processing completes"""
         self.running = False
-        self.gui_queue.put(lambda: self.progress_bar.pack_forget())
 
     # --------------------- System Operations ---------------------
     def _bind_cleanup(self):
@@ -152,7 +127,6 @@ class Interface(tk.Tk):
     def show_error(self, message):
             """Display error message to user"""
             self.running = False
-            self.progress_bar.pack_forget()
             error_label = ttk.Label(
                 self,
                 text=f"Error: {message}",
