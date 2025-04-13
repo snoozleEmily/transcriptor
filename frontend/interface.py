@@ -112,9 +112,28 @@ class Interface(tk.Tk):
         )
         self.buttons_panel.pack(pady=(0, 15))
 
-        # Log display area
+# --------------------- Log display area ---------------------
         log_frame = ttk.Frame(main_frame)
         log_frame.pack(expand=True, fill='both')
+
+        # Console Log Title
+        self.log_title = tk.Label(
+            log_frame,
+            text="Console Log",
+            bg=THEMES[self.current_theme]["bg"],
+            fg=THEMES[self.current_theme]["fg"],
+            font=("Arial", 10, "bold")
+        )
+        self.log_title.pack(side=tk.TOP, anchor="w", padx=5, pady=2)
+
+        # Copy Button
+        self.copy_btn = ttk.Button(
+            log_frame,
+            text="📋",
+            command=self.copy_log,
+            width=2
+        )
+        self.copy_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-5, y=5)
 
         self.log_text = tk.Text(
             log_frame,
@@ -129,6 +148,24 @@ class Interface(tk.Tk):
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+    def copy_log(self):
+        """Copy log content to clipboard"""
+        self.log_text.config(state=tk.NORMAL)
+        text = self.log_text.get("1.0", tk.END)
+        self.log_text.config(state=tk.DISABLED)
+        self.clipboard_clear()
+        self.clipboard_append(text)
+        self.show_feedback("Copied to clipboard!")
+
+    def show_feedback(self, message):
+        """Display temporary success message"""
+        feedback_label = ttk.Label(
+            self,
+            text=message,
+            foreground="green"
+        )
+        feedback_label.place(relx=0.5, rely=0.95, anchor="center")
+        self.after(3000, feedback_label.destroy)
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
