@@ -1,4 +1,3 @@
-# Theme and style constants
 THEMES = {
     "default": {
         "bg": "#F5F5F5",
@@ -25,5 +24,6 @@ FONTS = {
 }
 
 URLS = {
-    "github_repo": "https://github.com/snoozleEmily/transcriptor"
+    "github_repo": "https://github.com/snoozleEmily/transcriptor",
+    "bug_reports": "https://github.com/snoozleEmily/transcriptor/issues",
 }

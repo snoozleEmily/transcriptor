@@ -1,4 +1,4 @@
-from .constants import THEMES, FONTS
+from .constants import THEMES, FONTS, URLS
 from .interface import Interface
 from .theme import configure_theme
 from .async_processor import AsyncTaskManager
@@ -12,6 +12,7 @@ __all__ = [
     "MainWindow",
     "COLOR_SCHEME",
     "FONTS"
+    "URLS",
     "configure_theme",
     "AsyncTaskManager",
     "Header",
