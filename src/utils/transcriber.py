@@ -6,7 +6,7 @@ from tqdm import tqdm
 from pydub import AudioSegment
 
 
-from errors.exceptions import TranscriptionError
+from src.errors.exceptions import TranscriptionError
 
 
 

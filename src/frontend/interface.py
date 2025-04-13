@@ -4,13 +4,12 @@ from tkinter import ttk, filedialog
 from queue import Empty, Queue
 
 
-from .utils import open_browser
+from .url_opener import open_browser
 from .theme import configure_theme
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
-from .constants import THEMES, FONTS
-from ...config.metadata import PROJECT_URLS
+from .constants import THEMES, FONTS, GT_REPO
 
 
 
@@ -116,7 +115,7 @@ class Interface(tk.Tk):
         self.buttons_panel = ButtonsPanel(
             main_frame,
             self._start_processing,
-            lambda: open_browser(PROJECT_URLS["github_repo"])
+            lambda: open_browser(GT_REPO)
         )
         self.buttons_panel.pack(pady=(0, 15))
 

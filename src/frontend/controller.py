@@ -1,12 +1,12 @@
 from tkinter import filedialog
 
 
-from errors.handlers import catch_errors
-from errors.exceptions import ErrorCode, FileError
-from utils.transcriber import Transcriber
-from utils.file_handler import save_transcription
-from utils.audio_cleaner import clean_audio
-from utils.audio_processor import extract_audio
+from src.errors.handlers import catch_errors
+from src.errors.exceptions import ErrorCode, FileError
+from src.utils.transcriber import Transcriber
+from src.utils.file_handler import save_transcription
+from src.utils.audio_cleaner import clean_audio
+from src.utils.audio_processor import extract_audio
 
 
 

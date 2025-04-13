@@ -1,6 +1,6 @@
 from enum import Enum
 
-# Do I really need this module?
+# Add these to the logs
 
 class Status(Enum):
     PROCESSING = "⏳ Processing..."

@@ -4,7 +4,7 @@ import datetime
 from pathlib import Path
 
 
-from errors.exceptions import FileError
+from src.errors.exceptions import FileError
 
 
 
