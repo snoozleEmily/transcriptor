@@ -21,6 +21,8 @@ class ProcessingController:
         cleaned = clean_audio(audio)
 
         text = self.transcriber.transcribe(cleaned)
+        
+        # HANDLE TEXT REVISION HERE
 
         save_path = filedialog.asksaveasfilename(
             defaultextension=".txt", filetypes=[("Text Files", "*.txt")]

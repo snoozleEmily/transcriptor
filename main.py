@@ -1,5 +1,5 @@
 from src.frontend.interface import Interface
-from src.frontend.controller import ProcessingController
+from src.utils.controller import ProcessingController
 
 
 
@@ -13,3 +13,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    
