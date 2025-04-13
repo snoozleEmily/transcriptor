@@ -6,10 +6,11 @@ from queue import Empty, Queue
 
 from .utils import open_browser
 from .theme import configure_theme
-from .constants import THEMES, FONTS, URLS
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
+from .constants import THEMES, FONTS
+from ...config.metadata import PROJECT_URLS
 
 
 
@@ -115,7 +116,7 @@ class Interface(tk.Tk):
         self.buttons_panel = ButtonsPanel(
             main_frame,
             self._start_processing,
-            lambda: open_browser(URLS["github_repo"])
+            lambda: open_browser(PROJECT_URLS["github_repo"])
         )
         self.buttons_panel.pack(pady=(0, 15))
 

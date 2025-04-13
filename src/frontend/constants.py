@@ -22,8 +22,3 @@ FONTS = {
     "emoji_large": ("Segoe UI Emoji", 64),  
     "emoji_small": ("Segoe UI Emoji", 12)
 }
-
-URLS = {
-    "github_repo": "https://github.com/snoozleEmily/transcriptor",
-    "bug_reports": "https://github.com/snoozleEmily/transcriptor/issues",
-}
