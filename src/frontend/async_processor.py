@@ -2,6 +2,7 @@ import threading
 from queue import Queue
 
 
+
 class AsyncTaskManager:
     def __init__(self, gui_queue, interface, completion_callback):
         self.gui_queue = gui_queue

@@ -42,5 +42,5 @@ def configure_theme(root, theme_name="default"):
     )
     style.configure(
         "EmojiDisplay.TLabel",
-        font=FONTS["emoji"]
+        font=FONTS["emoji_large"]
     )

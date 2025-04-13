@@ -1,5 +1,5 @@
-from frontend.interface import Interface
-from frontend.controller import ProcessingController
+from src.frontend.interface import Interface
+from src.frontend.controller import ProcessingController
 
 
 

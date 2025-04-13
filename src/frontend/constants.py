@@ -1,4 +1,3 @@
-# Theme and style constants
 THEMES = {
     "default": {
         "bg": "#F5F5F5",
@@ -19,9 +18,9 @@ THEMES = {
 FONTS = {
     "title": ("Courier New", 16),
     "default": ("Courier New", 10),
-    "emoji": ("Segoe UI Emoji", 64)
+    "console": ("Consolas", 10),  
+    "emoji_large": ("Segoe UI Emoji", 64),  
+    "emoji_small": ("Segoe UI Emoji", 12)
 }
 
-URLS = {
-    "github_repo": "https://github.com/snoozleEmily/transcriptor"
-}
+GT_REPO = "https://github.com/snoozleEmily/transcriptor"
