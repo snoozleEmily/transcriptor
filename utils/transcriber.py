@@ -42,6 +42,7 @@ class Transcriber:
                 result = self._run_transcription(
                     audio_array, 
                     lambda p: self._update_progress(p, bar, progress_handler))
+                
             finally:
                 self._progress_active = False
                 duration_thread.join()

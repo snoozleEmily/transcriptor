@@ -1,78 +1,20 @@
-from tkinter import messagebox
-from threading import Thread
-
+import threading
+from queue import Queue
 
 
 class AsyncTaskManager:
-    def __init__(self, gui_queue, control, finish):
+    def __init__(self, gui_queue, interface, completion_callback):
         self.gui_queue = gui_queue
-        self.control = control
-        self.finish = finish
-    
-    def get_busy(self, path):
-        """Execute video processing in background thread"""
-        def task(control, finish):
-            try:
-                #def progress(percentage):
-                    # Send progress updates to the GUI queue
-                #    self.gui_queue.put(lambda: self._update_progress(percentage))
-                
-                control.process_video(path)
-                self.gui_queue.put(lambda: self._show_success())
-
-            except Exception as e:
-                # Capture 'e' as a default argument in the lambda
-                self.gui_queue.put(lambda e=e: self._show_error(e))
-                
-            finally:
-                finish()
+        self.interface = interface
+        self.completion_callback = completion_callback
         
-        Thread(target=task, args=(self.control, self.finish), daemon=True).start()
-    
-    #def _update_progress(self, percentage):
-    #    print(f"Progress: {percentage}%")
-
-    def _show_success(self):
-        messagebox.showinfo("Success", "Transcription saved successfully!")
-    
-    def _show_error(self, error):
-        messagebox.showerror("Error", str(error))
-
-# ------------------ TESTING ------------------
-if __name__ == "__main__":
-   '''
-    import queue
-    import time 
-
-    # Simulated control class with a process_video method
-    class Control:
-        def process_video(self, path):
-            # Simulating progress from 0% to 100%
-            for i in range(101):  
-                #progress_callback(i)
-                time.sleep(0.1)  # Simulate processing delay
-
-    # Simulated finish callback
-    def finish():
-        print("Processing finished.")
-
-    # Create a GUI queue
-    gui_queue = queue.Queue()
-
-    # Create an instance of AsyncTaskManager
-    manager = AsyncTaskManager(gui_queue)
-
-    # Start processing video
-    manager.process_video("dummy_path", Control(), finish)
-
-    # Process GUI queue to handle updates
-    while True:
-        try:
-            # Process tasks in the GUI queue
-            task = gui_queue.get_nowait()
-            task()  # Execute the task
-        except queue.Empty:
-            break
-    '''
-   # Might delete this testing code later
-   raise NotImplementedError("The name/main or testing code block should be changed, the current one is buggy.")
+    def get_busy(self, path, progress_handler=None):
+        """Handle async transcription with progress updates"""
+        def task():
+            try:
+                result = self.interface.controller.process_video(path)
+                self.gui_queue.put(self.completion_callback)
+            except Exception as e:
+                self.gui_queue.put(lambda: self.interface.show_error(str(e)))
+                
+        threading.Thread(target=task).start()

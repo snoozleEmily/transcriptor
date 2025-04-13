@@ -9,6 +9,7 @@ from .exceptions import (
     ErrorCode
 )
 
+
 def catch_errors(func: Callable) -> Callable:
     """Error handling decorator for controller methods"""
     @functools.wraps(func)

@@ -17,8 +17,8 @@ def save_transcription(text: str, save_path: str = None) -> str:
         # Generate default filename if not provided
         if not save_path:
             save_path = os.path.join(
-                os.getcwd(),
-                f"transcription_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+                os.getcwd(), # Current working directory
+                f"transcription_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt" # Timestamp filename
             )
 
         # Create parent directories if needed
@@ -33,5 +33,6 @@ def save_transcription(text: str, save_path: str = None) -> str:
             
     except PermissionError as e:
         raise FileError.save_failed(f"Permission denied: {save_path}") from e
+    
     except Exception as e:
         raise FileError.save_failed(str(e)) from e
