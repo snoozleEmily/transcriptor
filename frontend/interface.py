@@ -115,7 +115,7 @@ class Interface(tk.Tk):
         self.buttons_panel = ButtonsPanel(
             main_frame,
             self._start_processing,
-            lambda: open_browser(URLS)
+            lambda: open_browser(URLS["github_repo"])
         )
         self.buttons_panel.pack(pady=(0, 15))
 
