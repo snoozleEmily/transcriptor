@@ -19,7 +19,9 @@ THEMES = {
 FONTS = {
     "title": ("Courier New", 16),
     "default": ("Courier New", 10),
-    "emoji": ("Segoe UI Emoji", 64)
+    "console": ("Consolas", 10),  
+    "emoji_large": ("Segoe UI Emoji", 64),  
+    "emoji_small": ("Segoe UI Emoji", 12)
 }
 
 URLS = {

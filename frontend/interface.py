@@ -6,7 +6,7 @@ from queue import Empty, Queue
 
 from .utils import open_browser
 from .theme import configure_theme
-from .constants import THEMES, URLS
+from .constants import THEMES, FONTS, URLS
 from .widgets.header import Header
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
@@ -80,7 +80,7 @@ class Interface(tk.Tk):
         self.theme_emoji = ttk.Label(
             self,
             text="🌙" if self.current_theme == "dark" else "☀️",
-            font=("Arial", 14),
+            font=FONTS["emoji_small"],
             background=THEMES[self.current_theme]["bg"]
         )
         self.theme_emoji.place(relx=1.0, rely=0.0, anchor='ne', x=-10, y=10)
@@ -89,10 +89,17 @@ class Interface(tk.Tk):
     def _toggle_theme(self):
         """Handle theme toggle"""
         self.current_theme = "dark" if self.current_theme == "default" else "default"
+        # Update theme emoji
         self.theme_emoji.config(
             text="🌙" if self.current_theme == "dark" else "☀️",
             background=THEMES[self.current_theme]["bg"]
         )
+        # Update copy label colors
+        self.copy_label.config(
+            bg=THEMES[self.current_theme]["bg"],
+            fg=THEMES[self.current_theme]["fg"]
+        )
+        # Rest of existing theme configuration
         configure_theme(self, self.current_theme)
         self._update_root_theme()
 
@@ -122,18 +129,21 @@ class Interface(tk.Tk):
             text="Console Log",
             bg=THEMES[self.current_theme]["bg"],
             fg=THEMES[self.current_theme]["fg"],
-            font=("Arial", 10, "bold")
+            font=FONTS["console"]
         )
         self.log_title.pack(side=tk.TOP, anchor="w", padx=5, pady=2)
 
         # Copy Button
-        self.copy_btn = ttk.Button(
-            log_frame,
-            text="📋",
-            command=self.copy_log,
-            width=2
+        self.copy_label = tk.Label(
+        log_frame,
+        text="📋",
+        bg=THEMES[self.current_theme]["bg"],
+        fg=THEMES[self.current_theme]["fg"],
+        font=FONTS["emoji_small"],
+        cursor="hand2"
         )
-        self.copy_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-5, y=5)
+        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=1)
+        self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
 
         self.log_text = tk.Text(
             log_frame,

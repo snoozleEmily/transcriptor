@@ -14,11 +14,11 @@ def create_branding(parent):
         fg=THEMES["fg"]
     ).pack(pady=(0, 5))
 
-    # Emoji decoration
+    # Video emoji decoration
     tk.Label(
         container,
         text="🎥",
-        font=FONTS["emoji"],
+        font=FONTS["emoji_large"],
         bg=THEMES["bg"]
     ).pack(pady=(0, 35))
     
