@@ -1,3 +1,4 @@
+import sys
 import tkinter as tk
 from tkinter import ttk, filedialog
 from queue import Empty, Queue
@@ -11,7 +12,27 @@ from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 
 
+
 class Interface(tk.Tk):
+    # --------------------- Console Log Set Up ---------------------
+    class LogRedirector:
+        def __init__(self, queue, widget):
+            self.queue = queue
+            self.widget = widget
+
+        def write(self, text):
+            self.queue.put(lambda: self._append_log(text))
+
+        def _append_log(self, text):
+            self.widget.config(state=tk.NORMAL)
+            self.widget.insert(tk.END, text)
+            self.widget.see(tk.END)
+            self.widget.config(state=tk.DISABLED)
+
+        def flush(self):
+            pass
+
+    # --------------------- Base Variables ---------------------
     def __init__(self, controller):
         super().__init__()
         self.controller = controller
@@ -25,7 +46,6 @@ class Interface(tk.Tk):
                     self._complete_processing
                 )        
         
-
         # Initialization sequence
         self._configure_window()
         self._setup_theme()
@@ -33,13 +53,15 @@ class Interface(tk.Tk):
         self._create_theme_toggle()
         self._bind_cleanup()
 
-        
+        # Redirect standard streams after UI is initialized
+        sys.stdout = self.LogRedirector(self.gui_queue, self.log_text)
+        sys.stderr = self.LogRedirector(self.gui_queue, self.log_text)
 
     # --------------------- Window Configuration ---------------------
     def _configure_window(self):
         """Establish main window properties"""
         self.title("Emily's Transcriptor")
-        self.geometry("550x350")
+        self.geometry("700x500")
         self.resizable(False, False)
         self._update_root_theme()
 
@@ -89,6 +111,24 @@ class Interface(tk.Tk):
             lambda: open_browser(URLS)
         )
         self.buttons_panel.pack(pady=(0, 15))
+
+        # Log display area
+        log_frame = ttk.Frame(main_frame)
+        log_frame.pack(expand=True, fill='both')
+
+        self.log_text = tk.Text(
+            log_frame,
+            wrap=tk.WORD,
+            state='disabled',
+            height=10,
+            bg=THEMES[self.current_theme]['bg'],
+            fg=THEMES[self.current_theme]['fg']
+        )
+        scrollbar = ttk.Scrollbar(log_frame, command=self.log_text.yview)
+        self.log_text.configure(yscrollcommand=scrollbar.set)
+        self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
