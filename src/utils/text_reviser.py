@@ -1,3 +1,4 @@
+# First Development imports (might delete)
 import re
 import numpy as np
 from nltk.tree import Tree
@@ -7,23 +8,20 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
 from scipy.special import softmax
 
+# Second Development imports
+import re
+from tkinter import filedialog
+from typing import List, Optional
+
+
+
 
 class AdvancedTextReviser:
-    def __init__(self, technical_terms=None, min_confidence=0.4):
-        """
-        PHASE 1: OFFLINE-FIRST INITIALIZATION
+    def __init__(self, technical_terms: Optional[List[str]] = None, min_confidence: float = 0.4):
+        self.technical_terms = technical_terms if technical_terms else []
+        self.min_confidence = min_confidence  # Currently placeholder for future use
 
-        - Tradeoff: Larger initial bundle size vs runtime flexibility
-        - Critical: All NLTK resources must be bundled pre-deployment
-        - Security: Technical terms sanitized to prevent regex injection
-        """
-        # Pre-sanitize technical terms (escape regex special chars)
-        self.technical_terms = {re.escape(term) for term in (technical_terms or [])}
-        
-        # Content-type detection requires minimal resources - avoid heavy ML models?
-        self._init_content_classifier()
-
-    def revise(self, text, whisper_result=None):
+    def revise_text(self, text: str) -> str:
         """
         PHASE 2: ADAPTIVE PROCESSING PIPELINE
 
@@ -37,11 +35,19 @@ class AdvancedTextReviser:
         """
         # Content-type probabilities dict:
         # {'tech': 0.8, 'poetry': 0.1, 'multilingual': 0.4, ...}
-        content_profile = self._analyze_content(text)
+        # Pre-sanitize technical terms (escape regex special chars) present in the text.
+        
+        revised_text = text
+        for term in self.technical_terms:
+            # Case-insensitive replacement with exact term using word boundaries
+            pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+            revised_text = pattern.sub(term, revised_text)
 
-        # Early exit for poetry/lyrics (preserve original structure)
-        if content_profile.get('poetry') > 0.7:
-            return self._preserve_poetic_structure(text)
+
+        # Content-type detection requires minimal resources - avoid heavy ML models?
+
+        return revised_text
+    
 
     def _fix_structural_issues(self, text):
         """
