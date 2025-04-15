@@ -18,7 +18,7 @@ class Transcriber:
         self.sample_rate = 16000  # Whisper's required sample rate
         self._progress_active = False  # Flag for duration-based progress
 
-    def transcribe(self, audio_input=None, progress_handler=None) -> str:
+    def transcribe(self, audio_input=None, progress_handler=None) -> dict: # chanded to dict from str because of breaking change
         """Convert speech to text with progress updates"""
         audio = self._validate_input(audio_input)
         audio_array, duration = self._convert_audio_format(audio)
@@ -126,4 +126,4 @@ class Transcriber:
         """Ensure valid transcription result"""
         if not result.get("text"):
             raise TranscriptionError.no_speech()
-        return result["text"]
+        return result # ["text"] for now this is a BREAKING CHANGE
