@@ -11,9 +11,11 @@ from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 
 
+
 class ProcessingController:
     def __init__(self, technical_terms: Optional[List[str]] = None):
         self.transcriber = Transcriber()
+        technical_terms = ["AI", "Machine Learning", "NLP"] # For testing | it will be removed
         self.reviser = AdvancedTextReviser(technical_terms=technical_terms)
 
     @catch_errors
@@ -22,7 +24,9 @@ class ProcessingController:
         audio = extract_audio(video_path)
         cleaned = clean_audio(audio)
 
-        raw_text = self.transcriber.transcribe(cleaned)
+        # Extract text from the result dictionary
+        result = self.transcriber.transcribe(cleaned)
+        raw_text = result['text']
         revised_text = self.reviser.revise_text(raw_text)
 
         save_path = filedialog.asksaveasfilename(
