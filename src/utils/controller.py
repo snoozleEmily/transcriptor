@@ -10,7 +10,7 @@ from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 
-
+# TODO: Add technical_terms to be received from the user's input in the GUI
 
 class ProcessingController:
     def __init__(self, technical_terms: Optional[List[str]] = None):
