@@ -1,5 +1,4 @@
 # First Development imports (might delete)
-import re
 import numpy as np
 from nltk.tree import Tree
 from nltk import pos_tag, ne_chunk, word_tokenize, sent_tokenize
@@ -13,8 +12,7 @@ import re
 from tkinter import filedialog
 from typing import List, Optional
 
-
-
+# PHASE 1: GET TECHNICAL TERMS
 
 class AdvancedTextReviser:
     def __init__(self, technical_terms: Optional[List[str]] = None, min_confidence: float = 0.4):
