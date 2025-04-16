@@ -1,5 +1,7 @@
 from typing import Dict, List, Optional
 
+
+
 class ContentTypeConfig:
     """Configuration for content type characteristics and processing rules."""
     
