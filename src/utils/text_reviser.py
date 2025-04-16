@@ -7,46 +7,58 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
 from scipy.special import softmax
 
+
+
 # Second Development imports
 import re
-from tkinter import filedialog
-from typing import List, Optional
-
-# PHASE 1: GET TECHNICAL TERMS
+from typing import Dict, List
+from content_type import ContentTypeConfig
 
 class AdvancedTextReviser:
-    def __init__(self, technical_terms: Optional[List[str]] = None, min_confidence: float = 0.4):
-        self.technical_terms = technical_terms if technical_terms else []
-        self.min_confidence = min_confidence  # Currently placeholder for future use
+    def __init__(
+        self,
+        technical_terms: Dict[str, List[str]] = None,
+        content_config: ContentTypeConfig = ContentTypeConfig()
+    ):
+        self.technical_terms = technical_terms or {}
+        self.content_config = content_config
 
     def revise_text(self, text: str) -> str:
-        """
-        PHASE 2: ADAPTIVE PROCESSING PIPELINE
-
-        Execution priorities:
-        1. Content classification (guides all downstream processing)
-        2. Structural repairs (domain-sensitive)
-        3. Validation thresholds (content-aware)
-        4. Confidence integration (if ASR alignment possible)
-        
-        Tradeoff: Classification accuracy vs processing overhead
-        """
-        # Content-type probabilities dict:
-        # {'tech': 0.8, 'poetry': 0.1, 'multilingual': 0.4, ...}
-        # Pre-sanitize technical terms (escape regex special chars) present in the text.
-        
+        """Apply revisions based on content configuration"""
         revised_text = text
-        for term in self.technical_terms:
-            # Case-insensitive replacement with exact term using word boundaries
-            pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
-            revised_text = pattern.sub(term, revised_text)
+        
+        if self.content_config.is_technical:
+            # Get relevant technical terms from selected categories
+            selected_terms = [
+                term for category in self.content_config.technical_categories
+                for term in self.technical_terms.get(category, [])
+            ]
+            
+            # Apply technical term enforcement
+            revised_text = self._enforce_technical_terms(revised_text, selected_terms)
 
-
-        # Content-type detection requires minimal resources - avoid heavy ML models?
+        if self.content_config.has_code:
+            revised_text = self._preserve_code_formatting(revised_text)
 
         return revised_text
+
+    def _enforce_technical_terms(self, text: str, terms: List[str]) -> str:
+        for term in terms:
+            pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+            text = pattern.sub(term, text)
+        return text
+
+    def _preserve_code_formatting(self, text: str) -> str:
+        # Add code formatting preservation logic here
+        return text
     
 
+
+
+
+
+
+# --------------------------- WIP Bellow ------------------------------
     def _fix_structural_issues(self, text):
         """
         PHASE 3: CONTENT-AWARE REPAIRS
