@@ -8,58 +8,56 @@ from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
 from scipy.special import softmax
 
 
-
 # Second Development imports
 import re
 from typing import Dict, List
 from content_type import ContentTypeConfig
 
+
 class AdvancedTextReviser:
     def __init__(
         self,
-        technical_terms: Dict[str, List[str]] = None,
-        content_config: ContentTypeConfig = ContentTypeConfig()
+        specific_words: Dict[str, List[str]] = None,
+        config: ContentTypeConfig = ContentTypeConfig(),
     ):
-        self.technical_terms = technical_terms or {}
-        self.content_config = content_config
+        self.specific_words = specific_words or {} # Handled in ProcessingController
+        self.config = config
 
     def revise_text(self, text: str) -> str:
         """Apply revisions based on content configuration"""
         revised_text = text
-        
-        if self.content_config.is_technical:
+
+        if self.config.is_technical:
             # Get relevant technical terms from selected categories
             selected_terms = [
-                term for category in self.content_config.technical_categories
-                for term in self.technical_terms.get(category, [])
+                term
+                for category in self.config.tech_categories
+                for term in self.specific_words.get(category, [])
             ]
-            
+
             # Apply technical term enforcement
             revised_text = self._enforce_technical_terms(revised_text, selected_terms)
 
-        if self.content_config.has_code:
-            revised_text = self._preserve_code_formatting(revised_text)
+        if self.config.has_code:
+            revised_text = self._code_formatting(revised_text)
 
         return revised_text
 
     def _enforce_technical_terms(self, text: str, terms: List[str]) -> str:
         for term in terms:
-            pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+            pattern = re.compile(rf"\b{re.escape(term)}\b", re.IGNORECASE)
             text = pattern.sub(term, text)
+
         return text
 
-    def _preserve_code_formatting(self, text: str) -> str:
+    def _code_formatting(self, text: str) -> str:
         # Add code formatting preservation logic here
         return text
-    
 
 
 
-
-
-
-# --------------------------- WIP Bellow ------------------------------
-    def _fix_structural_issues(self, text):
+    # --------------------- WIP Bellow ---------------------
+    def _fix_structure(self, text):
         """
         PHASE 3: CONTENT-AWARE REPAIRS
 
@@ -67,7 +65,7 @@ class AdvancedTextReviser:
         - Code snippet detection using CamelCase/snake_case patterns
         - Variable preservation regex: (?<!\\)\b([A-Za-z_]\w*(?:\.\w+)*)\b
         - Avoid modifying quoted strings or bracketed content
-        
+
         Multilingual handling:
         - Language boundary detection via character set analysis
         - Script-specific normalization (CJK vs Latin vs Cyrillic)
@@ -75,7 +73,7 @@ class AdvancedTextReviser:
         # Fallback strategy if language detection fails
         # Minimum impact processing for unrecognized scripts
 
-    def _validate_linguistic_integrity(self, text):
+    def _validate_linguistics(self, text):
         """
         PHASE 4: DYNAMIC VALIDATION
 
@@ -83,7 +81,7 @@ class AdvancedTextReviser:
         - Validate code term presence without case distortion
         - Allow higher entity density for technical documents
         - Relax verb presence requirements for code comments
-        
+
         Poetry/Lyrics: # Is this really worth it?
         - Disable standard linguistic checks
         - Rhythm pattern validation (syllable counting)
@@ -91,15 +89,15 @@ class AdvancedTextReviser:
         """
         # Fail-safe: Minimum validation for mixed/unknown content
 
-    def _contextual_repair(self, text, validation_report):
+    def _context_repair(self, text, validation_report):
         """
         PHASE 5: CONSERVATIVE CORRECTION
-        
+
         Repair priorities:
         1. Preserve original casing in technical terms
         2. Maintain line breaks in poetry/lyrics
         3. Isolate multilingual segments without translation
-        
+
         Recovery protocol:
         - Fallback to raw text + confidence markers if repairs fail
         - Preserve original timestamps when available
