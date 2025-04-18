@@ -48,7 +48,7 @@ from tkinter import filedialog
 from typing import List, Optional
 from src.errors.handlers import catch_errors
 from src.errors.exceptions import ErrorCode, FileError
-from src.utils.transcriber import Transcriber
+from src.utils.textify import Textify
 from src.utils.content_type import ContentTypeConfig
 from src.utils.text_reviser import AdvancedTextReviser
 from src.utils.file_handler import save_transcription
@@ -57,7 +57,7 @@ from src.utils.audio_processor import extract_audio
 
 
 
-class ProcessingController:
+class EndFlow:
     models = [
         "tiny",    # 0 -> Fastest, lowest accuracy
         "base",    # 1 -> Fast, low accuracy
@@ -67,10 +67,10 @@ class ProcessingController:
         ]
     model_size = models[1]  # Default model size for transcription
     
-    def __init__(self):
-        self.transcriber = Transcriber(ProcessingController.model_size)  
-        self.reviser = AdvancedTextReviser()
-        self.content_config = None  # To be set before processing
+    def __init__(self, words: Optional[List[str]] = None):
+        words = ["AI", "Machine Learning", "NLP"] # For testing | it will be removed
+        self.textify = Textify()
+        self.reviser = TextReviser(specific_words=words)
 
     def configure_content(self, config_params: dict):
         """Update content configuration from GUI inputs"""
