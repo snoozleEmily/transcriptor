@@ -4,19 +4,19 @@ from typing import List, Optional
 
 from src.errors.handlers import catch_errors
 from src.errors.exceptions import ErrorCode, FileError
-from src.utils.transcriber import Transcriber
-from src.utils.text_reviser import AdvancedTextReviser
+from src.utils.textify import Textify
+from src.utils.text_reviser import TextReviser
 from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 
-# TODO: Add technical_terms to be received from the user's input in the GUI
+# TODO: Add specific_words to be received from the user's input in the GUI
 
-class ProcessingController:
-    def __init__(self, technical_terms: Optional[List[str]] = None):
-        self.transcriber = Transcriber()
-        technical_terms = ["AI", "Machine Learning", "NLP"] # For testing | it will be removed
-        self.reviser = AdvancedTextReviser(technical_terms=technical_terms)
+class EndFlow:
+    def __init__(self, words: Optional[List[str]] = None):
+        self.textify = Textify()
+        words = ["AI", "Machine Learning", "NLP"] # For testing | it will be removed
+        self.reviser = TextReviser(specific_words=words)
 
     @catch_errors
     def process_video(self, video_path: str) -> str:
@@ -25,7 +25,7 @@ class ProcessingController:
         cleaned = clean_audio(audio)
 
         # Extract text from the result dictionary
-        result = self.transcriber.transcribe(cleaned)
+        result = self.textify.transcribe(cleaned)
         raw_text = result['text']
         revised_text = self.reviser.revise_text(raw_text)
 

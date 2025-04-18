@@ -11,7 +11,7 @@ from sumy.utils import get_stop_words
 
 from errors.handlers import catch_errors
 from errors.exceptions import ErrorCode, FileError, AppError
-from utils.transcriber import Transcriber
+from utils.transcriber import Textify
 from utils.file_handler import save_transcription
 from utils.audio_cleaner import clean_audio
 from utils.audio_processor import extract_audio
@@ -46,7 +46,7 @@ def summarize_text(text: str, sentences: int = SUMMARY_SENTENCES) -> str:
 
 class ProcessingController:
     def __init__(self):
-        self.transcriber = Transcriber()
+        self.transcriber = Textify()
 
     @catch_errors
     def process_video(self, video_path: str, progress_cb: Callable[[int, str], None]):

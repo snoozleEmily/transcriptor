@@ -1,5 +1,5 @@
 from src.frontend.interface import Interface
-from src.utils.controller import ProcessingController
+from src.utils.end_flow import EndFlow
 
 
 
@@ -7,8 +7,8 @@ from src.utils.controller import ProcessingController
 #.\venv\Scripts\activate
 
 def main(): # It has breaking changes
-    controller = ProcessingController()
-    app = Interface(controller)
+    ef = EndFlow()
+    app = Interface(ef)
     app.mainloop()
 
 if __name__ == "__main__":
