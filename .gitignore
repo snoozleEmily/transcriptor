@@ -1,3 +1,76 @@
+# ==============================
+# Python
+# ==============================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+.pytest_cache/
+venv/
+.venv/
+.env
+.env.local
+.env.development
+.env.test
+
+# Test directories
+/test/
+test_*
+
+# Build/package artifacts
+build/
+dist/
+*.egg-info/
+*.whl
+*.tar.gz
+pip-wheel-metadata/
+
+# Setuptools/pip
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ==============================
+# Game Assets (if applicable)
+# ==============================
+# Uncomment if we get generated/binary assets not meant for version control
+# *.bin
+# *.assetbundle
+
+# ==============================
+# IDE/Editor
+# ==============================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# ==============================
+# OS/System
+# ==============================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==============================
+# Localization
+# ==============================
+*.mo  # Compiled translation files (keep .po files)
+
+# ==============================
+# Logs/Temporary Files
+# ==============================
+*.log
+*.tmp
+*.bak
+
+# ==============================
+# Testing/Code Quality
+# ==============================
+.coverage
+htmlcov/
+.mypy_cache/
+/src/constants/__pycache__
 *.pyc
-/venv
-/venv
