@@ -11,34 +11,34 @@ from scipy.special import softmax
 # Second Development imports
 import re
 from typing import Dict, List
-from content_type import ContentTypeConfig
+from .content_type import ContentType
 
 
-class AdvancedTextReviser:
+class TextReviser:
     def __init__(
         self,
         specific_words: Dict[str, List[str]] = None,
-        config: ContentTypeConfig = ContentTypeConfig(),
+        content: ContentType = ContentType(),
     ):
-        self.specific_words = specific_words or {} # Handled in ProcessingController
-        self.config = config
+        self.specific_words = specific_words or {} # Handled in EndFlow
+        self.content = content
 
     def revise_text(self, text: str) -> str:
         """Apply revisions based on content configuration"""
         revised_text = text
 
-        if self.config.is_technical:
+        if self.content.is_technical:
             # Get relevant technical terms from selected categories
             selected_terms = [
                 term
-                for category in self.config.tech_categories
+                for category in self.content.tech_categories
                 for term in self.specific_words.get(category, [])
             ]
 
             # Apply technical term enforcement
             revised_text = self._enforce_technical_terms(revised_text, selected_terms)
 
-        if self.config.has_code:
+        if self.content.has_code:
             revised_text = self._code_formatting(revised_text)
 
         return revised_text

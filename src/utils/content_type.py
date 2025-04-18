@@ -2,7 +2,7 @@ from typing import Dict, List, Optional
 
 
 
-class ContentTypeConfig:
+class ContentType:
     """Configuration for content type characteristics and processing rules."""
     
     def __init__(

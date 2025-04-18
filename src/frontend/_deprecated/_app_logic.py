@@ -5,7 +5,7 @@ from tkinter import messagebox, filedialog
 
 from frontend import constants
 from ..widgets.window import MainWindow
-from utils.transcriber import Transcriber
+from utils.transcriber import Textify
 from utils.file_handler import save_transcription
 from utils.audio_processor import check_ffmpeg, extract_audio
 from errors.handlers import catch_errors, format_error
@@ -17,7 +17,7 @@ class TranscriptorController:
     def __init__(self, root):
         self.root = root
         self.view = MainWindow(root)
-        self.transcriber = Transcriber(model_size="tiny")
+        self.transcriber = Textify(model_size="tiny")
         self.processing_active = False
 
         # Initialize UI bindings

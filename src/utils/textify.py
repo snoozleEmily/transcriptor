@@ -10,9 +10,8 @@ from src.errors.exceptions import TranscriptionError
 
 
 
-class Transcriber:
+class Textify: # called Transcriptor before
     """Audio transcription system using Whisper model"""
-
     def __init__(self, model_size: str = "tiny"):
         self.model = self._load_model(model_size)
         self.sample_rate = 16000  # Whisper's required sample rate
