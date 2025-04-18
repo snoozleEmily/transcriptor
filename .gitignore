@@ -1,6 +1,8 @@
 # ==============================
 # Python
 # ==============================
+.mypy_cache/
+/src/constants/__pycache__
 __pycache__/
 *.py[cod]
 *.pyo
@@ -14,10 +16,6 @@ venv/
 .env.local
 .env.development
 .env.test
-
-# Test directories
-/test/
-test_*
 
 # Build/package artifacts
 build/
@@ -70,8 +68,7 @@ desktop.ini
 # ==============================
 # Testing/Code Quality
 # ==============================
+/test/
+test_*
 .coverage
 htmlcov/
-.mypy_cache/
-/src/constants/__pycache__
-*.pyc
