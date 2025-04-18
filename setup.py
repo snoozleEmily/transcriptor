@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
-from src import __version__
 
 
+from config.__version__ import __version__
 from config.__authors__ import __author__
 from config.requirements import get_requirements
 from config.classifiers import CLASSIFIERS
