@@ -7,7 +7,7 @@ from pydub import AudioSegment
 
 
 from src.errors.exceptions import TranscriptionError
-from src.utils.content_type import ContentTypeConfig
+from src.utils.content_type import ContentType
 
 
 class Textify: # called Transcriptor before
@@ -68,7 +68,7 @@ class Textify: # called Transcriptor before
             return self.model.transcribe(audio_buffer, **kwargs)
 
     # --------------------- Handle Custom Words ---------------------
-    def _get_content_prompt(self, content_config: ContentTypeConfig) -> str:
+    def _get_content_prompt(self, content_config: ContentType) -> str:
         """Generate context prompt based on content configuration"""
         prompt_parts = []
 
