@@ -49,8 +49,8 @@ from typing import List, Optional
 from src.errors.handlers import catch_errors
 from src.errors.exceptions import ErrorCode, FileError
 from src.utils.textify import Textify
-from src.utils.content_type import ContentTypeConfig
-from src.utils.text_reviser import AdvancedTextReviser
+from src.utils.content_type import ContentType
+from src.utils.text_reviser import TextReviser
 from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
@@ -74,7 +74,7 @@ class EndFlow:
 
     def configure_content(self, config_params: dict):
         """Update content configuration from GUI inputs"""
-        self.content_config = ContentTypeConfig(**config_params)
+        self.content_config = ContentType(**config_params)
         
         # Update reviser with technical terms
         if self.content_config.tech_categories:
