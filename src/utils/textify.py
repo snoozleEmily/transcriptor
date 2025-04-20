@@ -15,7 +15,8 @@ from src.utils.content_type import ContentType
 class Textify:  # called Transcriptor before
     """Audio transcription system using Whisper model"""
 
-    def __init__(self, model_size: str = "tiny"):
+    def __init__(self, model_size: str):
+        self.model_size = model_size
         self.model = self._load_model(model_size)
         self.sample_rate = 16000  # Whisper's required sample rate
         self._progress_active = False  # Flag for duration-based progress
@@ -24,10 +25,27 @@ class Textify:  # called Transcriptor before
         self, audio_input=None, progress_handler=None, **kwargs
     ) -> dict:  # chanded to dict from str because of breaking change
         """Convert speech to text with progress updates"""
-        pipeline_start = time.time()
+        original_start = time.time()
 
         audio = self._validate_input(audio_input)
         audio_array, duration = self._convert_audio_format(audio)
+
+        # Show organizing parameters bar for medium/large models
+        if self.model_size in ['medium', 'large']:
+            with tqdm(
+                total=100,
+                desc="Organizing Parameters",
+                bar_format="{l_bar}{bar}| {n:.0f}%",
+                miniters=1,
+                mininterval=0,
+                maxinterval=1,
+            ) as org_bar:
+                for _ in range(23):
+                    time.sleep(1)
+                    org_bar.update(100 / 23)  # Increment ~4.35% per second
+            pipeline_start = time.time()
+        else:
+            pipeline_start = original_start
 
         with tqdm(
             total=100,
@@ -61,11 +79,14 @@ class Textify:  # called Transcriptor before
             bar.n = 100  # Force completion
             bar.refresh()
 
-    # --------------------- Time Measurement Printing ---------------------
-
+            # --------------------- Time Measurement Printing ---------------------
             # Calculate timing metrics
             total_time = time.time() - pipeline_start
-            speed_factor = duration / transcribe_time if transcribe_time > 0 else 0
+            speed_factor = (
+                duration / transcribe_time  # audio_duration/processing_time
+                if transcribe_time > 0  # prevent division by zero
+                else 0  # fallback value
+            )  # 1.0=real-time, >1.0=faster, <1.0=slower
 
             # Store all timing data
             result["metadata"] = {
@@ -89,19 +110,17 @@ class Textify:  # called Transcriptor before
     ):
         """Display beautiful formatted results with emojis"""
         print("\n")
-        print("-" * 14 + "\n")
         print("✨" * 14)
-        print(f"          🎉 Transcription Complete! 🎉")
+        print(f"🎉 Transcription Complete! 🎉")
         print("✨" * 14)
-        print("-" * 14 + "\n")
+        print("\n" + "-" * 22)
         print(f"[TIME REPORT]")
-        print(f"\n🔊 Audio Duration: {duration:.2f} seconds")
+        print(f"🔊 Audio Duration: {duration:.2f} seconds")
         print(f"⏱️ Total Processing: {total_time:.2f} seconds")
         print(f"✍️ Pure Transcription: {transcribe_time:.2f} seconds")
         print(f"🚀 Speed: {speed_factor:.2f}x real-time")
-        print("-" * 14 + "\n")
-        print(f"          ✏️ Results Ready! ✏️")
-        print("-" * 14 + "\n")
+        print("-" * 22)
+        print(f"\n✏️ Results Ready! ✏️")
 
     # --------------------- Core Pipeline ---------------------
     def _run_transcription(self, audio_buffer, progress_callback, **kwargs):
@@ -203,4 +222,4 @@ class Textify:  # called Transcriptor before
         """Ensure valid transcription result"""
         if not result.get("text"):
             raise TranscriptionError.no_speech()
-        return result  # ["text"] for now this is a BREAKING CHANGE
+        return result
