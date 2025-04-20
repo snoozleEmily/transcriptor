@@ -71,12 +71,15 @@ class Textify: # called Transcriptor before
     def _get_content_prompt(self, content_config: ContentType) -> str:
         """Generate context prompt based on content configuration"""
         prompt_parts = []
+        # Handle None type error
+        if content_config is None:
+            return ""
 
-        if content_config.is_technical:
-            print(f"[DEBUGGER] The transcript is technical: \n", content_config.is_technical)
-            if content_config.tech_categories:
+        if content_config.words: 
+            print(f"[DEBUGGER] The transcript has specific words: \n", content_config.words)
+            if content_config.words:
                 prompt_parts.append(
-                    f"Domains: {', '.join(content_config.tech_categories)}"
+                    f"Domains: {', '.join(content_config.words)}"
                 )
 
         if content_config.has_code:
@@ -84,10 +87,6 @@ class Textify: # called Transcriptor before
 
         if content_config.has_odd_names:
             print(f"[DEBUGGER] Odd names detected: \n", content_config.has_odd_names)
-
-        # Add custom rules and external word lists
-        if content_config.custom_rules.get("database"):
-            print(f"[DEBUGGER] Custom rules are being applied: \n", content_config.custom_rules)
 
         return " ".join(prompt_parts)
 

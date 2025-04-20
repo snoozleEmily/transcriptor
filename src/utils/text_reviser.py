@@ -27,11 +27,11 @@ class TextReviser:
         """Apply revisions based on content configuration"""
         revised_text = text
 
-        if self.content.is_technical:
+        if self.content.types:
             # Get relevant technical terms from selected categories
             selected_terms = [
                 term
-                for category in self.content.tech_categories
+                for category in self.content.categories
                 for term in self.specific_words.get(category, [])
             ]
 
