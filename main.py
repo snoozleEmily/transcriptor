@@ -2,7 +2,6 @@ from src.frontend.interface import Interface
 from src.utils.end_flow import EndFlow
 
 
-
 # Activate virtual environment
 #.\venv\Scripts\activate
 

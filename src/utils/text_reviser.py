@@ -27,11 +27,11 @@ class TextReviser:
         """Apply revisions based on content configuration"""
         revised_text = text
 
-        if self.content.is_technical:
+        if self.content.types:
             # Get relevant technical terms from selected categories
             selected_terms = [
                 term
-                for category in self.content.tech_categories
+                for category in self.content.categories
                 for term in self.specific_words.get(category, [])
             ]
 
@@ -52,15 +52,15 @@ class TextReviser:
 
     def _code_formatting(self, text: str) -> str:
         # Add code formatting preservation logic here
+        
         return text
 
-
-
+"""
     # --------------------- WIP Bellow ---------------------
     def _fix_structure(self, text):
-        """
+        
         PHASE 3: CONTENT-AWARE REPAIRS
-
+        
         Tech considerations:
         - Code snippet detection using CamelCase/snake_case patterns
         - Variable preservation regex: (?<!\\)\b([A-Za-z_]\w*(?:\.\w+)*)\b
@@ -69,12 +69,11 @@ class TextReviser:
         Multilingual handling:
         - Language boundary detection via character set analysis
         - Script-specific normalization (CJK vs Latin vs Cyrillic)
-        """
+        
         # Fallback strategy if language detection fails
         # Minimum impact processing for unrecognized scripts
 
     def _validate_linguistics(self, text):
-        """
         PHASE 4: DYNAMIC VALIDATION
 
         Tech content:
@@ -86,11 +85,10 @@ class TextReviser:
         - Disable standard linguistic checks
         - Rhythm pattern validation (syllable counting)
         - Rhyme scheme detection (end-line pattern matching)
-        """
+
         # Fail-safe: Minimum validation for mixed/unknown content
 
     def _context_repair(self, text, validation_report):
-        """
         PHASE 5: CONSERVATIVE CORRECTION
 
         Repair priorities:
@@ -102,8 +100,9 @@ class TextReviser:
         - Fallback to raw text + confidence markers if repairs fail
         - Preserve original timestamps when available
         - Never delete content - only annotate uncertainties
-        """
+        
         # Last-resort fragment extraction uses:
         # 1. Proper noun clustering
         # 2. High-confidence term proximity
         # 3. ASR timestamp anchoring
+"""

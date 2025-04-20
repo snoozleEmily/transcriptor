@@ -7,7 +7,7 @@ from pydub import AudioSegment
 
 
 from src.errors.exceptions import TranscriptionError
-
+from src.utils.content_type import ContentType
 
 
 class Textify: # called Transcriptor before
@@ -17,7 +17,9 @@ class Textify: # called Transcriptor before
         self.sample_rate = 16000  # Whisper's required sample rate
         self._progress_active = False  # Flag for duration-based progress
 
-    def transcribe(self, audio_input=None, progress_handler=None) -> dict: # chanded to dict from str because of breaking change
+    def transcribe(
+        self, audio_input=None, progress_handler=None, **kwargs
+    ) -> dict:  # chanded to dict from str because of breaking change
         """Convert speech to text with progress updates"""
         audio = self._validate_input(audio_input)
         audio_array, duration = self._convert_audio_format(audio)
@@ -33,15 +35,17 @@ class Textify: # called Transcriptor before
             # Start duration-based progress thread
             self._progress_active = True
             duration_thread = threading.Thread(
-                target=self._duration_progress,
-                args=(bar, duration, progress_handler))
+                target=self._duration_progress, args=(bar, duration, progress_handler)
+            )
             duration_thread.start()
 
             try:
                 result = self._run_transcription(
-                    audio_array, 
-                    lambda p: self._update_progress(p, bar, progress_handler))
-                
+                    audio_array,
+                    lambda p: self._update_progress(p, bar, progress_handler),
+                    **kwargs,  # For custom words
+                )
+
             finally:
                 self._progress_active = False
                 duration_thread.join()
@@ -51,22 +55,49 @@ class Textify: # called Transcriptor before
             return self._validate_output(result)
 
     # --------------------- Core Pipeline ---------------------
-    def _run_transcription(self, audio_buffer, progress_callback):
+    def _run_transcription(self, audio_buffer, progress_callback, **kwargs):
         """Execute transcription with version-safe progress"""
         try:
             # Try modern progress callback first
-            return self._transcribe_with_progress(audio_buffer, progress_callback)
+            return self._transcribe_with_progress(
+                audio_buffer, progress_callback, **kwargs  # For custom words
+            )
+
         except TypeError as e:
             # Fallback if progress callback fails
-            return self.model.transcribe(audio_buffer)
+            return self.model.transcribe(audio_buffer, **kwargs)
+
+    # --------------------- Handle Custom Words ---------------------
+    def _get_content_prompt(self, content_config: ContentType) -> str:
+        """Generate context prompt based on content configuration"""
+        prompt_parts = []
+        # Handle None type error
+        if content_config is None:
+            return ""
+
+        if content_config.words: 
+            print(f"[DEBUGGER] The transcript has specific words: \n", content_config.words)
+            if content_config.words:
+                prompt_parts.append(
+                    f"Domains: {', '.join(content_config.words)}"
+                )
+
+        if content_config.has_code:
+            print(f"[DEBUGGER] Code detected: \n", content_config.has_code)
+
+        if content_config.has_odd_names:
+            print(f"[DEBUGGER] Odd names detected: \n", content_config.has_odd_names)
+
+        return " ".join(prompt_parts)
 
     # --------------------- Progress Handling ---------------------
-    def _transcribe_with_progress(self, audio_buffer, progress_callback):
+    def _transcribe_with_progress(self, audio_buffer, progress_callback, **kwargs):
         """Universal progress tracking for all Whisper versions"""
         return self.model.transcribe(
             audio_buffer,
             progress_callback=progress_callback,
             verbose=None,  # Disable Whisper's internal prints
+            **kwargs,  # For custom words
         )
 
     def _duration_progress(self, bar, total_duration, handler):
@@ -97,7 +128,7 @@ class Textify: # called Transcriptor before
         duration = len(standardized) / 1000  # Duration in seconds
         return (
             np.frombuffer(standardized.raw_data, np.int16).astype(np.float32) / 32768.0,
-            duration
+            duration,
         )
 
     # --------------------- Model Management ---------------------
@@ -125,4 +156,4 @@ class Textify: # called Transcriptor before
         """Ensure valid transcription result"""
         if not result.get("text"):
             raise TranscriptionError.no_speech()
-        return result # ["text"] for now this is a BREAKING CHANGE
+        return result  # ["text"] for now this is a BREAKING CHANGE
