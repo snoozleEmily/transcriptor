@@ -21,7 +21,7 @@ class EndFlow:
         "medium",  # 3 -> Medium speed, high accuracy
         "large"    # 4 -> Slowest, highest accuracy
         ]
-    model_size = models[0]  # Default model size for transcription
+    model_size = models[1]  # Default model size for transcription
     
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)  
