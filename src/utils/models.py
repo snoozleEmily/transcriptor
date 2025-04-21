@@ -1,4 +1,4 @@
-MODELS = [
+MODELS: list[str] = [
         "tiny",    # 0 -> Fastest, lowest accuracy
         "base",    # 1 -> Fast, low accuracy
         "small",   # 2 -> Medium speed, medium accuracy
@@ -7,8 +7,8 @@ MODELS = [
         ]
 
 # Model speed profiles (words per second approximation)
-MODEL_SPEEDS = {
-    'tiny': 30,  
+MODEL_SPEEDS: dict[str:int] = {
+    'tiny': 30,   
     'base': 20,
     'small': 15,
     'medium': 5,
@@ -16,7 +16,7 @@ MODEL_SPEEDS = {
 }
 
 # Setup times for complex models (seconds)
-SETUP_TIMES = {
+SETUP_TIMES: dict[str:int] = {
     'medium': 22,
     'large': 32
 }

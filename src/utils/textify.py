@@ -8,41 +8,56 @@ from pydub import AudioSegment
 
 from src.errors.exceptions import TranscriptionError
 from src.utils.content_type import ContentType
+from src.utils.models import MODELS, MODEL_SPEEDS, SETUP_TIMES
 
-# TODO: Update model_size to be in tune with models in EndFlow
-
+# TODO: Split Textify into smaller module chunks
 
 class Textify:  # called Transcriptor before
     """Audio transcription system using Whisper model"""
 
     def __init__(self, model_size: str):
+        self.models_speeds = MODEL_SPEEDS
+        self.setup_times = SETUP_TIMES
+
         self.model_size = model_size
         self.model = self._load_model(model_size)
+
         self.sample_rate = 16000  # Whisper's required sample rate
         self._progress_active = False  # Flag for duration-based progress
+        self.estimated_total_time = 0
 
-    def transcribe(
-        self, audio_input=None, progress_handler=None, **kwargs
-    ) -> dict:  # chanded to dict from str because of breaking change
-        """Convert speech to text with progress updates"""
+    def transcribe(self, audio_input=None, progress_handler=None, **kwargs) -> dict:
+        """Convert speech to text with progress updates and time estimation"""
         original_start = time.time()
-
         audio = self._validate_input(audio_input)
         audio_array, duration = self._convert_audio_format(audio)
 
-        # Show organizing parameters bar for medium/large models
-        if self.model_size in ['medium', 'large']:
+        # Calculate time estimates
+        content_config = kwargs.get("content_config", ContentType())
+        custom_words = len(content_config.words) if content_config else 0
+        setup_time = self.setup_times.get(self.model_size, 0)
+        base_speed = self.models_speeds[self.model_size]
+
+        # Adjust speed for custom words (0.5% reduction per word)
+        adjusted_speed = base_speed * (1 - 0.005 * custom_words)
+        processing_speed = max(adjusted_speed, 0.1)  # Prevent zero division
+
+        # Time estimates
+        transcribe_estimate = duration / processing_speed
+        self.estimated_total_time = setup_time + transcribe_estimate
+
+        # Show setup progress for medium/large models
+        if setup_time > 0:
+            self._log_estimate(duration, setup_time, transcribe_estimate)
             with tqdm(
-                total=100,
-                desc="Organizing Parameters",
-                bar_format="{l_bar}{bar}| {n:.0f}%",
-                miniters=1,
-                mininterval=0,
-                maxinterval=1,
-            ) as org_bar:
-                for _ in range(23):
+                total=setup_time,
+                desc="Initializing Model",
+                bar_format="{l_bar}{bar}| {n:.1f}/{total:.1f}s",
+                unit="s",
+            ) as setup_bar:
+                for _ in range(int(setup_time)):
                     time.sleep(1)
-                    org_bar.update(100 / 23)  # Increment ~4.35% per second
+                    setup_bar.update(1)
             pipeline_start = time.time()
         else:
             pipeline_start = original_start
@@ -55,12 +70,13 @@ class Textify:  # called Transcriptor before
             mininterval=0,
             maxinterval=1,
         ) as bar:
-            # Start duration-based progress thread
+            # Start time-based progress thread
             self._progress_active = True
-            duration_thread = threading.Thread(
-                target=self._duration_progress, args=(bar, duration, progress_handler)
+            progress_thread = threading.Thread(
+                target=self._update_progress_estimate,
+                args=(bar, pipeline_start, progress_handler),
             )
-            duration_thread.start()
+            progress_thread.start()
 
             try:
                 # Core transcription
@@ -68,25 +84,17 @@ class Textify:  # called Transcriptor before
                 result = self._run_transcription(
                     audio_array,
                     lambda p: self._update_progress(p, bar, progress_handler),
-                    **kwargs,  # For custom words
+                    **kwargs,
                 )
                 transcribe_time = time.time() - transcribe_start
-
+                total_time = time.time() - pipeline_start
+                speed_factor = duration / transcribe_time if transcribe_time > 0 else 0
             finally:
                 self._progress_active = False
-                duration_thread.join()
+                progress_thread.join()
 
             bar.n = 100  # Force completion
             bar.refresh()
-
-            # --------------------- Time Measurement Printing ---------------------
-            # Calculate timing metrics
-            total_time = time.time() - pipeline_start
-            speed_factor = (
-                duration / transcribe_time  # audio_duration/processing_time
-                if transcribe_time > 0  # prevent division by zero
-                else 0  # fallback value
-            )  # 1.0=real-time, >1.0=faster, <1.0=slower
 
             # Store all timing data
             result["metadata"] = {
@@ -101,20 +109,39 @@ class Textify:  # called Transcriptor before
 
             return self._validate_output(result)
 
-    def _print_results(
-        self,
-        duration: float,
-        total_time: float,
-        transcribe_time: float,
-        speed_factor: float,
-    ):
+    def _update_progress_estimate(self, bar, start_time, handler):
+        """Update progress based on time estimates"""
+        while self._progress_active and bar.n < 95:  # Leave room for final updates
+            elapsed = time.time() - start_time
+            progress = min(
+                (elapsed / self.estimated_total_time) * 100, 95
+            )  # Cap at 95%
+
+            # Only update if progress increased
+            if progress > bar.n:
+                bar.update(progress - bar.n)
+
+                if handler:
+                    handler(progress)
+
+            time.sleep(0.2)
+
+    # --------------------- Logs ---------------------
+    def _log_estimate(self, duration, setup, transcribe):
+        """Display estimation details"""
+        print("\n📏 [ESTIMATION METRICS]")
+        print(f"  🔊 Audio Duration: {duration:.1f}s")
+        print(f"  ⚙️  Model Setup: {setup:.1f}s")
+        print(f"  ✍️  Transcription Estimate: {transcribe:.1f}s")
+        print(f"  🕛 Total Estimated: {self.estimated_total_time:.1f}s")
+
+    def _print_results(self, duration, total_time, transcribe_time, speed_factor):
         """Display beautiful formatted results with emojis"""
-        print("\n")
-        print("✨" * 14)
+        print("\n✨" * 14)
         print(f"🎉 Transcription Complete! 🎉")
         print("✨" * 14)
         print("\n" + "-" * 22)
-        print(f"[TIME REPORT]")
+        print(f"📝 [TIME REPORT]")
         print(f"🔊 Audio Duration: {duration:.2f} seconds")
         print(f"⏱️ Total Processing: {total_time:.2f} seconds")
         print(f"✍️ Pure Transcription: {transcribe_time:.2f} seconds")
@@ -130,7 +157,6 @@ class Textify:  # called Transcriptor before
             return self._transcribe_with_progress(
                 audio_buffer, progress_callback, **kwargs  # For custom words
             )
-
         except TypeError as e:
             # Fallback if progress callback fails
             return self.model.transcribe(audio_buffer, **kwargs)
@@ -139,7 +165,6 @@ class Textify:  # called Transcriptor before
     def _get_content_prompt(self, content_config: ContentType) -> str:
         """Generate context prompt based on content configuration"""
         prompt_parts = []
-
         if content_config.words:
             print(
                 f"[DEBUGGER] The transcript has specific words: \n",
@@ -147,13 +172,10 @@ class Textify:  # called Transcriptor before
             )
             if content_config.words:
                 prompt_parts.append(f"Domains: {', '.join(content_config.words)}")
-
         if content_config.has_code:
             print(f"[DEBUGGER] Code detected: \n", content_config.has_code)
-
         if content_config.has_odd_names:
             print(f"[DEBUGGER] Odd names detected: \n", content_config.has_odd_names)
-
         return " ".join(prompt_parts)
 
     # --------------------- Progress Handling ---------------------
@@ -200,12 +222,13 @@ class Textify:  # called Transcriptor before
     # --------------------- Model Management ---------------------
     def _load_model(self, model_size: str):
         """Load Whisper model with validation"""
-        valid_sizes = ["tiny", "base", "small", "medium", "large"]
-        if model_size not in valid_sizes:
+        models = MODELS
+        if model_size not in models:
             raise TranscriptionError.invalid_model()
 
         try:
             return whisper.load_model(model_size)
+
         except Exception as e:
             raise TranscriptionError.load_failed() from e
 
@@ -222,4 +245,5 @@ class Textify:  # called Transcriptor before
         """Ensure valid transcription result"""
         if not result.get("text"):
             raise TranscriptionError.no_speech()
+
         return result
