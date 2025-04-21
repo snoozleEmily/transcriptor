@@ -1,5 +1,5 @@
 from tkinter import filedialog
-from typing import List, Optional
+from typing import List
 
 
 from src.errors.handlers import catch_errors
