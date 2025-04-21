@@ -4,6 +4,7 @@ import threading
 import numpy as np
 from tqdm import tqdm
 from pydub import AudioSegment
+from scipy.stats import norm
 
 
 from src.errors.exceptions import TranscriptionError
@@ -12,8 +13,13 @@ from src.utils.models import MODELS, MODEL_SPEEDS, SETUP_TIMES
 
 # TODO: Split Textify into smaller module chunks
 
+
 class Textify:  # called Transcriptor before
     """Audio transcription system using Whisper model"""
+
+    SPEECH_RATE_MU = 2.5
+    SPEECH_RATE_SIGMA = 0.5
+    CI_LEVEL = 0.95
 
     def __init__(self, model_size: str):
         self.models_speeds = MODEL_SPEEDS
@@ -32,54 +38,89 @@ class Textify:  # called Transcriptor before
         audio = self._validate_input(audio_input)
         audio_array, duration = self._convert_audio_format(audio)
 
-        # Calculate time estimates
         content_config = kwargs.get("content_config", ContentType())
-        custom_words = len(content_config.words) if content_config else 0
+        custom_words = (
+            len(content_config.words) if content_config and content_config.words else 0
+        )
+
+        mean_t, lo_t, hi_t = self._estimate_transcription_time(duration, custom_words)
         setup_time = self.setup_times.get(self.model_size, 0)
-        base_speed = self.models_speeds[self.model_size]
-
-        # Adjust speed for custom words (0.5% reduction per word)
-        adjusted_speed = base_speed * (1 - 0.005 * custom_words)
-        processing_speed = max(adjusted_speed, 0.1)  # Prevent zero division
-
-        # Time estimates
-        transcribe_estimate = duration / processing_speed
-        self.estimated_total_time = setup_time + transcribe_estimate
+        self.estimated_total_time = setup_time + mean_t
 
         # Show setup progress for medium/large models
         if setup_time > 0:
-            self._log_estimate(duration, setup_time, transcribe_estimate)
+            self._log_estimate(duration, setup_time, mean_t, lo_t, hi_t)
+
             with tqdm(
                 total=setup_time,
                 desc="Initializing Model",
-                bar_format="{l_bar}{bar}| {n:.1f}/{total:.1f}s",
+                bar_format="\n{l_bar}| {n:.1f}/{total:.1f}s",
                 unit="s",
             ) as setup_bar:
                 for _ in range(int(setup_time)):
                     time.sleep(1)
                     setup_bar.update(1)
             pipeline_start = time.time()
+
         else:
             pipeline_start = original_start
 
         with tqdm(
             total=100,
-            desc="Transcribing",
-            bar_format="{l_bar}{bar}| {n:.0f}%",
+            desc="\nTranscribing",
+            bar_format="{l_bar}| {n:.0f}%",
             miniters=1,
             mininterval=0,
             maxinterval=1,
         ) as bar:
-            # Start time-based progress thread
             self._progress_active = True
+
+            # start time-based estimator
             progress_thread = threading.Thread(
                 target=self._update_progress_estimate,
                 args=(bar, pipeline_start, progress_handler),
             )
             progress_thread.start()
 
+            # watchdog to force completion
+            watchdog_thread = threading.Thread(
+                target=self._watchdog,
+                args=(bar, progress_handler),
+            )
+            watchdog_thread.daemon = True
+            watchdog_thread.start()
+
+            # delay indicator when stuck at 99%
+            def _delay_indicator():
+                interval = 2.6  # Bar tick (in seconds)
+
+                while self._progress_active and bar.n > 99:
+                    time.sleep(0.1)
+
+                if self._progress_active and bar.n > 100:
+                    print ("ETA: {remaining}")
+                    print(
+                        "\n\n⚠️ Transcription is taking longer than usual, but this is expected.\n"
+                        "⏳ Please be patient and DO NOT close the app.\n\n"
+                    )
+
+                if self._progress_active:
+                    with tqdm(
+                        total=self.estimated_total_time,
+                        desc="[DELAY] Still Transcribing",
+                        bar_format="{l_bar} | Elapsed: {elapsed} seconds",
+                        unit="s",
+                        leave=False,
+                    ) as delay_bar:
+                        while self._progress_active:
+                            time.sleep(interval)
+                            delay_bar.update(interval)
+
+            delay_thread = threading.Thread(target=_delay_indicator)
+            delay_thread.daemon = True
+            delay_thread.start()
+
             try:
-                # Core transcription
                 transcribe_start = time.time()
                 result = self._run_transcription(
                     audio_array,
@@ -89,14 +130,20 @@ class Textify:  # called Transcriptor before
                 transcribe_time = time.time() - transcribe_start
                 total_time = time.time() - pipeline_start
                 speed_factor = duration / transcribe_time if transcribe_time > 0 else 0
+
+                # event-driven final update
+                bar.update(100 - bar.n)
+                if progress_handler:
+                    progress_handler(100)
+
             finally:
                 self._progress_active = False
                 progress_thread.join()
+                delay_thread.join()
 
             bar.n = 100  # Force completion
             bar.refresh()
 
-            # Store all timing data
             result["metadata"] = {
                 "audio_duration": duration,
                 "processing_time": total_time,
@@ -104,40 +151,46 @@ class Textify:  # called Transcriptor before
                 "speed_factor": speed_factor,
             }
 
-            # Print pretty results
             self._print_results(duration, total_time, transcribe_time, speed_factor)
 
             return self._validate_output(result)
 
-    def _update_progress_estimate(self, bar, start_time, handler):
-        """Update progress based on time estimates"""
-        while self._progress_active and bar.n < 95:  # Leave room for final updates
-            elapsed = time.time() - start_time
-            progress = min(
-                (elapsed / self.estimated_total_time) * 100, 95
-            )  # Cap at 95%
+    def _estimate_transcription_time(
+        self, duration: float, custom_words: int
+    ) -> tuple[float, float, float]:
+        mu_words = duration * self.SPEECH_RATE_MU
+        sigma_words = duration * self.SPEECH_RATE_SIGMA
+        alpha = (1 + self.CI_LEVEL) / 2
+        z = norm.ppf(alpha)
+        lower_words = max(0.0, mu_words - z * sigma_words)
+        upper_words = mu_words + z * sigma_words
 
-            # Only update if progress increased
-            if progress > bar.n:
-                bar.update(progress - bar.n)
+        base_speed = self.models_speeds.get(self.model_size, 1)
+        penalty = 1 + 0.005 * custom_words
+        adjusted_speed = base_speed / penalty
 
-                if handler:
-                    handler(progress)
-
-            time.sleep(0.2)
+        mean_t = mu_words / adjusted_speed
+        lo_t = lower_words / adjusted_speed
+        hi_t = upper_words / adjusted_speed
+        return mean_t, lo_t, hi_t
 
     # --------------------- Logs ---------------------
-    def _log_estimate(self, duration, setup, transcribe):
-        """Display estimation details"""
+    def _log_estimate(self, duration, setup, mean_t, lo_t, hi_t):
+        """Display estimation details with confidence interval"""
+        CURRENT_MODEL = {self.model_size.upper()}
+
         print("\n📏 [ESTIMATION METRICS]")
         print(f"  🔊 Audio Duration: {duration:.1f}s")
+        print(f"  🎥  Used Model : {CURRENT_MODEL}")
         print(f"  ⚙️  Model Setup: {setup:.1f}s")
-        print(f"  ✍️  Transcription Estimate: {transcribe:.1f}s")
-        print(f"  🕛 Total Estimated: {self.estimated_total_time:.1f}s")
+        print(
+            f"  ✍️  Transcription Estimate: {mean_t:.1f}s (95% CI: {lo_t:.1f}-{hi_t:.1f}s)"
+        )
+        print(f"  🕛 Total Estimated: {setup + mean_t:.1f}s")
 
     def _print_results(self, duration, total_time, transcribe_time, speed_factor):
         """Display beautiful formatted results with emojis"""
-        print("\n✨" * 14)
+        print("\n" + "✨" * 14)
         print(f"🎉 Transcription Complete! 🎉")
         print("✨" * 14)
         print("\n" + "-" * 22)
@@ -153,12 +206,10 @@ class Textify:  # called Transcriptor before
     def _run_transcription(self, audio_buffer, progress_callback, **kwargs):
         """Execute transcription with version-safe progress"""
         try:
-            # Try modern progress callback first
             return self._transcribe_with_progress(
-                audio_buffer, progress_callback, **kwargs  # For custom words
+                audio_buffer, progress_callback, **kwargs
             )
-        except TypeError as e:
-            # Fallback if progress callback fails
+        except TypeError:
             return self.model.transcribe(audio_buffer, **kwargs)
 
     # --------------------- Handle Custom Words ---------------------
@@ -170,8 +221,8 @@ class Textify:  # called Transcriptor before
                 f"[DEBUGGER] The transcript has specific words: \n",
                 content_config.words,
             )
-            if content_config.words:
-                prompt_parts.append(f"Domains: {', '.join(content_config.words)}")
+        if content_config.words:
+            prompt_parts.append(f"Domains: {', '.join(content_config.words)}")
         if content_config.has_code:
             print(f"[DEBUGGER] Code detected: \n", content_config.has_code)
         if content_config.has_odd_names:
@@ -191,18 +242,35 @@ class Textify:  # called Transcriptor before
     def _duration_progress(self, bar, total_duration, handler):
         """Time-based progress using audio duration estimate"""
         increment = 100 / total_duration  # Percent per second
-        while self._progress_active and bar.n < 95:
+        while self._progress_active and bar.n < 99:
             time.sleep(1)
-            bar.update(min(increment, 100 - bar.n))
+            bar.update(min(increment, 99 - bar.n))
             if handler:
                 handler(bar.n)
 
+    def _watchdog(self, bar, handler):
+        """Force-progress ensures final completion"""
+        time.sleep(self.estimated_total_time + 1)
+        if self._progress_active and bar.n < 100:
+            bar.update(100 - bar.n)
+            if handler:
+                handler(100)
+
+    def _update_progress_estimate(self, bar, start_time, handler):
+        """Update progress based on time estimates"""
+        while self._progress_active and bar.n < 99:
+            elapsed = time.time() - start_time
+            progress = min((elapsed / self.estimated_total_time) * 100, 99)
+            if progress > bar.n:
+                bar.update(progress - bar.n)
+                if handler:
+                    handler(progress)
+            time.sleep(0.2)
+
     def _update_progress(self, percent, tqdm_bar, progress_handler):
         """Universal progress updater"""
-        # Calculate safe increment
         current = tqdm_bar.n
         new_value = min(max(percent, current + 1), 100)  # Force minimum 1% increments
-
         if new_value > current:
             tqdm_bar.update(new_value - current)
         if progress_handler:
@@ -225,7 +293,6 @@ class Textify:  # called Transcriptor before
         models = MODELS
         if model_size not in models:
             raise TranscriptionError.invalid_model()
-
         try:
             return whisper.load_model(model_size)
 
@@ -245,5 +312,4 @@ class Textify:  # called Transcriptor before
         """Ensure valid transcription result"""
         if not result.get("text"):
             raise TranscriptionError.no_speech()
-
         return result

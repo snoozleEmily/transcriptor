@@ -1,22 +1,39 @@
-MODELS: list[str] = [
-        "tiny",    # 0 -> Fastest, lowest accuracy
-        "base",    # 1 -> Fast, low accuracy
-        "small",   # 2 -> Medium speed, medium accuracy
-        "medium",  # 3 -> Medium speed, high accuracy
-        "large"    # 4 -> Slowest, highest accuracy
-        ]
+from typing import List, Dict
 
-# Model speed profiles (words per second approximation)
-MODEL_SPEEDS: dict[str:int] = {
-    'tiny': 30,   
-    'base': 20,
-    'small': 15,
-    'medium': 5,
-    'large': 2    
+
+
+MODELS: List[str] = [
+    "tiny",   # 0 - Fastest, lowest accuracy        ||||||||->  (~3M parameters)
+    "base",   # 1 - Very fast, low accuracy         ||||||||->  (~40M parameters)
+    "small",  # 2 - Moderate speed, medium accuracy ||||||||->  (~74M parameters)
+    "medium", # 3 - Slower, high accuracy           ||||||||->  (~155M parameters)
+    "large"   # 4 - Slowest, highest accuracy       ||||||||->  (~300M parameters)
+]
+
+MODEL_SPEEDS: Dict[str, float] = {
+    # Words per second based on mid-range GPU benchmarks
+    # Used to estimate transcription time: wall_time ≈ word_count / wps
+
+    "tiny":   40.0,  # Ultra-fast, minimal resource use
+    "base":   30.0,  # Fast, lightweight
+    "small":  18.0,  # Balanced performance
+    "medium": 10.0,  # Slower, higher accuracy
+    "large":   5.0   # Slowest, most accurate
+
 }
 
-# Setup times for complex models (seconds)
-SETUP_TIMES: dict[str:int] = {
-    'medium': 22,
-    'large': 32
+SETUP_TIMES: Dict[str, float] = {
+    # Initialization times (seconds) 
+    "tiny":    1.0,
+    "base":    2.5,
+    "small":   5.0,
+    "medium": 12.0,
+    "large":  20.0
 }
+
+for model in MODELS: # Ensure all models have speed and setup entries
+    if model not in MODEL_SPEEDS:
+        raise ValueError(f"Missing speed entry for model '{model}' in MODEL_SPEEDS.")
+    
+    if model not in SETUP_TIMES:
+        SETUP_TIMES[model] = 0.0  # Default setup for missing entries

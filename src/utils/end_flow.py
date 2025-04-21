@@ -15,7 +15,7 @@ from src.utils.audio_processor import extract_audio
 # TODO: Add words to be received from the user's input in the GUI
 
 class EndFlow:
-    model_size = MODELS[0]  # Default model size for transcription
+    model_size = MODELS[2]  # Default model size for transcription
     
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)  
