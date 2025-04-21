@@ -4,6 +4,7 @@ from typing import List
 
 from src.errors.handlers import catch_errors
 from src.errors.exceptions import ErrorCode, FileError
+from src.utils.models import MODELS
 from src.utils.textify import Textify
 from src.utils.content_type import ContentType
 from src.utils.text_reviser import TextReviser
@@ -14,14 +15,7 @@ from src.utils.audio_processor import extract_audio
 # TODO: Add words to be received from the user's input in the GUI
 
 class EndFlow:
-    models = [
-        "tiny",    # 0 -> Fastest, lowest accuracy
-        "base",    # 1 -> Fast, low accuracy
-        "small",   # 2 -> Medium speed, medium accuracy
-        "medium",  # 3 -> Medium speed, high accuracy
-        "large"    # 4 -> Slowest, highest accuracy
-        ]
-    model_size = models[0]  # Default model size for transcription
+    model_size = MODELS[4]  # Default model size for transcription
     
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)  
@@ -58,8 +52,7 @@ class EndFlow:
         result = self.transcriber.transcribe(
             cleaned,
             initial_prompt=full_prompt,
-            temperature=0.2 if self.content_config.types else 0.5,
-            language="en"
+            temperature=0.2 if self.content_config.types else 0.5
         )
 
         revised_text = self.reviser.revise_text(result['text'])
