@@ -10,15 +10,15 @@ from typing import Optional, Callable
 
 
 class Loader:
-    """Handles all progress tracking and visualization for transcription"""
+    """Handles progress visualization and timing for transcription pipeline"""
 
     def __init__(self):
-        self.active = False
-        self.estimated_total = 0
-        self.handler = None
-        self.start_time = 0
-        self.progress_bar = None
-        self.delay_interval = 2.6
+        self.active: bool = False
+        self.estimated_total: float = 0.0
+        self.handler: Optional[Callable] = None
+        self.start_time: float = 0.0
+        self.progress_bar: Optional[tqdm] = None
+        self.delay_interval: float = 2.6  # Seconds between delay updates
 
     def setup(
         self,
@@ -26,10 +26,12 @@ class Loader:
         transcribe_estimate: float,
         handler: Optional[Callable] = None,
     ) -> None:
+        """Initialize progress tracking parameters"""
         self.estimated_total = setup_time + transcribe_estimate
         self.handler = handler
 
     def show_setup_progress(self, setup_time: float) -> float:
+        """Display model initialization progress bar"""
         if setup_time <= 0:
             return time.time()
 
@@ -42,9 +44,11 @@ class Loader:
             for _ in range(int(setup_time)):
                 time.sleep(1)
                 bar.update(1)
+
         return time.time()
 
     def start_transcription_progress(self, handler: Optional[Callable] = None) -> None:
+        """Initialize main transcription progress components"""
         self.progress_bar = tqdm(
             total=100,
             desc="\nTranscribing",
@@ -62,6 +66,8 @@ class Loader:
         self._start_delay_indicator()
 
     def _start_progress_thread(self) -> None:
+        """Time-based progress estimation thread"""
+
         def update():
             while self.active and self.progress_bar.n < 99:
                 elapsed = time.time() - self.start_time
@@ -73,6 +79,8 @@ class Loader:
         threading.Thread(target=update, daemon=True).start()
 
     def _start_watchdog(self) -> None:
+        """Safety thread to force completion if stuck"""
+
         def watchdog():
             time.sleep(self.estimated_total + 1)
             if self.active and self.progress_bar.n < 100:
@@ -81,71 +89,72 @@ class Loader:
         threading.Thread(target=watchdog, daemon=True).start()
 
     def _start_delay_indicator(self) -> None:
-        """Thread for delay notifications (original behavior)"""
+        """Delay notification system"""
+
         def delay_indicator():
-            # Wait until we're past 99% and stuck
+            # Wait until transcription is "stuck" at high percentage
             while self.active and self.progress_bar.n < 99:
                 time.sleep(0.1)
 
-            # Original logic: Only show message if stuck past estimated time
+            # Show warning message once
             if self.active:
                 print("\n\n⚠️ Transcription is taking longer than expected")
                 print("⏳ Please be patient and DO NOT close the app\n\n")
 
-            # Show progress only if still active after message
-            if self.active:
-                with tqdm(
-                    total=self.estimated_total,
-                    desc="[DELAY] Still Transcribing",
-                    bar_format="{l_bar} | Elapsed: {elapsed} seconds",
-                    unit="s",
-                    leave=False
-                ) as delay_bar:
-                    start_time = time.time()
-                    while self.active and (time.time() - start_time) < self.estimated_total * 2:
-                        time.sleep(self.delay_interval)
-                        delay_bar.update(self.delay_interval)
-            
+            # Show elapsed time progress
+            with tqdm(
+                total=self.estimated_total,
+                desc="[DELAY] Still Transcribing",
+                bar_format="{l_bar} | Elapsed: {elapsed}",
+                unit="s",
+                leave=False,  # Prevent residual progress bars
+            ) as delay_bar:
+                while self.active:
+                    time.sleep(self.delay_interval)
+                    delay_bar.update(self.delay_interval)
+                    delay_bar.refresh()  # Prevent ANSI artifacts
+
         threading.Thread(target=delay_indicator, daemon=True).start()
-    
-    def _cleanup_threads(self):
-        """Ensure all threads are properly stopped"""
-        self.active = False
-        # Give threads time to exit
-        time.sleep(0.5)  
-        if self.progress_bar:
-            self.progress_bar.close()
 
     def update(self, increment: float) -> None:
-        """Restore original progress update behavior"""
+        """Update progress with minimum 1% increments"""
         if self.progress_bar:
-            # Force minimum 1% increments like original code
             current = self.progress_bar.n
             new_value = min(max(current + 1, current + increment), 100)
             self.progress_bar.update(new_value - current)
 
         if self.handler:
-            self.handler(self.progress_bar.n)
+            self.handler(self.progress_bar.n if self.progress_bar else 0)
 
     def complete(self, result: dict, duration: float) -> dict:
-        """Finalize progress and add metadata"""
-        self._cleanup_threads()
-        
-        if not self.progress_bar:
-            return result
+        """Finalize progress tracking and cleanup"""
+        self.active = False  # Signal threads to stop
 
-        # Force final completion like original code
-        self.progress_bar.update(100 - self.progress_bar.n)
+        # Allow threads to exit gracefully
+        time.sleep(0.4)
+
+        if self.progress_bar:
+            self.progress_bar.update(100 - self.progress_bar.n)
+            self.progress_bar.close()
+            self.progress_bar = None
+
         if self.handler:
             self.handler(100)
 
-        transcribe_time = time.time() - self.start_time
-        result["metadata"] = {
-            "audio_duration": duration,
-            "processing_time": time.time() - (self.start_time - self.estimated_total),
-            "transcription_time": transcribe_time,
-            "speed_factor": duration / transcribe_time if transcribe_time > 0 else 0,
-        }
+        # Add timing metadata
+        if "metadata" not in result:
+            result["metadata"] = {}
 
-        self.active = False
+        result["metadata"].update(
+            {
+                "audio_duration": duration,
+                "processing_time": time.time() - self.start_time,
+                "speed_factor": (
+                    duration / (time.time() - self.start_time)
+                    if (time.time() - self.start_time) > 0
+                    else 0
+                ),
+            }
+        )
+
         return result
