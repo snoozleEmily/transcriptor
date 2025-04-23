@@ -55,7 +55,7 @@ class TextReviser:
         
         return text
 
-"""
+""" 
     # --------------------- WIP Bellow ---------------------
     def _fix_structure(self, text):
         

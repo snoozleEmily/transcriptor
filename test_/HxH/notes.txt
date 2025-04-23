@@ -1,0 +1,30 @@
+23/04 | First transcription test run to compare the models available
+
+
+--
+"tiny",    # 0 -> Fastest, lowest accuracy
+
+It did not reconize the specific words nor had contextual proficiency.
+
+
+--
+"base",    # 1 -> Fast, low accuracy
+It did not reconize the specific words nor had contextual proficiency.
+
+
+--
+"small",   # 2 -> Medium speed, medium accuracy
+It reconized 50% of the specific word words (it only had 2), 
+it had better contextual proficiency than "tiny" and "base", but it got simple words wrong.
+
+
+--
+"medium",  # 3 -> Medium speed, high accuracy
+It reconized 100% of the specific word words (it only had 2),
+it had great contextual proficiency, but it got simple words wrong.
+
+
+--
+"large"    # 4 -> Slowest, highest accuracy
+It reconized 100% of the specific word words (it only had 2),
+it had amazing contextual proficiency, but it added words that were not in the audio.

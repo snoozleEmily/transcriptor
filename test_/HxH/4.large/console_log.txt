@@ -1,0 +1,993 @@
+Calling process_video with args: ('D:/Projects/Python-studies/transcriptor/test_/HxH/HxH.mp4',), kwargs: {}
+[DEBUGGER] The transcript has specific words: 
+ ['Maha', 'Zoldyck']
+[DEBUGGER] Odd names detected: 
+ True
+
+📏 [ESTIMATION METRICS]
+  🔊 Audio Duration: 56.7s
+  ⚙️  Model Setup: 20.0s
+  ✍️  Transcription Estimate: 28.3s (95% CI: 17.2-39.5s)
+  🕛 Total Estimated: 48.3s
+
+Initializing Model:   0%|                                                                                                                  | 0.0/20.0s
+Initializing Model:   5%|#####7                                                                                                            | 1.0/20.0s
+Initializing Model:  10%|###########4                                                                                                      | 2.0/20.0s
+Initializing Model:  15%|#################                                                                                                 | 3.0/20.0s
+Initializing Model:  20%|######################8                                                                                           | 4.0/20.0s
+Initializing Model:  25%|############################5                                                                                     | 5.0/20.0s
+Initializing Model:  30%|##################################1                                                                               | 6.0/20.0s
+Initializing Model:  35%|#######################################9                                                                          | 7.0/20.0s
+Initializing Model:  40%|#############################################6                                                                    | 8.0/20.0s
+Initializing Model:  45%|###################################################3                                                              | 9.0/20.0s
+Initializing Model:  50%|########################################################5                                                        | 10.0/20.0s
+Initializing Model:  55%|##############################################################1                                                  | 11.0/20.0s
+Initializing Model:  60%|###################################################################8                                             | 12.0/20.0s
+Initializing Model:  65%|#########################################################################4                                       | 13.0/20.0s
+Initializing Model:  70%|###############################################################################1                                 | 14.0/20.0s
+Initializing Model:  75%|####################################################################################7                            | 15.0/20.0s
+Initializing Model:  80%|##########################################################################################4                      | 16.0/20.0s
+Initializing Model:  85%|################################################################################################                 | 17.0/20.0s
+Initializing Model:  90%|#####################################################################################################7           | 18.0/20.0s
+Initializing Model:  95%|###########################################################################################################3     | 19.0/20.0s
+Initializing Model: 100%|#################################################################################################################| 20.0/20.0s
+Initializing Model: 100%|#################################################################################################################| 20.0/20.0s
+
+Transcribing:   0%|                                                                                                                               | 0%D:\Projects\Python-studies\transcriptor\venv\Lib\site-packages\whisper\transcribe.py:115: UserWarning: FP16 is not supported on CPU; using FP32 instead
+  warnings.warn("FP16 is not supported on CPU; using FP32 instead")
+
+Transcribing:   1%|#5                                                                                                                             | 1%
+Transcribing:   2%|###1                                                                                                                           | 2%
+Transcribing:   4%|####6                                                                                                                          | 4%
+Transcribing:   5%|######4                                                                                                                        | 5%
+Transcribing:   6%|########                                                                                                                       | 6%
+Transcribing:   8%|#########6                                                                                                                     | 8%
+Transcribing:   9%|###########2                                                                                                                   | 9%
+Transcribing:  10%|############6                                                                                                                 | 10%
+Transcribing:  11%|##############2                                                                                                               | 11%
+Transcribing:  13%|###############8                                                                                                              | 13%
+Transcribing:  14%|#################3                                                                                                            | 14%
+Transcribing:  15%|##################9                                                                                                           | 15%
+Transcribing:  16%|####################5                                                                                                         | 16%
+Transcribing:  18%|######################                                                                                                        | 18%
+Transcribing:  19%|#######################6                                                                                                      | 19%
+Transcribing:  20%|#########################2                                                                                                    | 20%
+Transcribing:  21%|##########################8                                                                                                   | 21%
+Transcribing:  23%|############################3                                                                                                 | 23%
+Transcribing:  24%|#############################9                                                                                                | 24%
+Transcribing:  25%|###############################5                                                                                              | 25%
+Transcribing:  26%|#################################                                                                                             | 26%
+Transcribing:  27%|##################################6                                                                                           | 27%
+Transcribing:  29%|####################################2                                                                                         | 29%
+Transcribing:  30%|#####################################7                                                                                        | 30%
+Transcribing:  31%|#######################################3                                                                                      | 31%
+Transcribing:  32%|########################################9                                                                                     | 32%
+Transcribing:  34%|##########################################4                                                                                   | 34%
+Transcribing:  35%|############################################                                                                                  | 35%
+Transcribing:  36%|#############################################6                                                                                | 36%
+Transcribing:  37%|###############################################2                                                                              | 37%
+Transcribing:  39%|################################################7                                                                             | 39%
+Transcribing:  40%|##################################################3                                                                           | 40%
+Transcribing:  41%|###################################################9                                                                          | 41%
+Transcribing:  42%|#####################################################4                                                                        | 42%
+Transcribing:  44%|#######################################################                                                                       | 44%
+Transcribing:  45%|########################################################6                                                                     | 45%
+Transcribing:  46%|##########################################################1                                                                   | 46%
+Transcribing:  47%|###########################################################7                                                                  | 47%
+Transcribing:  49%|#############################################################3                                                                | 49%
+Transcribing:  50%|##############################################################9                                                               | 50%
+Transcribing:  51%|################################################################4                                                             | 51%
+Transcribing:  52%|##################################################################                                                            | 52%
+Transcribing:  54%|###################################################################6                                                          | 54%
+Transcribing:  55%|#####################################################################1                                                        | 55%
+Transcribing:  56%|######################################################################7                                                       | 56%
+Transcribing:  57%|########################################################################3                                                     | 57%
+Transcribing:  59%|#########################################################################8                                                    | 59%
+Transcribing:  60%|###########################################################################4                                                  | 60%
+Transcribing:  61%|#############################################################################                                                 | 61%
+Transcribing:  62%|##############################################################################5                                               | 62%
+Transcribing:  64%|################################################################################1                                             | 64%
+Transcribing:  65%|#################################################################################7                                            | 65%
+Transcribing:  66%|###################################################################################2                                          | 66%
+Transcribing:  67%|####################################################################################8                                         | 67%
+Transcribing:  69%|######################################################################################4                                       | 69%
+Transcribing:  70%|#######################################################################################9                                      | 70%
+Transcribing:  71%|#########################################################################################5                                    | 71%
+Transcribing:  72%|###########################################################################################1                                  | 72%
+Transcribing:  74%|############################################################################################6                                 | 74%
+Transcribing:  75%|##############################################################################################2                               | 75%
+Transcribing:  76%|###############################################################################################8                              | 76%
+Transcribing:  77%|#################################################################################################4                            | 77%
+Transcribing:  79%|##################################################################################################9                           | 79%
+Transcribing:  80%|####################################################################################################5                         | 80%
+Transcribing:  81%|######################################################################################################1                       | 81%
+Transcribing:  82%|#######################################################################################################6                      | 82%
+Transcribing:  84%|#########################################################################################################2                    | 84%
+Transcribing:  85%|##########################################################################################################8                   | 85%
+Transcribing:  86%|############################################################################################################3                 | 86%
+Transcribing:  87%|#############################################################################################################9                | 87%
+Transcribing:  89%|###############################################################################################################5              | 89%
+Transcribing:  90%|#################################################################################################################1            | 90%
+Transcribing:  91%|##################################################################################################################6           | 91%
+Transcribing:  92%|####################################################################################################################2         | 92%
+Transcribing:  93%|#####################################################################################################################8        | 93%
+Transcribing:  95%|#######################################################################################################################3      | 95%
+Transcribing:  96%|########################################################################################################################9     | 96%
+Transcribing:  97%|##########################################################################################################################5   | 97%
+Transcribing:  98%|############################################################################################################################  | 98%
+
+[DELAY] Still Transcribing: |                                                                                                                     | 0s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 1s[A
+Transcribing: 100%|#############################################################################################################################| 100%
+
+[DELAY] Still Transcribing: |                                                                                                                     | 2s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 3s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 4s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 5s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 6s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 7s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 8s[A
+
+[DELAY] Still Transcribing: |                                                                                                                     | 9s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 10s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 11s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 12s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 13s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 14s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 15s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 16s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 17s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 18s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 19s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 20s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 21s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 22s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 23s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 24s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 25s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 26s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 27s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 28s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 29s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 30s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 31s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 32s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 33s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 34s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 35s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 36s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 37s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 38s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 39s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 40s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 41s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 42s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 43s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 44s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 45s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 46s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 47s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 48s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 49s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 50s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 51s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 52s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 53s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 54s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 55s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 56s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 57s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 58s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 59s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 60s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 61s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 62s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 63s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 64s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 65s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 66s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 67s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 68s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 69s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 70s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 71s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 72s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 73s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 74s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 75s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 76s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 77s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 78s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 79s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 80s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 81s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 82s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 83s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 84s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 85s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 86s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 87s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 88s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 89s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 90s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 91s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 92s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 93s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 94s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 95s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 96s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 97s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 98s[A
+
+[DELAY] Still Transcribing: |                                                                                                                    | 99s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 100s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 101s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 102s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 103s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 104s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 105s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 106s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 107s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 108s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 109s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 110s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 111s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 112s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 113s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 114s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 115s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 116s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 117s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 118s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 119s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 120s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 121s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 122s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 123s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 124s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 125s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 126s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 127s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 128s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 129s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 130s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 131s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 132s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 133s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 134s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 135s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 136s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 137s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 138s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 139s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 140s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 141s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 142s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 143s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 144s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 145s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 146s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 147s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 148s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 149s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 150s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 151s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 152s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 153s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 154s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 155s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 156s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 157s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 158s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 159s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 160s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 161s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 162s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 163s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 164s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 165s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 166s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 167s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 168s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 169s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 170s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 171s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 172s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 173s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 174s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 175s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 176s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 177s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 178s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 179s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 180s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 181s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 182s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 183s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 184s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 185s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 186s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 187s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 188s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 189s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 190s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 191s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 192s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 193s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 194s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 195s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 196s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 197s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 198s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 199s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 200s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 201s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 202s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 203s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 204s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 205s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 206s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 207s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 208s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 209s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 210s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 211s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 212s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 213s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 214s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 215s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 216s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 217s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 218s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 219s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 220s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 221s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 222s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 223s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 224s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 225s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 226s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 227s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 228s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 229s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 230s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 231s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 232s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 233s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 234s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 235s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 236s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 237s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 238s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 239s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 240s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 241s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 242s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 243s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 244s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 245s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 246s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 247s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 248s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 249s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 250s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 251s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 252s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 253s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 254s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 255s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 256s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 257s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 258s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 259s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 260s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 261s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 262s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 263s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 264s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 265s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 266s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 267s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 268s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 269s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 270s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 271s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 272s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 273s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 274s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 275s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 276s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 277s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 278s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 279s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 280s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 281s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 282s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 283s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 284s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 285s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 286s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 287s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 288s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 289s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 290s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 291s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 292s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 293s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 294s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 295s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 296s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 297s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 298s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 299s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 300s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 301s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 302s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 303s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 304s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 305s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 306s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 307s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 308s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 309s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 310s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 311s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 312s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 313s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 314s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 315s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 316s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 317s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 318s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 319s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 320s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 321s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 322s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 323s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 324s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 325s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 326s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 327s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 328s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 329s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 330s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 331s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 332s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 333s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 334s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 335s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 336s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 337s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 338s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 339s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 340s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 341s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 342s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 343s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 344s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 345s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 346s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 347s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 348s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 349s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 350s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 351s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 352s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 353s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 354s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 355s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 356s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 357s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 358s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 359s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 360s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 361s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 362s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 363s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 364s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 365s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 366s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 367s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 368s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 369s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 370s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 371s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 372s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 373s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 374s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 375s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 376s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 377s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 378s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 379s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 380s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 381s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 382s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 383s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 384s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 385s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 386s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 387s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 388s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 389s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 390s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 391s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 392s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 393s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 394s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 395s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 396s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 397s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 398s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 399s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 400s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 401s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 402s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 403s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 404s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 405s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 406s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 407s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 408s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 409s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 410s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 411s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 412s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 413s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 414s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 415s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 416s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 417s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 418s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 419s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 420s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 421s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 422s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 423s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 424s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 425s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 426s[A
+
+[DELAY] Still Transcribing: |                                                                                                                   | 427s[A
+
+                                                                                                                                                      [A
+Transcribing: 100%|#############################################################################################################################| 100%
+✨✨✨✨✨✨✨✨✨✨✨✨✨✨
+🎉 Transcription Complete! 🎉
+✨✨✨✨✨✨✨✨✨✨✨✨✨✨
+
+----------------------
+📝 [TIME REPORT]
+🔊 Audio Duration: 56.68 seconds
+⏱️ Total Processing: 479.11 seconds
+✍️ Pure Transcription: 479.11 seconds
+🚀 Speed: 0.12x real-time
+----------------------
+
+✏️ Results Ready! ✏️
+
+Transcribing: 100%|#############################################################################################################################| 100%
+
