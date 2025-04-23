@@ -81,27 +81,40 @@ class Loader:
         threading.Thread(target=watchdog, daemon=True).start()
 
     def _start_delay_indicator(self) -> None:
+        """Thread for delay notifications (original behavior)"""
         def delay_indicator():
-            while self.active and self.progress_bar.n > 99:
+            # Wait until we're past 99% and stuck
+            while self.active and self.progress_bar.n < 99:
                 time.sleep(0.1)
 
-            if self.active and self.progress_bar.n > 100:
-                print("\n\n⚠️ Transcription is taking longer than usual")
+            # Original logic: Only show message if stuck past estimated time
+            if self.active:
+                print("\n\n⚠️ Transcription is taking longer than expected")
                 print("⏳ Please be patient and DO NOT close the app\n\n")
 
+            # Show progress only if still active after message
             if self.active:
                 with tqdm(
                     total=self.estimated_total,
                     desc="[DELAY] Still Transcribing",
                     bar_format="{l_bar} | Elapsed: {elapsed} seconds",
                     unit="s",
-                    leave=False,
+                    leave=False
                 ) as delay_bar:
-                    while self.active:
+                    start_time = time.time()
+                    while self.active and (time.time() - start_time) < self.estimated_total * 2:
                         time.sleep(self.delay_interval)
                         delay_bar.update(self.delay_interval)
-
+            
         threading.Thread(target=delay_indicator, daemon=True).start()
+    
+    def _cleanup_threads(self):
+        """Ensure all threads are properly stopped"""
+        self.active = False
+        # Give threads time to exit
+        time.sleep(0.5)  
+        if self.progress_bar:
+            self.progress_bar.close()
 
     def update(self, increment: float) -> None:
         """Restore original progress update behavior"""
@@ -115,6 +128,9 @@ class Loader:
             self.handler(self.progress_bar.n)
 
     def complete(self, result: dict, duration: float) -> dict:
+        """Finalize progress and add metadata"""
+        self._cleanup_threads()
+        
         if not self.progress_bar:
             return result
 
