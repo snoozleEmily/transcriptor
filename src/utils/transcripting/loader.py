@@ -5,8 +5,9 @@ from typing import Optional, Callable
 
 # Do I need this?
 # Add this to prevent zombie threads
-#def __del__(self):
+# def __del__(self):
 #    self.active = False
+
 
 class Loader:
     """Handles all progress tracking and visualization for transcription"""
@@ -25,12 +26,10 @@ class Loader:
         transcribe_estimate: float,
         handler: Optional[Callable] = None,
     ) -> None:
-        """Initialize progress tracking with time estimates"""
         self.estimated_total = setup_time + transcribe_estimate
         self.handler = handler
 
     def show_setup_progress(self, setup_time: float) -> float:
-        """Display model loading progress bar (returns start time)"""
         if setup_time <= 0:
             return time.time()
 
@@ -43,11 +42,9 @@ class Loader:
             for _ in range(int(setup_time)):
                 time.sleep(1)
                 bar.update(1)
-
         return time.time()
 
     def start_transcription_progress(self, handler: Optional[Callable] = None) -> None:
-        """Initialize and start transcription progress tracking"""
         self.progress_bar = tqdm(
             total=100,
             desc="\nTranscribing",
@@ -60,19 +57,15 @@ class Loader:
         self.start_time = time.time()
         self.active = True
 
-        # Start monitoring threads
         self._start_progress_thread()
         self._start_watchdog()
         self._start_delay_indicator()
 
     def _start_progress_thread(self) -> None:
-        """Thread for time-based progress updates"""
-
         def update():
             while self.active and self.progress_bar.n < 99:
                 elapsed = time.time() - self.start_time
                 progress = min((elapsed / self.estimated_total) * 100, 99)
-
                 if progress > self.progress_bar.n:
                     self.update(progress - self.progress_bar.n)
                 time.sleep(0.2)
@@ -80,7 +73,6 @@ class Loader:
         threading.Thread(target=update, daemon=True).start()
 
     def _start_watchdog(self) -> None:
-        """Thread to force completion if stuck"""
         def watchdog():
             time.sleep(self.estimated_total + 1)
             if self.active and self.progress_bar.n < 100:
@@ -89,8 +81,6 @@ class Loader:
         threading.Thread(target=watchdog, daemon=True).start()
 
     def _start_delay_indicator(self) -> None:
-        """Thread for delay notifications (original behavior)"""
-
         def delay_indicator():
             while self.active and self.progress_bar.n > 99:
                 time.sleep(0.1)
@@ -113,25 +103,22 @@ class Loader:
 
         threading.Thread(target=delay_indicator, daemon=True).start()
 
-    def update(self, progress: float) -> None:
-        """Handle both absolute values and percentages"""
-        if 0 <= progress <= 1:  # Convert fraction to percentage
-            increment = (progress * 100) - self.progress_bar.n
-            
-        else:
-            increment = progress - self.progress_bar.n
-            
+    def update(self, increment: float) -> None:
+        """Restore original progress update behavior"""
         if self.progress_bar:
-            self.progress_bar.update(increment)
+            # Force minimum 1% increments like original code
+            current = self.progress_bar.n
+            new_value = min(max(current + 1, current + increment), 100)
+            self.progress_bar.update(new_value - current)
 
         if self.handler:
             self.handler(self.progress_bar.n)
 
     def complete(self, result: dict, duration: float) -> dict:
-        """Finalize progress and add metadata"""
         if not self.progress_bar:
             return result
 
+        # Force final completion like original code
         self.progress_bar.update(100 - self.progress_bar.n)
         if self.handler:
             self.handler(100)
