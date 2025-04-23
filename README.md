@@ -73,7 +73,7 @@ If you're working on a different operating system `or want to manually arrange y
    pip install -r requirements.txt
    ```
   
-6.  [there is another step to add for version 2 - how to setup pydub]
+6.  [there is another step to add for the newer versions - how to setup `pydub`]
 
 7. **Run the Script**:
    You're ready to go! Run the script with:
