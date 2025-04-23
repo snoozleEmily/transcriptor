@@ -61,7 +61,7 @@ class Interface(tk.Tk):
     def _configure_window(self):
         """Establish main window properties"""
         self.title("Emily's Transcriptor")
-        self.geometry("700x500")
+        self.geometry("870x500")
         self.resizable(False, False)
         self._update_root_theme()
 

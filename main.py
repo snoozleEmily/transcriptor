@@ -5,7 +5,7 @@ from src.utils.end_flow import EndFlow
 # Activate virtual environment
 #.\venv\Scripts\activate
 
-def main(): # It has breaking changes
+def main():
     ef = EndFlow()
     app = Interface(ef)
     app.mainloop()
