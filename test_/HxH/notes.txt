@@ -1,0 +1,17 @@
+"tiny",    # 0 -> Fastest, lowest accuracy
+
+
+
+"base",    # 1 -> Fast, low accuracy
+
+
+
+"small",   # 2 -> Medium speed, medium accuracy
+
+
+
+"medium",  # 3 -> Medium speed, high accuracy
+
+
+
+"large"    # 4 -> Slowest, highest accuracy
