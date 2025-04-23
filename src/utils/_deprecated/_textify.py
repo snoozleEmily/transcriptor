@@ -98,7 +98,7 @@ class Textify:  # called Transcriptor before
                     time.sleep(0.1)
 
                 if self._progress_active and bar.n > 100:
-                    print ("ETA: {remaining}")
+                    print("ETA: {remaining}")
                     print(
                         "\n\n⚠️ Transcription is taking longer than usual, but this is expected.\n"
                         "⏳ Please be patient and DO NOT close the app.\n\n"
