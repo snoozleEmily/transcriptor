@@ -12,8 +12,14 @@ from src.utils.content_type import ContentType
 
 
 
+import time
+import inspect
+from typing import Dict
+
+
 class Textify:
     """Main transcription controller coordinating all components"""
+    
     def __init__(self, model_size: str):
         self.model_size = model_size
         self.logger = InfoDump(model_size)
@@ -21,6 +27,15 @@ class Textify:
         self.audio_processor = ConvertAudio()
         self.estimator = TimeEstimator(model_size)
         self.progress = Loader()
+        
+        # Detect Whisper version parameters
+        self._detect_whisper_params()
+
+    def _detect_whisper_params(self):
+        """Determine correct progress parameter name for Whisper version"""
+        transcribe_params = inspect.signature(self.model.transcribe).parameters
+        self.use_on_progress = 'on_progress' in transcribe_params
+        self.use_progress_callback = 'progress_callback' in transcribe_params
 
     def transcribe(self, audio_input=None, progress_handler=None, **kwargs) -> Dict:
         """Main transcription pipeline"""
@@ -44,40 +59,35 @@ class Textify:
         self.progress.start_transcription_progress(progress_handler)
 
         try:
-            # Handle progress callback properly for different Whisper versions
-            def progress_wrapper(p: float):
-                # Convert between 0-1 and 0-100 based on version
-                percent = p * 100 if hasattr(self.model, 'on_progress') else p
-                self.progress.update(percent)
-
             # Create version-safe transcription parameters
             whisper_args = {
                 "audio": audio_array,
                 "temperature": kwargs.get("temperature", 0.2),
             }
 
-            # Handle initial prompt if provided
+            # Handle initial prompt
             if "initial_prompt" in kwargs:
-                whisper_args["initial_prompt"] = kwargs.pop("initial_prompt")  # Remove from kwargs
+                whisper_args["initial_prompt"] = kwargs.pop("initial_prompt")
 
-            # Set the correct progress callback parameter name
-            if hasattr(self.model, "on_progress"):  # Newer Whisper versions
-                whisper_args["on_progress"] = progress_wrapper
-            else:  # Older versions
-                whisper_args["progress_callback"] = progress_wrapper
+            # Add version-specific progress handler
+            def progress_converter(p: float):
+                # Convert between 0-1 and 0-100 based on version
+                percent = p * 100 if self.use_on_progress else p
+                self.progress.update(percent)
+
+            if self.use_on_progress:
+                whisper_args["on_progress"] = progress_converter
+            elif self.use_progress_callback:
+                whisper_args["progress_callback"] = progress_converter
 
             # Filter out unsupported arguments
             supported_args = [
-                "task",
-                "language",
-                "best_of",
-                "beam_size",
-                "patience",
-                "length_penalty",
-                "suppress_tokens",
-                "condition_on_previous_text",
+                "task", "language", "best_of", "beam_size",
+                "patience", "length_penalty", "suppress_tokens",
+                "condition_on_previous_text"
             ]
-            filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_args}
+            filtered_kwargs = {k: v for k, v in kwargs.items() 
+                               if k in supported_args}
 
             result = self.model.transcribe(**whisper_args, **filtered_kwargs)
 
@@ -90,9 +100,7 @@ class Textify:
                 duration,
                 time.time() - start_time,
                 time.time() - pipeline_start,
-                (
-                    duration / (time.time() - pipeline_start)
-                    if (time.time() - pipeline_start) > 0
-                    else 0
-                ),
+                duration / (time.time() - pipeline_start) 
+                if (time.time() - pipeline_start) > 0 
+                else 0
             )
