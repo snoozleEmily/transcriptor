@@ -64,7 +64,7 @@ If you're working on a different operating system `or want to manually arrange y
      source venv/bin/activate   # macOS/Linux
      ```
      ```bash
-     venv\Scripts\activate.bat  # Windows
+     venv\Scripts\activate  # Windows
      ```
 
 5. **Install Dependencies**:
