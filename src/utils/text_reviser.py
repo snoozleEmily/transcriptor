@@ -55,7 +55,7 @@ class TextReviser:
         
         return text
 
-""" \src\utils\text_reviser.py:58: SyntaxWarning: invalid escape sequence '\w'
+""" 
     # --------------------- WIP Bellow ---------------------
     def _fix_structure(self, text):
         
