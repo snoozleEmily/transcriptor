@@ -62,3 +62,4 @@ class ContentType:
             self.has_odd_names,
             self.is_multilingual
         ])
+    
