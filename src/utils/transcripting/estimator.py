@@ -29,7 +29,7 @@ class TimeEstimator:
         self.setup_times = setup_times or SETUP_TIMES
 
         if model_size not in self.model_speeds:
-            raise ValueError(f"Unknown model size: {model_size}")
+            raise ValueError(f"Unknown model size: {model_size}") Add err to exceptions
 
     def estimate(
         self, audio_duration: float, custom_word_count: int = 0
