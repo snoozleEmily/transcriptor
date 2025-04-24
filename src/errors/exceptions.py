@@ -36,6 +36,14 @@ class FileError(AppError):
             context={"original_error": str(error)}
         )
     
+    @classmethod
+    def empty_text(cls, error: Exception) -> "FileError":
+        return cls(
+                code=ErrorCode.FILE_ERROR,
+                message="Empty transcription text",
+                context={"original_error": str(error)}
+            )
+    
 class FFmpegError(AppError):
     """FFmpeg-related operation errors"""
     
