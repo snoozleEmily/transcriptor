@@ -1,6 +1,7 @@
-from typing import Callable, Any
 import functools
 import speech_recognition as sr
+from typing import Callable, Any
+
 
 from .logging import log_unexpected_error
 from .exceptions import (
@@ -8,6 +9,7 @@ from .exceptions import (
     TranscriptionError,
     ErrorCode
 )
+
 
 
 def catch_errors(func: Callable) -> Callable:
