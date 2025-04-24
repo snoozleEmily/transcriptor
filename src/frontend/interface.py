@@ -11,7 +11,7 @@ from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from .constants import THEMES, FONTS, GT_REPO
 
-
+# TODO: Refactor this class into smaller modules
 
 class Interface(tk.Tk):
     # --------------------- Console Log Set Up ---------------------
@@ -142,7 +142,7 @@ class Interface(tk.Tk):
         font=FONTS["emoji_small"],
         cursor="hand2"
         )
-        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=1)
+        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=-1)
         self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
 
         self.log_text = tk.Text(
@@ -172,7 +172,7 @@ class Interface(tk.Tk):
         feedback_label = ttk.Label(
             self,
             text=message,
-            foreground="green"
+            foreground=THEMES[self.current_theme]['message']
         )
         feedback_label.place(relx=0.5, rely=0.95, anchor="center")
         self.after(3000, feedback_label.destroy)
@@ -205,6 +205,7 @@ class Interface(tk.Tk):
         while not self.gui_queue.empty():
             try:
                 self.gui_queue.get_nowait()()
+
             except Empty:
                 break
 
