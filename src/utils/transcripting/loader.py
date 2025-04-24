@@ -71,11 +71,11 @@ class Loader:
 
     def _start_progress_thread(self) -> None:
         """Time-based progress estimation thread"""
-
         def update():
             while self.active and self.progress_bar.n < 99:
                 elapsed = time.time() - self.start_time
                 progress = min((elapsed / self.estimated_total) * 100, 99)
+
                 if progress > self.progress_bar.n:
                     self.update(progress - self.progress_bar.n)
                 time.sleep(0.2)
@@ -108,7 +108,7 @@ class Loader:
             with tqdm(
                 total=self.estimated_total,
                 desc="[DELAY] Still Transcribing",
-                bar_format="{l_bar} | Elapsed: {elapsed}",
+                bar_format="{l_bar} | Elapsed: {elapsed}\n",
                 unit="s",
                 leave=False,  # Prevent residual progress bars
             ) as delay_bar:
