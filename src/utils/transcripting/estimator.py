@@ -8,12 +8,11 @@ from src.utils.models import MODEL_SPEEDS, SETUP_TIMES
 
 class TimeEstimator:
     """Handles all time estimation calculations for transcription"""
-
     # Constants for speech rate estimation
-    SPEECH_RATE_MU = 2.5  # Average words per second
-    SPEECH_RATE_SIGMA = 0.5  # Standard deviation
-    CI_LEVEL = 0.95  # Confidence interval level
-    CUSTOM_WORD_PENALTY = 0.005  # Slowdown factor per custom word
+    WORDS_PER_SECOND_MEAN = 2.5    # Average words per second
+    WORDS_PER_SECOND_STD = 0.5     # Standard deviation
+    CONFIDENCE_LEVEL = 0.95        # Confidence interval level 
+    CUSTOM_WORD_PENALTY = 0.005    # Slowdown factor per custom word
 
     def __init__(
         self, model_size: str, model_speeds: dict = None, setup_times: dict = None
@@ -34,50 +33,55 @@ class TimeEstimator:
             raise ValueError(f"Unknown model size: {model_size}")
 
     def estimate(
-        self, duration: float, custom_word_count: int = 0
+        self, audio_duration: float, custom_word_count: int = 0
     ) -> Tuple[float, float, float]:
         """
         Estimate transcription time with confidence interval.
 
         Args:
-            duration: Audio duration in seconds
+            audio_duration: Audio duration in seconds
             custom_word_count: Number of custom vocabulary words
 
         Returns:
-            Tuple of (mean_time, low_ci, high_ci) in seconds
+            Tuple of (mean_time, low_ci_bound, high_ci_bound) in seconds
         """
         # Calculate word count estimates
-        mu_words = duration * self.SPEECH_RATE_MU
-        sigma_words = duration * self.SPEECH_RATE_SIGMA
+        total_words_mean = audio_duration * self.WORDS_PER_SECOND_MEAN
+        total_words_std = audio_duration * self.WORDS_PER_SECOND_STD
 
         # Calculate confidence interval
-        lower_words, upper_words = self._calculate_confidence_interval(
-            mu_words, sigma_words
+        ci_lower, ci_upper = self._calculate_confidence_interval(
+            total_words_mean, 
+            total_words_std
         )
 
         # Adjust for model speed and custom words
-        adjusted_speed = self._get_adjusted_speed(custom_word_count)
+        actual_speed = self._get_adjusted_speed(custom_word_count)
 
         return (
-            mu_words / adjusted_speed,
-            lower_words / adjusted_speed,
-            upper_words / adjusted_speed,
+            total_words_mean / actual_speed,
+            ci_lower / actual_speed,
+            ci_upper / actual_speed,
         )
 
     def get_setup_time(self) -> float:
-        """Get the estimated setup time for the model"""
+        """Get the estimated setup time for the current model size."""
         return self.setup_times.get(self.model_size, 0)
 
     def _calculate_confidence_interval(
-        self, mu: float, sigma: float
+        self, mean_words: float, std_words: float
     ) -> Tuple[float, float]:
-        """Calculate 95% confidence interval bounds"""
-        alpha = (1 + self.CI_LEVEL) / 2
-        z = norm.ppf(alpha)
-        return (max(0.0, mu - z * sigma), mu + z * sigma)
+        """Calculate 95% confidence interval bounds."""
+        two_tailed_alpha = (1 + self.CONFIDENCE_LEVEL) / 2  
+        z_score = norm.ppf(two_tailed_alpha) 
+
+        return (
+            max(0.0, mean_words - z_score * std_words),
+            mean_words + z_score * std_words,
+        )
 
     def _get_adjusted_speed(self, custom_word_count: int) -> float:
-        """Calculate speed adjusted for custom vocabulary"""
+        """Adjust transcription speed based on custom vocabulary."""
         base_speed = self.model_speeds[self.model_size]
-        penalty_factor = 1 + (self.CUSTOM_WORD_PENALTY * custom_word_count)
-        return base_speed / penalty_factor
+        speed_reduction = 1 + (self.CUSTOM_WORD_PENALTY * custom_word_count)
+        return base_speed / speed_reduction
