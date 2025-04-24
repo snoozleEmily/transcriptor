@@ -5,7 +5,6 @@ from typing import Tuple
 from src.utils.models import MODEL_SPEEDS, SETUP_TIMES
 
 
-
 class TimeEstimator:
     """Handles all time estimation calculations for transcription"""
     # Constants for speech rate estimation
