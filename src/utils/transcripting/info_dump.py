@@ -64,5 +64,5 @@ class InfoDump:
 
     def log_delay_warning(self):
         """Display warning when transcription is delayed"""
-        print("\n\n⚠️ Transcription is taking longer than usual")
+        print("\n\n\n⚠️ Transcription is taking longer than usual")
         print("⏳ Please be patient and DO NOT close the app\n\n")
