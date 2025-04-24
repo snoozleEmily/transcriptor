@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional, Dict, Any
 
-
+# TODO: Reorganize this file
 
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
@@ -124,4 +124,27 @@ class TranscriptionError(AppError):
             code=ErrorCode.UNEXPECTED_ERROR,
             message="Invalid result format from transcription service",
             context={},
+        )
+
+    @classmethod
+    def missing_model_config(cls, model: str, config_type: str) -> "TranscriptionError":
+        """Raised when a model is missing required configuration."""
+        return cls(
+            code=ErrorCode.INVALID_INPUT,
+            message=f"Missing {config_type} configuration for model '{model}'",
+            context={
+                "model": model,
+                "config_type": config_type
+            }
+        )
+
+    @classmethod
+    def invalid_model_size(cls, model: str) -> "TranscriptionError":
+        """Raised when an invalid model size is requested."""
+        return cls(
+            code=ErrorCode.INVALID_INPUT,
+            message=f"Invalid model size: '{model}'",
+            context={
+                "model": model
+            }
         )
