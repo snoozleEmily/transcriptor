@@ -1,20 +1,24 @@
-from typing import Callable, Any
 import functools
 import speech_recognition as sr
+from typing import Any, Callable
+
 
 from .logging import log_unexpected_error
-from .exceptions import (
-    AppError,
-    TranscriptionError,
-    ErrorCode
-)
+from .exceptions import AppError, ErrorCode, TranscriptionError
+
 
 
 def catch_errors(func: Callable) -> Callable:
-    """Error handling decorator for controller methods"""
+    """
+    Error handling decorator for controller methods.
+    
+    Catches specific speech recognition errors and general exceptions, converting them
+    to application-specific error types while preserving the original traceback.
+    """
     @functools.wraps(func)
-    def wrapper(self, *args, **kwargs) -> Any: 
-        print(f"Calling {func.__name__} with args: {args}, kwargs: {kwargs}") # Debug
+    def wrapper(self, *args, **kwargs) -> Any:
+        print(f"Calling {func.__name__} with args: {args}, kwargs: {kwargs}")  # Debug
+        
         try:
             return func(self, *args, **kwargs)
             
@@ -39,8 +43,15 @@ def catch_errors(func: Callable) -> Callable:
 
     return wrapper
 
+
 def format_error(error: Exception) -> dict:
-    """Serialize error for API/client consumption"""
+    """
+    Serialize exception details for API/client consumption.
+    
+    Returns:
+        dict: Structured error information containing error code, message, 
+              and context details.
+    """
     if isinstance(error, AppError):
         return {
             "code": error.code.value,

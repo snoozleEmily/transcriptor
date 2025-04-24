@@ -3,6 +3,9 @@ import threading
 from tqdm import tqdm
 from typing import Optional, Callable
 
+
+from src.utils.transcripting.info_dump import InfoDump
+
 # Do I need this?
 # Add this to prevent zombie threads
 # def __del__(self):
@@ -11,7 +14,6 @@ from typing import Optional, Callable
 
 class Loader:
     """Handles progress visualization and timing for transcription pipeline"""
-
     def __init__(self):
         self.active: bool = False
         self.estimated_total: float = 0.0
@@ -19,6 +21,8 @@ class Loader:
         self.start_time: float = 0.0
         self.progress_bar: Optional[tqdm] = None
         self.delay_interval: float = 2.6  # Seconds between delay updates
+
+        self.info = InfoDump()
 
     def setup(
         self,
@@ -67,11 +71,11 @@ class Loader:
 
     def _start_progress_thread(self) -> None:
         """Time-based progress estimation thread"""
-
         def update():
             while self.active and self.progress_bar.n < 99:
                 elapsed = time.time() - self.start_time
                 progress = min((elapsed / self.estimated_total) * 100, 99)
+
                 if progress > self.progress_bar.n:
                     self.update(progress - self.progress_bar.n)
                 time.sleep(0.2)
@@ -98,14 +102,13 @@ class Loader:
 
             # Show warning message once
             if self.active:
-                print("\n\n⚠️ Transcription is taking longer than expected")
-                print("⏳ Please be patient and DO NOT close the app\n\n")
+                self.info.log_delay_warning()
 
             # Show elapsed time progress
             with tqdm(
                 total=self.estimated_total,
                 desc="[DELAY] Still Transcribing",
-                bar_format="{l_bar} | Elapsed: {elapsed}",
+                bar_format="{l_bar} | Elapsed: {elapsed}\n",
                 unit="s",
                 leave=False,  # Prevent residual progress bars
             ) as delay_bar:

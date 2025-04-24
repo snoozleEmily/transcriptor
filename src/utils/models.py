@@ -1,7 +1,19 @@
 from typing import List, Dict
 
 
+from src.errors.exceptions import TranscriptionError
 
+# --------------------- Constants For User ---------------------
+# Implement this info for the user on the interface
+MODELS_INFO = {
+    "tiny":   [0, "Fastest", "Lowest accuracy", "~3M parameters"],
+    "base":   [1, "Very fast", "Low accuracy", "~40M parameters"],
+    "small":  [2, "Moderate speed", "Medium accuracy", "~74M parameters"],
+    "medium": [3, "Slower", "High accuracy", "~155M parameters"],
+    "large":  [4, "Slowest", "Highest accuracy", "~300M parameters"]
+}
+
+# --------------------- Constants For Processing ---------------------
 MODELS: List[str] = [
     "tiny",   # 0 - Fastest, lowest accuracy        ||||||||->  (~3M parameters)
     "base",   # 1 - Very fast, low accuracy         ||||||||->  (~40M parameters)
@@ -31,9 +43,14 @@ SETUP_TIMES: Dict[str, float] = {
     "large":  20.0
 }
 
+# --------------------- Error Check ---------------------
 for model in MODELS: # Ensure all models have speed and setup entries
     if model not in MODEL_SPEEDS:
-        raise ValueError(f"Missing speed entry for model '{model}' in MODEL_SPEEDS.")
+        raise TranscriptionError.missing_model_config(model, "speed")
+    
+    if model not in SETUP_TIMES:
+        raise TranscriptionError.missing_model_config(model, "setup_time")
     
     if model not in SETUP_TIMES:
         SETUP_TIMES[model] = 0.0  # Default setup for missing entries
+        print("Missing entries detected. Using default.") # No errors should be raised here
