@@ -6,7 +6,6 @@ from src.errors.handlers import TranscriptionError
 
 class SetModel:
     """Manages Whisper model loading"""
-    
     def load(self, model_size: str):
         if model_size not in MODELS:
             raise TranscriptionError.invalid_model()

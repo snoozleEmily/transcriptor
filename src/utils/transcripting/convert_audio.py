@@ -4,7 +4,6 @@ from pydub import AudioSegment
 
 class ConvertAudio:
     """Handles audio format conversion for Whisper"""
-
     def __init__(self, sample_rate=16000):
         self.sample_rate = sample_rate  # Whisper's required rate
 
