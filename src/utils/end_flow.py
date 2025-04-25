@@ -19,6 +19,7 @@ from src.utils.transcripting.output_debugger import OutputDebugger
 
 class EndFlow:
     model_size = MODELS[2]  # Default model size for transcription
+    # TODO: Add a way to set the model size from the GUI
 
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)
@@ -74,5 +75,6 @@ class EndFlow:
         )
         if not save_path:
             raise FileError(code=ErrorCode.FILE_ERROR, message="Save cancelled by user")
+        
         save_transcription(text, save_path)
         return save_path
