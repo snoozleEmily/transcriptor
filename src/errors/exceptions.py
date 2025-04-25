@@ -137,6 +137,7 @@ class TranscriptionError(AppError):
                 "config_type": config_type
             }
         )
+    
 
     @classmethod
     def invalid_model_size(cls, model: str) -> "TranscriptionError":
