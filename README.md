@@ -20,16 +20,16 @@ Do you need to turn a video into text or want to get organized notes from a leng
 
 The goal of this app is to make it easy and fun for everyone to use, even if you have no technical background.
 
----
-
-### **For Non-Techies** 
+### **Steps** 
 1. Download the project files from github.
 2. Open the folder and click on the file that ends with `.exe`. 
 3. Click on the button `Select Video` and choose the one you'd like.
 
 ---
 
-### **For Developers**
+## Contributing [WIP]
+
+**Contributions are welcome!** Below are some guidelines to help you get started:
 
 #### **Windows Users** 
 [This setup script seems to be a little buggy and it is outdated, if you do need it ASAP, please let me know]
@@ -80,13 +80,6 @@ If you're working on a different operating system `or want to manually arrange y
    ```bash
    python main.py
    ```
----
-
-## Contributing
-
-**Contributions are welcome!** Below are some guidelines to help you get started:
-[WIP]
-
 ---
 
 ## License
