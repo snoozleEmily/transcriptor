@@ -3,7 +3,8 @@ from src.utils.end_flow import EndFlow
 
 
 # Activate virtual environment
-#.\venv\Scripts\activate
+# .\venv\Scripts\activate
+
 
 def main():
     ef = EndFlow()
