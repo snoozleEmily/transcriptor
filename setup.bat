@@ -126,6 +126,11 @@ call venv\Scripts\activate.bat
 :: ---------------------------------------------------------------------
 :: Step 4: Install Dependencies
 :: ---------------------------------------------------------------------
+
+:: TODO -> ajust the instaliation of torch
+:: pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
+
+
 call :display "Step 4/5: Installing Dependencies..."
 if exist requirements.txt (
     pip install -r requirements.txt >nul 2>&1
