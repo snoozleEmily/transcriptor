@@ -150,15 +150,14 @@ echo ===========================================
 echo  All Done! Emily's Transcriptor is running
 echo ===========================================
 echo.
-echo Although this is a hobby, creating these types of programs is quite
-echo challenging, so I would really appreciate it if you could give me a
-echo star on my GitHub repository to support my work! Come on... they're
-echo free :3
+echo Although this is a hobby, creating these types of programs is quite challenging,
+echo how about a star on my GitHub repository to support my work?
+echo Come on... they're free :3
+echo 
 echo.
-echo Embora isso seja um hobby, criar esse tipo de programa e bem
-echo desafiador, entao eu ficaria muito feliz se voce pudesse me dar uma
-echo estrelinha la no meu repositorio do GitHub para apoiar meu trabalho!
-echo Fala serio... e de graca :3
+echo Embora isso seja um hobby, criar esse tipo de programa e bem desafiador, 
+echo que tal uma estrelinha la no meu repositorio do GitHub para apoiar meu trabalho?
+echo Fala serio... são de graca :3
 echo.
 echo ------------------------------------------------
 echo.
