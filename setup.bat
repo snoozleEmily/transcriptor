@@ -127,6 +127,8 @@ call venv\Scripts\activate.bat
 :: Step 4: Install Dependencies
 :: ---------------------------------------------------------------------
 
+:: ANTES de qualquer coisa, ativar o venv
+
 :: TODO -> ajust the instaliation of torch
 :: pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
 
