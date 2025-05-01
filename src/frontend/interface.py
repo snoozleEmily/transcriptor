@@ -103,22 +103,28 @@ class Interface(tk.Tk):
         configure_theme(self, self.current_theme)
         self._update_root_theme()
 
-        # --------------------- Layout Management ---------------------
+    # --------------------- Layout Management ---------------------
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
         main_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
-        # Create top frame for header and words panel
+        # Create top frame with 3 columns: left spacer, center header, right panel
         top_frame = ttk.Frame(main_frame)
         top_frame.pack(fill='x', pady=(0, 10))
+        
+        # Left spacer (empty frame to balance the right panel)
+        left_spacer = ttk.Frame(top_frame, width=200)  # Match width of right panel
+        left_spacer.pack(side=tk.LEFT, fill='y')
 
-        # Add header to top frame
-        Header(top_frame).pack(side=tk.LEFT, padx=(0, 20))
+        # Center header
+        header_frame = ttk.Frame(top_frame)
+        header_frame.pack(side=tk.LEFT, expand=True, fill='both')
+        Header(header_frame).pack()
 
-        # Create compact words panel frame
+        # Right panel for custom words
         words_frame = ttk.Frame(top_frame, width=200)
-        words_frame.pack(side=tk.RIGHT, fill=tk.Y)  # Changed to RIGHT
+        words_frame.pack(side=tk.RIGHT, fill='y')
         self._create_custom_words_panel(words_frame)
 
         # Buttons panel
@@ -132,7 +138,7 @@ class Interface(tk.Tk):
         # Rest of the content
         content_frame = ttk.Frame(main_frame)
         content_frame.pack(expand=True, fill='both')
-    
+
         # --------------------- Console Log Setup ---------------------
         log_frame = ttk.Frame(content_frame)
         log_frame.pack(side=tk.LEFT, expand=True, fill='both', padx=(0, 10))
@@ -180,22 +186,13 @@ class Interface(tk.Tk):
         title_frame = ttk.Frame(parent_frame)
         title_frame.pack(fill='x', pady=(0, 3))
 
-        # Compact title
-        ttk.Label(
+        tk.Label(
             title_frame,
             text="Custom Terms",
-            font=FONTS["console"]
-        ).pack(side=tk.LEFT, anchor='w')
-
-        # Toggle button (emoji)
-        self.toggle_emoji = ttk.Label(
-            title_frame,
-            text="⬇️",
-            font=FONTS["emoji_small"], 
-            cursor="hand2"
-        )
-        self.toggle_emoji.pack(side=tk.RIGHT, anchor='e')
-        self.toggle_emoji.bind("<Button-1>", lambda e: self._toggle_custom_words_visibility())
+            bg=THEMES[self.current_theme]["bg"],
+            fg=THEMES[self.current_theme]["fg"],
+            font=FONTS["console"] 
+        ).pack(side=tk.LEFT, anchor='w')  
 
         # Input area
         self.words_input_frame = ttk.Frame(parent_frame)
@@ -204,8 +201,8 @@ class Interface(tk.Tk):
         # Compact text widget
         self.custom_words_text = tk.Text(
             self.words_input_frame,
-            height=2,  # Reduced height
-            width=20,  # Fixed width
+            height=3,  
+            width=20,  
             wrap=tk.WORD,
             font=FONTS["console"],
             bg=THEMES[self.current_theme]['bg'],
