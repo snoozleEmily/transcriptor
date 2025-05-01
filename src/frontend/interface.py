@@ -103,10 +103,11 @@ class Interface(tk.Tk):
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
-        main_frame.pack(expand=True, fill="both", 
-                        padx=40, # height border
-                        pady=50 # width border
-                        )
+        main_frame.pack(
+            expand=True, fill="both", 
+            padx=40,  # height border
+            pady=50   # width border
+        )
 
         # Create top frame with 3 columns
         top_frame = ttk.Frame(main_frame)
@@ -117,12 +118,17 @@ class Interface(tk.Tk):
         words_frame.pack(side=tk.LEFT, fill="y", padx=(0, 10))
         self._create_custom_words_panel(words_frame)
 
-        # Center header area - this will expand to fill available space
+        # Center header area -
         header_container = ttk.Frame(top_frame)
-        header_container.pack(side=tk.LEFT, expand=True, fill="both")
+        header_container.pack(
+            side=tk.LEFT,
+            expand=True,  # this will expand to fill available space
+            fill="both",
+        )
 
+        # Set branding (title and video emoji)
         header = Header(header_container)
-        header.pack(expand=True, fill="both") 
+        header.pack(expand=True, fill="both")
 
         # Right spacer
         right_spacer = ttk.Frame(top_frame, width=150)
