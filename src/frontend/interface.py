@@ -103,31 +103,37 @@ class Interface(tk.Tk):
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
-        main_frame.pack(expand=True, fill="both", padx=20, pady=20)
+        main_frame.pack(expand=True, fill="both", 
+                        padx=40, # height border
+                        pady=50 # width border
+                        )
 
-        # Create top frame with 3 columns: left panel, center header, right spacer
+        # Create top frame with 3 columns
         top_frame = ttk.Frame(main_frame)
         top_frame.pack(fill="x", pady=(0, 10))
 
-        # Left panel for custom words (moved to left side)
-        words_frame = ttk.Frame(top_frame, width=100)
+        # Left panel for custom words
+        words_frame = ttk.Frame(top_frame, width=150)
         words_frame.pack(side=tk.LEFT, fill="y", padx=(0, 10))
         self._create_custom_words_panel(words_frame)
 
-        # Center header
-        header_frame = ttk.Frame(top_frame)
-        header_frame.pack(side=tk.LEFT, expand=True, fill="both")
-        Header(header_frame).pack()
+        # Center header area - this will expand to fill available space
+        header_container = ttk.Frame(top_frame)
+        header_container.pack(side=tk.LEFT, expand=True, fill="both")
 
-        # Right spacer (empty frame to balance the left panel)
-        right_spacer = ttk.Frame(top_frame, width=100)
+        # Create header - this will center its content
+        header = Header(header_container)
+        header.pack(expand=True, fill="both")  # Changed from place() to pack()
+
+        # Right spacer
+        right_spacer = ttk.Frame(top_frame, width=150)
         right_spacer.pack(side=tk.RIGHT, fill="y")
 
         # Buttons panel
         self.buttons_panel = ButtonsPanel(
             main_frame, self._start_processing, lambda: open_browser(GT_REPO)
         )
-        self.buttons_panel.pack(pady=(0, 15))
+        self.buttons_panel.pack(pady=(0, 2))
 
         # Rest of the content
         content_frame = ttk.Frame(main_frame)
