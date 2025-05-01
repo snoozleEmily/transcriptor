@@ -61,7 +61,7 @@ class Interface(tk.Tk):
     def _configure_window(self):
         """Establish main window properties"""
         self.title("Emily's Transcriptor")
-        self.geometry("870x500")
+        self.geometry("850x600")
         self.resizable(False, False)
         self._update_root_theme()
 
@@ -103,13 +103,23 @@ class Interface(tk.Tk):
         configure_theme(self, self.current_theme)
         self._update_root_theme()
 
-    # --------------------- Layout Management ---------------------
+        # --------------------- Layout Management ---------------------
     def _create_layout(self):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
-        main_frame.pack(expand=True, fill="both", padx=40, pady=50)
+        main_frame.pack(expand=True, fill="both", padx=20, pady=20)
 
-        Header(main_frame).pack()
+        # Create top frame for header and words panel
+        top_frame = ttk.Frame(main_frame)
+        top_frame.pack(fill='x', pady=(0, 10))
+
+        # Add header to top frame
+        Header(top_frame).pack(side=tk.LEFT, padx=(0, 20))
+
+        # Create compact words panel frame
+        words_frame = ttk.Frame(top_frame, width=200)
+        words_frame.pack(side=tk.RIGHT, fill=tk.Y)  # Changed to RIGHT
+        self._create_custom_words_panel(words_frame)
 
         # Buttons panel
         self.buttons_panel = ButtonsPanel(
@@ -119,9 +129,13 @@ class Interface(tk.Tk):
         )
         self.buttons_panel.pack(pady=(0, 15))
 
-# --------------------- Log display area ---------------------
-        log_frame = ttk.Frame(main_frame)
-        log_frame.pack(expand=True, fill='both')
+        # Rest of the content
+        content_frame = ttk.Frame(main_frame)
+        content_frame.pack(expand=True, fill='both')
+    
+        # --------------------- Console Log Setup ---------------------
+        log_frame = ttk.Frame(content_frame)
+        log_frame.pack(side=tk.LEFT, expand=True, fill='both', padx=(0, 10))
 
         # Console Log Title
         self.log_title = tk.Label(
@@ -133,23 +147,12 @@ class Interface(tk.Tk):
         )
         self.log_title.pack(side=tk.TOP, anchor="w", padx=5, pady=2)
 
-        # Copy Button
-        self.copy_label = tk.Label(
-        log_frame,
-        text="📋",
-        bg=THEMES[self.current_theme]["bg"],
-        fg=THEMES[self.current_theme]["fg"],
-        font=FONTS["emoji_small"],
-        cursor="hand2"
-        )
-        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=-1)
-        self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
-
+        # Create the log text widget
         self.log_text = tk.Text(
             log_frame,
             wrap=tk.WORD,
             state='disabled',
-            height=10,
+            height=6,  
             bg=THEMES[self.current_theme]['bg'],
             fg=THEMES[self.current_theme]['fg']
         )
@@ -158,24 +161,89 @@ class Interface(tk.Tk):
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
+        # Copy Button
+        self.copy_label = tk.Label(
+            log_frame,
+            text="📋",
+            bg=THEMES[self.current_theme]["bg"],
+            fg=THEMES[self.current_theme]["fg"],
+            font=FONTS["emoji_small"],
+            cursor="hand2"
+        )
+        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=-1)
+        self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
+
+    # --------------------- Custom words panel methods ---------------------
+    def _create_custom_words_panel(self, parent_frame):
+        """Create compact custom words input panel"""
+        # Frame for the title and toggle button
+        title_frame = ttk.Frame(parent_frame)
+        title_frame.pack(fill='x', pady=(0, 3))
+
+        # Compact title
+        ttk.Label(
+            title_frame,
+            text="Custom Terms",
+            font=FONTS["console"]
+        ).pack(side=tk.LEFT, anchor='w')
+
+        # Toggle button (emoji)
+        self.toggle_emoji = ttk.Label(
+            title_frame,
+            text="⬇️",
+            font=FONTS["emoji_small"], 
+            cursor="hand2"
+        )
+        self.toggle_emoji.pack(side=tk.RIGHT, anchor='e')
+        self.toggle_emoji.bind("<Button-1>", lambda e: self._toggle_custom_words_visibility())
+
+        # Input area
+        self.words_input_frame = ttk.Frame(parent_frame)
+        self.words_input_frame.pack(fill='both', expand=True)
+
+        # Compact text widget
+        self.custom_words_text = tk.Text(
+            self.words_input_frame,
+            height=2,  # Reduced height
+            width=20,  # Fixed width
+            wrap=tk.WORD,
+            font=FONTS["console"],
+            bg=THEMES[self.current_theme]['bg'],
+            fg=THEMES[self.current_theme]['fg'],
+            insertbackground=THEMES[self.current_theme]['fg']
+        )
+
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(self.words_input_frame, command=self.custom_words_text.yview)
+        self.custom_words_text.configure(yscrollcommand=scrollbar.set)
+        
+        # Layout
+        self.custom_words_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
+
+        # Initial text
+        self.custom_words_text.insert(tk.END, "Enter words here")
+        self.custom_words_text.bind("<FocusIn>", lambda e: self._clear_default_text())
+
+    # --------------------- Helper Methods ---------------------
+    def _toggle_custom_words_visibility(self):
+        """Toggle visibility of the custom words input area"""
+        if self.words_input_frame.winfo_ismapped():
+            self.words_input_frame.pack_forget()
+            self.toggle_emoji.config(text="⬇️")  # Down arrow indicating content is hidden
+        else:
+            self.words_input_frame.pack(fill='both', expand=True)
+            self.toggle_emoji.config(text="⬆️")  # Up arrow indicating content is visible
+
+    def _clear_default_text(self):
+        """Clear the default text when user clicks in the text widget"""
+        if self.custom_words_text.get("1.0", "end-1c") == "Enter words here":
+            self.custom_words_text.delete("1.0", tk.END)
+
     def copy_log(self):
         """Copy log content to clipboard"""
-        self.log_text.config(state=tk.NORMAL)
-        text = self.log_text.get("1.0", tk.END)
-        self.log_text.config(state=tk.DISABLED)
         self.clipboard_clear()
-        self.clipboard_append(text)
-        self.show_feedback("Copied to clipboard!")
-
-    def show_feedback(self, message):
-        """Display temporary success message"""
-        feedback_label = ttk.Label(
-            self,
-            text=message,
-            foreground=THEMES[self.current_theme]['message']
-        )
-        feedback_label.place(relx=0.5, rely=0.95, anchor="center")
-        self.after(3000, feedback_label.destroy)
+        self.clipboard_append(self.log_text.get("1.0", tk.END))
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
