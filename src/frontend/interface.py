@@ -121,9 +121,8 @@ class Interface(tk.Tk):
         header_container = ttk.Frame(top_frame)
         header_container.pack(side=tk.LEFT, expand=True, fill="both")
 
-        # Create header - this will center its content
         header = Header(header_container)
-        header.pack(expand=True, fill="both")  # Changed from place() to pack()
+        header.pack(expand=True, fill="both") 
 
         # Right spacer
         right_spacer = ttk.Frame(top_frame, width=150)
@@ -177,7 +176,7 @@ class Interface(tk.Tk):
             font=FONTS["emoji_small"],
             cursor="hand2",
         )
-        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=-1)
+        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=1)
         self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
 
     # --------------------- Custom words panel methods ---------------------
