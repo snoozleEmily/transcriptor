@@ -150,7 +150,7 @@ class Interface(tk.Tk):
             fg=THEMES[self.current_theme]["fg"],
             font=FONTS["console"],
         )
-        self.log_title.pack(side=tk.TOP, anchor="w", padx=5, pady=2)
+        self.log_title.pack(side=tk.TOP, anchor="w", padx=0, pady=2)
 
         # Create the log text widget
         self.log_text = tk.Text(
@@ -176,7 +176,7 @@ class Interface(tk.Tk):
             font=FONTS["emoji_small"],
             cursor="hand2",
         )
-        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=1)
+        self.copy_label.place(relx=1.0, rely=0.0, anchor="ne", x=-1, y=-3)
         self.copy_label.bind("<Button-1>", lambda e: self.copy_log())
 
     # --------------------- Custom words panel methods ---------------------
