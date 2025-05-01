@@ -8,22 +8,20 @@ from .set_model import SetModel
 from .info_dump import InfoDump
 from .estimator import TimeEstimator
 from .convert_audio import ConvertAudio
-from .output_debugger import OutputDebugger
 from src.utils.content_type import ContentType
 
 
 
 class Textify:
     """Main transcription controller coordinating all components"""
-    
     def __init__(self, model_size: str):
         self.model_size = model_size
+        self.progress = Loader()
+        self.audio_processor = ConvertAudio()        
         self.logger = InfoDump(model_size)
         self.model = SetModel().load(model_size)
-        self.audio_processor = ConvertAudio()
         self.estimator = TimeEstimator(model_size)
-        self.progress = Loader()
-        
+
         # Detect Whisper version parameters
         self._detect_whisper_params()
 

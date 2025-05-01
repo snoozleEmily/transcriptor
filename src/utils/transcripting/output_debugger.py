@@ -7,7 +7,6 @@ from src.utils.content_type import ContentType
 
 class OutputDebugger:
     """Handles content-specific debugging and prompt generation"""
-
     DEBUG_PREFIX = "[DEBUG]"
     PROMPT_DOMAIN_PREFIX = "Domains:"
 

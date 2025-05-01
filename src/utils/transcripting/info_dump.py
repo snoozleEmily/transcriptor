@@ -55,6 +55,7 @@ class InfoDump:
             f"✍️ Pure Transcription: {transcribe_time:.2f} seconds", 
             f"🚀 Speed: {speed_factor:.2f}x real-time"
         ]
+        
         for metric in metrics:
             print(metric)
         print("-" * 22)
