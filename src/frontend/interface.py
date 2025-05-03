@@ -190,7 +190,7 @@ class Interface(tk.Tk):
         """Create compact custom words input panel"""
         # Frame for the title and toggle button
         title_frame = ttk.Frame(parent_frame)
-        title_frame.pack(fill="x", pady=(0, 5))
+        title_frame.pack(fill="x", pady=(0, 2))
 
         tk.Label(
             title_frame,
