@@ -1,9 +1,11 @@
+LOGO_COLOR = "#EBAC36" # Video emoji
+
 THEMES = {
     "default": {
         "bg": "#F5F5F5",
         "fg": "#333333",
-        "button_bg": "#E0E0E0",
-        "active_bg": "#CCCCCC",
+        "button_bg": "#A5D9F1",
+        "active_bg": "#6CA0B8",
         "active_fg": "#000000",
         "message": "#0C890C",
     },
