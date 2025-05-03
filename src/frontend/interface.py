@@ -45,6 +45,12 @@ class Interface(tk.Tk):
             self.gui_queue, self, self._complete_processing
         )
 
+        # Message for Custom Words
+        self.C_WORDS_NOTE = f"Enter custom words here divided by commas:\n"
+        self.C_WORDS_EX = (
+            f"{self.C_WORDS_NOTE}\n(e.g.\nEiichiro Oda,\nAvril Lavigne,\nSAP, MLM, Okta,\nPR Flow, DeleteAllLogs)"
+        )
+
         # Initialization sequence
         self._configure_window()
         self._setup_theme()
@@ -104,9 +110,7 @@ class Interface(tk.Tk):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
         main_frame.pack(
-            expand=True, fill="both", 
-            padx=40,  # height border
-            pady=50   # width border
+            expand=True, fill="both", padx=40, pady=50  # height border  # width border
         )
 
         # Create top frame with 3 columns
@@ -227,13 +231,13 @@ class Interface(tk.Tk):
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Initial text
-        self.custom_words_text.insert(tk.END, "Enter words here")
+        self.custom_words_text.insert(tk.END, self.C_WORDS_EX)
         self.custom_words_text.bind("<FocusIn>", lambda e: self._clear_default_text())
 
     # --------------------- Helper Methods ---------------------
     def _clear_default_text(self):
         """Clear the default text when user clicks in the text widget"""
-        if self.custom_words_text.get("1.0", "end-1c") == "Enter words here":
+        if self.custom_words_text.get("1.0", "end-1c") == self.C_WORDS_EX:
             self.custom_words_text.delete("1.0", tk.END)
 
     def copy_log(self):
