@@ -110,7 +110,7 @@ class Interface(tk.Tk):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
         main_frame.pack(
-            expand=True, fill="both", padx=40, pady=50  # height border  # width border
+            expand=True, fill="both", padx=40, pady=50 
         )
 
         # Create top frame with 3 columns
