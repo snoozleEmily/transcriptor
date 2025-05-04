@@ -63,7 +63,6 @@ class Interface(tk.Tk):
         sys.stdout = self.LogRedirector(self.gui_queue, self.log_text)
         sys.stderr = self.LogRedirector(self.gui_queue, self.log_text)
 
-      # In your Interface class __init__ method:
         self.after(100, lambda: WarningPopup.show(
             self,
             title="Important Notice"
