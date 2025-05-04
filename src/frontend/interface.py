@@ -198,7 +198,7 @@ class Interface(tk.Tk):
 
         tk.Label(
             title_frame,
-            text="Custom Terms",
+            text="Custom Words",
             bg=THEMES[self.current_theme]["bg"],
             fg=THEMES[self.current_theme]["fg"],
             font=FONTS["console"],
@@ -209,7 +209,7 @@ class Interface(tk.Tk):
         self.words_input_frame.pack(fill="both", expand=True)
 
         # Compact text widget
-        self.custom_words_text = tk.Text(
+        self.custom_words_raw = tk.Text(
             self.words_input_frame,
             height=3,
             width=20,
@@ -222,23 +222,23 @@ class Interface(tk.Tk):
 
         # Scrollbar
         scrollbar = ttk.Scrollbar(
-            self.words_input_frame, command=self.custom_words_text.yview
+            self.words_input_frame, command=self.custom_words_raw.yview
         )
-        self.custom_words_text.configure(yscrollcommand=scrollbar.set)
+        self.custom_words_raw.configure(yscrollcommand=scrollbar.set)
 
         # Layout
-        self.custom_words_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.custom_words_raw.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Initial text
-        self.custom_words_text.insert(tk.END, self.C_WORDS_EX)
-        self.custom_words_text.bind("<FocusIn>", lambda e: self._clear_default_text())
+        self.custom_words_raw.insert(tk.END, self.C_WORDS_EX)
+        self.custom_words_raw.bind("<FocusIn>", lambda e: self._clear_default_text())
 
     # --------------------- Helper Methods ---------------------
     def _clear_default_text(self):
         """Clear the default text when user clicks in the text widget"""
-        if self.custom_words_text.get("1.0", "end-1c") == self.C_WORDS_EX:
-            self.custom_words_text.delete("1.0", tk.END)
+        if self.custom_words_raw.get("1.0", "end-1c") == self.C_WORDS_EX:
+            self.custom_words_raw.delete("1.0", tk.END)
 
     def copy_log(self):
         """Copy log content to clipboard"""
@@ -255,9 +255,28 @@ class Interface(tk.Tk):
             filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
         )
         if path:
-            self.running = True
-            self.async_mgr.get_busy(path)
-
+            # Get custom words from the text console
+            custom_words = self.custom_words_raw.get("1.0", tk.END).strip()
+            
+            # Process the words (remove example text if present, split by commas, clean)
+            if custom_words == self.C_WORDS_EX:
+                custom_words = []
+            else:
+                # Split by commas or newlines, strip whitespace, remove empty entries
+                custom_words = [
+                    word.strip() 
+                    for word in custom_words.replace('\n', ',').split(',') 
+                    if word.strip()
+                ]
+                # Create config dictionary with the words
+                config_params = {
+                    'words': custom_words,
+                    'has_odd_names': True
+                }
+            
+            self.running = True        
+            self.async_mgr.get_busy(path, config_params=config_params)
+    
     def _complete_processing(self):
         """Cleanup after processing completes"""
         self.running = False

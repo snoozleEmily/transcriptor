@@ -4,28 +4,28 @@ from typing import List
 
 from src.errors.handlers import catch_errors
 from src.errors.exceptions import ErrorCode, FileError
+from src.utils.transcripting.output_debugger import OutputDebugger
 from src.utils.transcripting.textify import Textify
-from src.utils.models import MODELS
 from src.utils.content_type import ContentType
 from src.utils.text_reviser import TextReviser
-from src.utils.file_handler import save_transcription
+from src.utils.models import MODELS
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
-from src.utils.transcripting.output_debugger import OutputDebugger
+from src.utils.file_handler import save_transcription
 
-
-# TODO: Add words to be received from the user's input in the GUI
 
 
 class EndFlow:
     model_size = MODELS[2]  # Default model size for transcription
-    # TODO: Add a way to set the model size from the GUI
+    # TODO: Add a way to set the model size from the GUI?
 
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
         self.reviser = TextReviser()
-        self.content_config = ContentType(words=["Maha", "Zoldyck"], has_odd_names=True)
+        
+        # Initialize with empty words by default
+        self.content_config = ContentType(words=[], has_odd_names=True)
 
     def configure_content(self, config_params: dict):
         """Update content configuration from GUI inputs"""
@@ -36,7 +36,11 @@ class EndFlow:
             self.reviser.specific_words = self.content_config.words
 
     @catch_errors
-    def process_video(self, video_path: str) -> str:
+    def process_video(self, video_path: str, config_params: dict = None) -> str:
+        # Update content configuration if parameters are provided
+        if config_params:
+            self.configure_content(config_params)
+        
         audio = extract_audio(video_path)
         cleaned = clean_audio(audio)
 
