@@ -78,6 +78,7 @@ class EndFlow:
             defaultextension=".txt", filetypes=[("Text Files", "*.txt")]
         )
         if not save_path:
+            # TODO: Add saving transcription automatically in the .exe location
             raise FileError(code=ErrorCode.FILE_ERROR, message="Save cancelled by user")
         
         save_transcription(text, save_path)
