@@ -7,6 +7,7 @@ from queue import Empty, Queue
 from .url_opener import open_browser
 from .theme import configure_theme
 from .widgets.header import Header
+from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from .constants import THEMES, FONTS, GT_REPO
@@ -62,6 +63,11 @@ class Interface(tk.Tk):
         sys.stdout = self.LogRedirector(self.gui_queue, self.log_text)
         sys.stderr = self.LogRedirector(self.gui_queue, self.log_text)
 
+      # In your Interface class __init__ method:
+        self.after(100, lambda: WarningPopup.show(
+            self,
+            title="Important Notice"
+        ))
     # --------------------- Window Configuration ---------------------
     def _configure_window(self):
         """Establish main window properties"""
