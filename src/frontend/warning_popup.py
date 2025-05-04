@@ -36,7 +36,7 @@ class WarningPopup:
             text="⚠️",
             font=FONTS["emoji_large"],
             foreground="orange"
-        ).pack(side=tk.LEFT, padx=(0, 10))
+        ).pack(side=tk.LEFT, padx=(5, 5))
         
         # Use class message if none provided
         display_message = message if message is not None else WarningPopup.WARNING_MSG
@@ -44,7 +44,7 @@ class WarningPopup:
         tk.Label(
             icon_frame,
             text=display_message,
-            font=FONTS["console"],
+            font=FONTS["default"],
             justify=tk.LEFT,
             wraplength=width-50
         ).pack(side=tk.LEFT, fill=tk.X)
@@ -52,7 +52,7 @@ class WarningPopup:
         # OK button
         ttk.Button(
             main_frame,
-            text="I Understand",
+            text="OK",
             command=popup.destroy
         ).pack(pady=(10, 0))
         
