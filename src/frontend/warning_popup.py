@@ -12,7 +12,7 @@ class WarningPopup:
     )
 
     @staticmethod
-    def show(parent, title="Warning", message=None, width=300):
+    def show(parent, title="Warning", message=None, width=600):
         """Show a warning popup dialog"""
         popup = tk.Toplevel(parent)
         popup.title(title)
@@ -34,12 +34,15 @@ class WarningPopup:
         tk.Label(
             icon_frame,
             text="⚠️",
-            font=FONTS["emoji_large"],
+            font=FONTS["emoji_medium"],
             foreground="orange"
-        ).pack(side=tk.LEFT, padx=(5, 5))
+        ).pack(side=tk.LEFT)
         
         # Use class message if none provided
-        display_message = message if message is not None else WarningPopup.WARNING_MSG
+        display_message = (message 
+                           if message is not None 
+                           else WarningPopup.WARNING_MSG
+                           )
         
         tk.Label(
             icon_frame,
