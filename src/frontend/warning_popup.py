@@ -7,7 +7,7 @@ class WarningPopup:
         "The Transcriptor is an experimental application in its early stage.\n"
         "This tool was made with the purpose of helping professionals optimize video "
         "training with specific targeted terms that common AIs do not have in their "
-        "knowledge base. However, since it uses generative AI, the results might be wrong "
+        "knowledge base. However, since it uses generative AI, the results might be inaccurate "
         "or incomplete. It's recommended to verify and confirm if they are as expected."
     )
 
