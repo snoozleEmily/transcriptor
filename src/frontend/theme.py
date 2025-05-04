@@ -1,8 +1,6 @@
 from tkinter import ttk
 from .constants import THEMES, FONTS
 
-
-
 def configure_theme(root, theme_name="default"):
     """Configures ttk styles for a given theme"""
     style = ttk.Style(root)
@@ -10,37 +8,53 @@ def configure_theme(root, theme_name="default"):
     colors = THEMES[theme_name]
 
     # Base styles
-    style.configure(
-        "TFrame",
-        background=colors["bg"]
-    )
-    style.configure(
-        "TLabel",
-        background=colors["bg"],
-        foreground=colors["fg"],
-        font=FONTS["default"]
-    )
-    style.configure(
-        "TButton",
-        background=colors["button_bg"],
-        foreground=colors["fg"],
-        font=FONTS["default"],
-        borderwidth=0
-    )
-    
+    base_config = {
+        "TFrame": {"background": colors["bg"]},
+        "TLabel": {
+            "background": colors["bg"],
+            "foreground": colors["fg"],
+            "font": FONTS["default"]
+        },
+        "TButton": {
+            "background": colors["button_bg"],
+            "foreground": colors["fg"],
+            "font": FONTS["default"],
+            "borderwidth": 0,
+            "focuscolor": colors["bg"]
+        },
+        "TCheckbutton": {
+            "background": colors["button_bg"],
+            "foreground": colors["fg"],
+            "font": FONTS["default"],
+            "indicatorcolor": colors["bg"],
+            "indicatordepth": 1
+        }
+    }
+
+    # Apply base configurations
+    for element, config in base_config.items():
+        style.configure(element, **config)
+
     # Interactive states
     style.map(
         "TButton",
-        background=[("active", colors["active_bg"])],
+        background=[("active", colors["active_bg"]), ("disabled", colors["bg"])],
         foreground=[("active", colors["active_fg"])]
     )
 
+    style.map(
+        "TCheckbutton",
+        indicatorbackground=[
+            ("selected", colors["fg"]),
+            ("!selected", colors["bg"])
+        ]
+    )
+
     # Custom widget styles
-    style.configure(
-        "HeaderTitle.TLabel",
-        font=FONTS["title"]
-    )
-    style.configure(
-        "EmojiDisplay.TLabel",
-        font=FONTS["emoji_large"]
-    )
+    custom_styles = {
+        "HeaderTitle.TLabel": {"font": FONTS["title"]},
+        "EmojiDisplay.TLabel": {"font": FONTS["emoji_large"]}
+    }
+
+    for style_name, config in custom_styles.items():
+        style.configure(style_name, **config)
