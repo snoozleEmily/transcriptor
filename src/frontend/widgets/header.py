@@ -1,7 +1,7 @@
 from tkinter import ttk
 
 
-from src.frontend.constants import FONTS
+from src.frontend.constants import FONTS, LOGO_COLOR
 
 
 
@@ -21,6 +21,7 @@ class Header(ttk.Frame):
         style.configure(
             "HeaderEmoji.TLabel",
             font=FONTS["emoji_large"],
+            foreground=LOGO_COLOR,  # Set emoji color
             anchor="center"
         )
     

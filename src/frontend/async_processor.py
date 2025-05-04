@@ -1,5 +1,4 @@
 import threading
-from queue import Queue
 
 
 
@@ -9,11 +8,11 @@ class AsyncTaskManager:
         self.interface = interface
         self.completion_callback = completion_callback
         
-    def get_busy(self, path, progress_handler=None):
+    def get_busy(self, path, config_params=None, progress_handler=None):
         """Handle async transcription with progress updates"""
         def task():
             try:
-                result = self.interface.controller.process_video(path)
+                result = self.interface.controller.process_video(path, config_params)
                 self.gui_queue.put(self.completion_callback)
             except Exception as e:
                 self.gui_queue.put(lambda: self.interface.show_error(str(e)))

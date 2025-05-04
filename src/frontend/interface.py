@@ -7,6 +7,7 @@ from queue import Empty, Queue
 from .url_opener import open_browser
 from .theme import configure_theme
 from .widgets.header import Header
+from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from .constants import THEMES, FONTS, GT_REPO
@@ -45,6 +46,12 @@ class Interface(tk.Tk):
             self.gui_queue, self, self._complete_processing
         )
 
+        # Message for Custom Words
+        self.C_WORDS_NOTE = f"Enter custom words here divided by commas:\n"
+        self.C_WORDS_EX = (
+            f"{self.C_WORDS_NOTE}\n(e.g.\nEiichiro Oda,\nAvril Lavigne,\nSAP, MLM, Okta,\nPR Flow, DeleteAllLogs)"
+        )
+
         # Initialization sequence
         self._configure_window()
         self._setup_theme()
@@ -56,6 +63,10 @@ class Interface(tk.Tk):
         sys.stdout = self.LogRedirector(self.gui_queue, self.log_text)
         sys.stderr = self.LogRedirector(self.gui_queue, self.log_text)
 
+        self.after(100, lambda: WarningPopup.show(
+            self,
+            title="Important Notice"
+        ))
     # --------------------- Window Configuration ---------------------
     def _configure_window(self):
         """Establish main window properties"""
@@ -104,9 +115,7 @@ class Interface(tk.Tk):
         """Build UI component hierarchy"""
         main_frame = ttk.Frame(self)
         main_frame.pack(
-            expand=True, fill="both", 
-            padx=40,  # height border
-            pady=50   # width border
+            expand=True, fill="both", padx=40, pady=50 
         )
 
         # Create top frame with 3 columns
@@ -190,11 +199,11 @@ class Interface(tk.Tk):
         """Create compact custom words input panel"""
         # Frame for the title and toggle button
         title_frame = ttk.Frame(parent_frame)
-        title_frame.pack(fill="x", pady=(0, 5))
+        title_frame.pack(fill="x", pady=(0, 2))
 
         tk.Label(
             title_frame,
-            text="Custom Terms",
+            text="Custom Words",
             bg=THEMES[self.current_theme]["bg"],
             fg=THEMES[self.current_theme]["fg"],
             font=FONTS["console"],
@@ -205,7 +214,7 @@ class Interface(tk.Tk):
         self.words_input_frame.pack(fill="both", expand=True)
 
         # Compact text widget
-        self.custom_words_text = tk.Text(
+        self.custom_words_raw = tk.Text(
             self.words_input_frame,
             height=3,
             width=20,
@@ -218,23 +227,23 @@ class Interface(tk.Tk):
 
         # Scrollbar
         scrollbar = ttk.Scrollbar(
-            self.words_input_frame, command=self.custom_words_text.yview
+            self.words_input_frame, command=self.custom_words_raw.yview
         )
-        self.custom_words_text.configure(yscrollcommand=scrollbar.set)
+        self.custom_words_raw.configure(yscrollcommand=scrollbar.set)
 
         # Layout
-        self.custom_words_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+        self.custom_words_raw.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Initial text
-        self.custom_words_text.insert(tk.END, "Enter words here")
-        self.custom_words_text.bind("<FocusIn>", lambda e: self._clear_default_text())
+        self.custom_words_raw.insert(tk.END, self.C_WORDS_EX)
+        self.custom_words_raw.bind("<FocusIn>", lambda e: self._clear_default_text())
 
     # --------------------- Helper Methods ---------------------
     def _clear_default_text(self):
         """Clear the default text when user clicks in the text widget"""
-        if self.custom_words_text.get("1.0", "end-1c") == "Enter words here":
-            self.custom_words_text.delete("1.0", tk.END)
+        if self.custom_words_raw.get("1.0", "end-1c") == self.C_WORDS_EX:
+            self.custom_words_raw.delete("1.0", tk.END)
 
     def copy_log(self):
         """Copy log content to clipboard"""
@@ -251,9 +260,28 @@ class Interface(tk.Tk):
             filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
         )
         if path:
-            self.running = True
-            self.async_mgr.get_busy(path)
-
+            # Get custom words from the text console
+            custom_words = self.custom_words_raw.get("1.0", tk.END).strip()
+            
+            # Process the words (remove example text if present, split by commas, clean)
+            if custom_words == self.C_WORDS_EX:
+                custom_words = []
+            else:
+                # Split by commas or newlines, strip whitespace, remove empty entries
+                custom_words = [
+                    word.strip() 
+                    for word in custom_words.replace('\n', ',').split(',') 
+                    if word.strip()
+                ]
+                # Create config dictionary with the words
+                config_params = {
+                    'words': custom_words,
+                    'has_odd_names': True
+                }
+            
+            self.running = True        
+            self.async_mgr.get_busy(path, config_params=config_params)
+    
     def _complete_processing(self):
         """Cleanup after processing completes"""
         self.running = False
