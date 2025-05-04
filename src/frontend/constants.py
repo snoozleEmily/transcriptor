@@ -24,6 +24,7 @@ FONTS = {
     "default": ("Courier New", 10),
     "console": ("Consolas", 10),  
     "emoji_large": ("Segoe UI Emoji", 64),  
+    "emoji_medium": ("Segoe UI Emoji", 36), 
     "emoji_small": ("Segoe UI Emoji", 12)
 }
 
