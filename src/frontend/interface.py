@@ -154,12 +154,12 @@ class Interface(tk.Tk):
         content_frame.pack(expand=True, fill="both")
 
         # --------------------- Console Log Setup ---------------------
-        log_frame = ttk.Frame(content_frame)
-        log_frame.pack(side=tk.LEFT, expand=True, fill="both", padx=(0, 10))
+        self.log_frame = ttk.Frame(content_frame)
+        self.log_frame.pack(side=tk.LEFT, expand=True, fill="both", padx=(0, 10))
 
         # Console Log Title
         self.log_title = tk.Label(
-            log_frame,
+            self.log_frame,
             text="Console Log",
             bg=THEMES[self.current_theme]["bg"],
             fg=THEMES[self.current_theme]["fg"],
@@ -169,7 +169,7 @@ class Interface(tk.Tk):
 
         # Create the log text widget
         self.log_text = tk.Text(
-            log_frame,
+            self.log_frame,
             wrap=tk.WORD,
             state="disabled",
             height=1,
@@ -177,14 +177,14 @@ class Interface(tk.Tk):
             fg=THEMES[self.current_theme]["fg"],
             font=FONTS["console"],
         )
-        scrollbar = ttk.Scrollbar(log_frame, command=self.log_text.yview)
+        scrollbar = ttk.Scrollbar(self.log_frame, command=self.log_text.yview)
         self.log_text.configure(yscrollcommand=scrollbar.set)
         self.log_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
 
         # Copy Button
         self.copy_label = tk.Label(
-            log_frame,
+            self.log_frame,
             text="📋",
             bg=THEMES[self.current_theme]["bg"],
             fg=THEMES[self.current_theme]["fg"],
@@ -249,6 +249,19 @@ class Interface(tk.Tk):
         """Copy log content to clipboard"""
         self.clipboard_clear()
         self.clipboard_append(self.log_text.get("1.0", tk.END))
+        
+        # Create and show a notification label
+        self.copy_notification = tk.Label(
+            self.log_frame,
+            text=" ✓ Text copied!",
+            bg=THEMES[self.current_theme]["bg"],
+            fg=THEMES[self.current_theme]["message"],
+            font=FONTS["console"]
+        )
+        self.copy_notification.place(relx=0.5, rely=1.0, anchor="s", y=5)
+        
+        # Remove the notification after 2 seconds
+        self.after(2000, self.copy_notification.destroy)
 
     # --------------------- Core Functionality ---------------------
     def _start_processing(self):
