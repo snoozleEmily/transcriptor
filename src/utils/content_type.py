@@ -1,6 +1,6 @@
 from typing import List, Optional
 
-# TODO: Implement types logic in V.4.0 
+
 
 class ContentType:
     """Configuration for content type characteristics and processing rules."""
