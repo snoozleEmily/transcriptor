@@ -1,5 +1,7 @@
 LOGO_COLOR = "#EBAC36" # Video emoji
 
+PLACEHOLDER_TEXT = "#334345"
+
 THEMES = {
     "default": {
         "bg": "#F5F5F5",
@@ -7,7 +9,7 @@ THEMES = {
         "button_bg": "#A5D9F1",
         "active_bg": "#6CA0B8",
         "active_fg": "#000000",
-        "message": "#0C890C", # For copy button 
+        "message": "#00707D", # For copy button 
     },
     "dark": {
         "bg": "#2E3B4E",
