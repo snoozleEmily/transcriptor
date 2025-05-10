@@ -7,7 +7,7 @@ THEMES = {
         "button_bg": "#A5D9F1",
         "active_bg": "#6CA0B8",
         "active_fg": "#000000",
-        "message": "#0C890C",
+        "message": "#0C890C", # For copy button 
     },
     "dark": {
         "bg": "#2E3B4E",
@@ -15,7 +15,7 @@ THEMES = {
         "button_bg": "#3C8DBC",
         "active_bg": "#367FA6",
         "active_fg": "#FFFFFF",
-        "message": "#FFFF00",
+        "message": "#FFFF00", # For copy button 
     }
 }
 
