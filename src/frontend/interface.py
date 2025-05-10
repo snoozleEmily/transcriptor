@@ -314,25 +314,22 @@ class Interface(tk.Tk):
             # Get custom words from the text console
             custom_words = self.custom_words_raw.get("1.0", tk.END).strip()
 
+            # Default to no config unless valid custom words are found
+            config_params = None
+
             # Process the words (remove example text if present, split by commas, clean)
-            if custom_words == self.C_WORDS_EX:
-                custom_words = []
-            else:
-                # Split by commas or newlines, strip whitespace, remove empty entries
+            if custom_words != self.C_WORDS_EX:
                 custom_words = [
-                    word.strip()
+                    word.strip() # Split by commas or newlines, strip whitespace, remove empty entries
                     for word in custom_words.replace("\n", ",").split(",")
                     if word.strip()
                 ]
                 # Create config dictionary with the words
-                config_params = {"words": custom_words, "has_odd_names": True}
+                if custom_words:
+                    config_params = {"words": custom_words, "has_odd_names": True}
 
             self.running = True
             self.async_mgr.get_busy(path, config_params=config_params)
-
-    def _complete_processing(self):
-        """Cleanup after processing completes"""
-        self.running = False
 
     # --------------------- System Operations ---------------------
     def _bind_cleanup(self):
@@ -363,3 +360,9 @@ class Interface(tk.Tk):
         self._alive = False
         self.gui_queue.queue.clear()
         self.destroy()
+
+# --------------------- Async Completion Handler ---------------------
+    def _complete_processing(self):
+        """Handle completion of async processing"""
+        self.running = False
+        self.show_feedback("✓ Processing complete!")
