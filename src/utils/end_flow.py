@@ -17,6 +17,7 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 
+
 class EndFlow:
     model_size = MODELS[2]  # Default model size for transcription
 
@@ -32,9 +33,9 @@ class EndFlow:
         self.content_config = ContentType(**config_params)
         self.notes_gen = NotesGenerator(self.content_config)
 
-        # Update reviser with technical terms
+        # Update reviser with technical terms - now handles string/list/dict inputs
         if self.content_config.words:
-            self.reviser.specific_words = self.content_config.words
+            self._update_reviser_words(self.content_config.words)
 
     @catch_errors
     def process_video(
@@ -57,7 +58,7 @@ class EndFlow:
         if config_params:
             self.content_config = config_params
             self.notes_gen = NotesGenerator(self.content_config)
-            self.reviser.specific_words = self.content_config.words
+            self._update_reviser_words(self.content_config.words)
 
         # 1. Extract and clean audio
         audio = extract_audio(video_path)
@@ -79,7 +80,9 @@ class EndFlow:
             progress_handler=progress_callback,
         )
 
-        # 3. Revise and save transcript
+        # 3. Revise and save transcript - fixed execution order
+        detected_lang = result['language']
+        self.reviser.set_detected_language(detected_lang)
         revised_text = self.reviser.revise_text(result["text"])
         transcript_path = self._save_transcript(revised_text)
 
@@ -90,6 +93,20 @@ class EndFlow:
             notes_path = self._save_notes(notes, os.path.splitext(transcript_path)[0])
 
         return transcript_path, notes_path
+
+    def _update_reviser_words(self, words):
+        """Helper method to safely update reviser's technical terms"""
+        if isinstance(words, dict):
+            self.reviser.specific_words = words
+
+        elif isinstance(words, str):
+            self.reviser.specific_words = {"default": [words]}
+
+        elif isinstance(words, list):
+            self.reviser.specific_words = {"default": words}
+
+        else:
+            self.reviser.specific_words = {}
 
     def _save_transcript(self, text: str) -> str:
         """Save revised transcript to text file."""
