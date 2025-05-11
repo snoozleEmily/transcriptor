@@ -1,108 +1,109 @@
-# First Development imports (might delete)
-import numpy as np
-from nltk.tree import Tree
-from nltk import pos_tag, ne_chunk, word_tokenize, sent_tokenize
-from sumy.summarizers.lex_rank import LexRankSummarizer
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
-from scipy.special import softmax
-
-
-# Second Development imports
 import re
-from typing import Dict, List
-from .content_type import ContentType
+from typing import Dict, List, Optional
+from dataclasses import dataclass
 
+
+
+@dataclass
+class LanguageRule:
+    quotation_pairs: Dict[str, str]
+    special_cases: Dict[str, str] 
 
 class TextReviser:
+    # Default language rules (could be moved to config/json)
+    LANGUAGE_RULES = { 
+        'fr': LanguageRule(
+            quotation_pairs={'« ': ' »'},
+            special_cases={}
+        ),
+        'de': LanguageRule(
+            quotation_pairs={'„': '“'},
+            special_cases={}
+        ),
+        # Add more languages?
+    }
+    
     def __init__(
         self,
-        specific_words: Dict[str, List[str]] = None,
-        content: ContentType = ContentType(),
+        specific_words: Optional[Dict[str, List[str]]] = None,
+        language_rules: Optional[Dict[str, LanguageRule]] = None
     ):
-        self.specific_words = specific_words or {} # Handled in EndFlow
-        self.content = content
+        # Convert string input to dictionary format
+        if isinstance(specific_words, str):
+            self.specific_words = {"default": [specific_words]}
+        elif isinstance(specific_words, list):
+            self.specific_words = {"default": specific_words}
+        else:
+            self.specific_words = specific_words or {}
+        
+        self.language_rules = language_rules or self.LANGUAGE_RULES
+        self.detected_language = None
+
+    def set_detected_language(self, lang_code: str):
+        """Validates and sets the language code"""
+        if lang_code:
+            self.detected_language = lang_code.lower().split('-')[0]
 
     def revise_text(self, text: str) -> str:
-        """Apply revisions based on content configuration"""
+        """Main revision pipeline"""
+        if not text:
+            return text
+
         revised_text = text
+        
+        # Language processing if detected
+        if self.detected_language:
+            revised_text = self._apply_language_rules(revised_text)
 
-        if self.content.types:
-            # Get relevant technical terms from selected categories
-            selected_terms = [
-                term
-                for category in self.content.categories
-                for term in self.specific_words.get(category, [])
-            ]
-
-            # Apply technical term enforcement
-            revised_text = self._enforce_technical_terms(revised_text, selected_terms)
-
-        if self.content.has_code:
-            revised_text = self._code_formatting(revised_text)
+        # Technical term processing
+        if self.specific_words:
+            revised_text = self._process_technical_terms(revised_text)
 
         return revised_text
 
-    def _enforce_technical_terms(self, text: str, terms: List[str]) -> str:
-        for term in terms:
-            pattern = re.compile(rf"\b{re.escape(term)}\b", re.IGNORECASE)
-            text = pattern.sub(term, text)
+    def _apply_language_rules(self, text: str) -> str:
+        """Applies language-specific formatting rules"""
+        if self.detected_language not in self.language_rules:
+            return text
+
+        rules = self.language_rules[self.detected_language]
+        text = self._process_quotations(text, rules.quotation_pairs)
+        text = self._process_special_cases(text, rules.special_cases)
 
         return text
 
-    def _code_formatting(self, text: str) -> str:
-        # Add code formatting preservation logic here
-        
+    def _process_quotations(self, text: str, quotation_pairs: Dict[str, str]) -> str:
+        """Replace generic quotes with language-specific ones"""
+        for open_q, close_q in quotation_pairs.items():
+            parts = text.split('"')
+
+            # Only process if we have an even number of quotes
+            if len(parts) > 1 and len(parts) % 2 == 1:
+                text = ''
+                for i, part in enumerate(parts):
+                    if i == 0:
+                        text += part
+
+                    elif i % 2 == 1:
+                        text += open_q + part
+
+                    else:
+                        text += close_q + part
+
         return text
 
-""" 
-    # --------------------- WIP Bellow ---------------------
-    def _fix_structure(self, text):
-        
-        PHASE 3: CONTENT-AWARE REPAIRS
-        
-        Tech considerations:
-        - Code snippet detection using CamelCase/snake_case patterns
-        - Variable preservation regex: (?<!\\)\b([A-Za-z_]\w*(?:\.\w+)*)\b
-        - Avoid modifying quoted strings or bracketed content
+    def _process_special_cases(self, text: str, special_cases: Dict[str, str]) -> str:
+        """Handle other language-specific replacements"""
+        for pattern, replacement in special_cases.items():
+            text = text.replace(pattern, replacement)
 
-        Multilingual handling:
-        - Language boundary detection via character set analysis
-        - Script-specific normalization (CJK vs Latin vs Cyrillic)
-        
-        # Fallback strategy if language detection fails
-        # Minimum impact processing for unrecognized scripts
+        return text
 
-    def _validate_linguistics(self, text):
-        PHASE 4: DYNAMIC VALIDATION
+    def _process_technical_terms(self, text: str) -> str:
+        """Enforce consistent technical term usage"""
+        for category, terms in self.specific_words.items():
+            for term in terms:
+                pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+                text = pattern.sub(term, text)
 
-        Tech content:
-        - Validate code term presence without case distortion
-        - Allow higher entity density for technical documents
-        - Relax verb presence requirements for code comments
-
-        Poetry/Lyrics: # Is this really worth it?
-        - Disable standard linguistic checks
-        - Rhythm pattern validation (syllable counting)
-        - Rhyme scheme detection (end-line pattern matching)
-
-        # Fail-safe: Minimum validation for mixed/unknown content
-
-    def _context_repair(self, text, validation_report):
-        PHASE 5: CONSERVATIVE CORRECTION
-
-        Repair priorities:
-        1. Preserve original casing in technical terms
-        2. Maintain line breaks in poetry/lyrics
-        3. Isolate multilingual segments without translation
-
-        Recovery protocol:
-        - Fallback to raw text + confidence markers if repairs fail
-        - Preserve original timestamps when available
-        - Never delete content - only annotate uncertainties
-        
-        # Last-resort fragment extraction uses:
-        # 1. Proper noun clustering
-        # 2. High-confidence term proximity
-        # 3. ASR timestamp anchoring
-"""
+        return text
