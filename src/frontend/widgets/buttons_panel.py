@@ -28,12 +28,6 @@ class ButtonsPanel(ttk.Frame):
             text="SELECT VIDEO",
             command=select_handler
         )
-        
-        self.github_btn = ttk.Button(
-            self,
-            text="GITHUB REPO",
-            command=github_handler
-        )
 
         self.pretty_notes_cb = ttk.Checkbutton(
             self,
@@ -42,10 +36,17 @@ class ButtonsPanel(ttk.Frame):
             style='PrettyNotes.TCheckbutton'
         )
         
+        self.github_btn = ttk.Button(
+            self,
+            text="GITHUB REPO",
+            command=github_handler
+        )
+
+        
         # --------------------- Layout ---------------------
         self.select_btn.pack(side=tk.LEFT, padx=(0, 15)) 
-        self.github_btn.pack(side=tk.LEFT, padx=(0, 15))
         self.pretty_notes_cb.pack(side=tk.LEFT, padx=(0, 15))
+        self.github_btn.pack(side=tk.LEFT, padx=(0, 15))
         
     def get_pretty_notes_flag(self):
         """Returns the current state of the Pretty Notes checkbox"""
