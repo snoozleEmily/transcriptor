@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Dict, Optional
 
 
 
@@ -8,7 +8,7 @@ class ContentType:
         self,
         *,
         types: Optional[List[str]] = None, # List of content types (e.g., ['database', 'radiology'])
-        words: Optional[List[str]] = None, # List of specific words/terms (names, acronyms, etc.)
+        words: Optional[Dict[str, List[str]]]  = None, # List of specific words/terms (names, acronyms, etc.)
         has_code: bool = False,            # Whether content contains code snippets/commands
         has_odd_names: bool = False,       # Whether content contains unusual names/identifiers
         is_multilingual: bool = False,     # Whether content contains multiple languages
