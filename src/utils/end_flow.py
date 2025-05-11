@@ -89,7 +89,7 @@ class EndFlow:
         # Generate and save notes
         notes_path = None
         if self.notes_gen:
-            notes, _ = self.notes_gen.create_notes(revised_text)
+            notes = self.notes_gen.create_notes(revised_text, detected_lang)
             notes_path = self._save_notes(notes, os.path.splitext(transcript_path)[0])
 
         return transcript_path, notes_path
