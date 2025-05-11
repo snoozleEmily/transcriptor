@@ -42,6 +42,3 @@ class MainWindow:
         self.button_panel.add_button('select', "SELECT VIDEO")
         self.button_panel.add_button('github', "GITHUB REPO")
         self.button_panel.frame.pack(pady=(0, 15))
-
-        # Progress system
-        # Show progress bar and status label here
