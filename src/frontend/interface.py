@@ -10,7 +10,9 @@ from .widgets.header import Header
 from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
+from src.utils.content_type import ContentType
 from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, GT_REPO
+
 
 # TODO: Refactor this class into smaller modules
 
@@ -314,8 +316,14 @@ class Interface(tk.Tk):
             # Get custom words from the text console
             custom_words = self.custom_words_raw.get("1.0", tk.END).strip()
 
-            # Default to no config unless valid custom words are found
-            config_params = None
+            has_odd = bool(custom_words)
+            config = ContentType(
+                words=custom_words,
+                has_odd_names=has_odd,
+                has_code=False,
+                types=[],
+                is_multilingual=False,
+            )
 
             # Process the words (remove example text if present, split by commas, clean)
             if custom_words != self.C_WORDS_EX:
@@ -324,12 +332,9 @@ class Interface(tk.Tk):
                     for word in custom_words.replace("\n", ",").split(",")
                     if word.strip()
                 ]
-                # Create config dictionary with the words
-                if custom_words:
-                    config_params = {"words": custom_words, "has_odd_names": True}
-
+                
             self.running = True
-            self.async_mgr.get_busy(path, config_params=config_params)
+            self.async_mgr.get_busy(path, config_params=config)
 
     # --------------------- System Operations ---------------------
     def _bind_cleanup(self):
