@@ -76,7 +76,7 @@ class EndFlow:
             cleaned,
             initial_prompt=full_prompt,
             temperature=0.2 if self.content_config.types else 0.5,
-            progress_handler=progress_callback
+            progress_handler=progress_callback,
         )
 
         # 3. Revise and save transcript
@@ -116,12 +116,18 @@ class EndFlow:
         return None
 
     def _get_domain_terms(self) -> List[str]:
-        """Retrieve domain-specific terms from database."""
-        if self.content_config.words:
-            return [
-                "Terraform",
-                "Kubernetes",
-                "CI/CD",
-                "IaC",
-            ] + self.content_config.words
-        return []
+        """Retrieve domain-specific terms from configuration."""
+        custom_terms = ["Terraform", "Kubernetes", "CI/CD", "IaC"]
+
+        # Get words from content config
+        content_words = self.content_config.words
+
+        # Handle case where words is a single string
+        if isinstance(content_words, str):
+            content_words = [content_words]  # Convert to list
+
+        # Merge terms only if we have valid words
+        if content_words and isinstance(content_words, list):
+            return custom_terms + content_words
+
+        return custom_terms  # Return default terms if no valid words
