@@ -16,6 +16,9 @@ from src.utils.models import MODELS
 
 
 class EndFlow:
+    # Default model size for transcription
+    model_size = MODELS[2]  # Will use 3
+
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
@@ -23,9 +26,6 @@ class EndFlow:
 
         # Initialize with empty words by default
         self.content_config = ContentType(words=[], has_odd_names=True)
-
-        # Default model size for transcription
-        self.model_size = MODELS[2]  # Will use 3
 
     def configure_content(self, config_params: dict):
         """Update content configuration from GUI inputs"""
