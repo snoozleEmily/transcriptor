@@ -7,8 +7,8 @@ from src.utils.end_flow import EndFlow
 
 
 def main():
-    ef = EndFlow()
-    app = Interface(ef)
+    flow = EndFlow()
+    app = Interface(flow)
     app.mainloop()
 
 if __name__ == "__main__":
