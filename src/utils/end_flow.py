@@ -1,5 +1,4 @@
 from tkinter import filedialog
-from typing import List
 
 
 from src.errors.handlers import catch_errors
@@ -13,6 +12,7 @@ from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
 from src.utils.models import MODELS
+
 
 
 class EndFlow:
