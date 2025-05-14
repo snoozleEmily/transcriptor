@@ -1,3 +1,4 @@
+import os
 from tkinter import filedialog
 
 
@@ -17,12 +18,13 @@ from src.utils.models import MODELS
 
 
 class EndFlow:
-    model_size = MODELS[2]  # Default model size
+    model_size = MODELS[1]  # Default model size
 
     def __init__(self):
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
         self.reviser = TextReviser()
+        self.pdf_exporter = PDFExporter()
         self.content_config = ContentType(words=[], has_odd_names=True)
 
     def configure_content(self, config_params):
@@ -74,19 +76,47 @@ class EndFlow:
                 {"config_params": config_params, **kwargs}
             ))
 
-        return self._save_result(revised_text)
+        return self._save_result(revised_text)    
 
-    def _save_result(self, text: str) -> str:
-        """Handle file saving"""
+    def _save_result(self, text: str, source_filename: str = "") -> str:
+        """Handle file saving with both TXT and PDF options"""
+        # First save as TXT
         save_path = filedialog.asksaveasfilename(
             defaultextension=".txt",
-            filetypes=[("Text Files", "*.txt")]
+            filetypes=[("Text Files", "*.txt"), ("PDF Files", "*.pdf")],
+            title="Save Transcription As",
+            initialfile=os.path.splitext(source_filename)[0]
         )
-        if not save_path:            
+        
+        if not save_path:
             # TODO: Add saving transcription automatically in the .exe location
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
                 message="Save cancelled by user"
             )
-        save_transcription(text, save_path)
-        return save_path
+        try:
+            if save_path.lower().endswith('.pdf'):
+                print("\nExporting to PDF...")
+                success = self.pdf_exporter.export_to_pdf(
+                    text,
+                    save_path,
+                    title=f"Transcription: {os.path.splitext(source_filename)[0]}"
+                )
+                print(f"PDF export success: {success}")
+                if not success:
+                    raise FileError(
+                        code=ErrorCode.FILE_ERROR,
+                        message="Failed to save PDF file"
+                    )
+            else:
+                print("\nSaving as TXT...")
+                save_transcription(text, save_path)
+                
+            return save_path
+        
+        except Exception as e:
+            raise FileError(
+                code=ErrorCode.FILE_ERROR,
+                message=f"Error when saving the result: {str(e)}"
+            )
+        
