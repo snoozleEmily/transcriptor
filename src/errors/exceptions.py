@@ -1,8 +1,6 @@
 from enum import Enum
 from typing import Optional, Dict, Any
 
-# TODO: Reorganize this file
-
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
@@ -14,15 +12,32 @@ class ErrorCode(Enum):
 
 
 class AppError(Exception):
-    """Base application exception type"""
+    """Base application exception type with emoji support"""
+    # Emoji mapping for different error types
+    EMOJI_MAP = {
+        ErrorCode.FILE_ERROR: "📄",
+        ErrorCode.FFMPEG_ERROR: "🎬",
+        ErrorCode.SERVICE_UNAVAILABLE: "🛠️",
+        ErrorCode.INVALID_INPUT: "❌",
+        ErrorCode.NO_SPEECH: "🔇",
+        ErrorCode.UNEXPECTED_ERROR: "💥",
+        ErrorCode.UNKNOWN_ERROR: "❓"
+    }
+    
+    DEFAULT_EMOJI = "🛑"  # Fallback emoji
 
     def __init__(
         self, code: ErrorCode, message: str, context: Optional[Dict[str, Any]] = None
     ):
         self.code = code
-        self.message = message
+        self.message = self._format_message(message)
         self.context = context or {}
-        super().__init__(message)
+        super().__init__(self.message)
+
+    def _format_message(self, message: str) -> str:
+        """Formats the message with appropriate emoji"""
+        emoji = self.EMOJI_MAP.get(self.code, self.DEFAULT_EMOJI)
+        return f"{emoji} {message}"
 
 
 class FileError(AppError):
@@ -37,11 +52,11 @@ class FileError(AppError):
         )
 
     @classmethod
-    def empty_text(cls, error: Exception) -> "FileError":
+    def empty_text(cls) -> "FileError":
         return cls(
             code=ErrorCode.FILE_ERROR,
             message="Empty transcription text",
-            context={"original_error": str(error)},
+            context={},
         )
 
 
@@ -86,7 +101,11 @@ class TranscriptionError(AppError):
 
     @classmethod
     def empty_audio(cls) -> "TranscriptionError":
-        return cls(code=ErrorCode.INVALID_INPUT, message="Empty audio file", context={})
+        return cls(
+            code=ErrorCode.INVALID_INPUT,
+            message="Empty audio file",
+            context={}
+        )
 
     @classmethod
     def preprocessing_failed(cls, error: Exception = None) -> "TranscriptionError":
@@ -99,7 +118,9 @@ class TranscriptionError(AppError):
     @classmethod
     def invalid_model(cls) -> "TranscriptionError":
         return cls(
-            code=ErrorCode.INVALID_INPUT, message="Invalid model size", context={}
+            code=ErrorCode.INVALID_INPUT,
+            message="Invalid model size",
+            context={}
         )
 
     @classmethod
@@ -128,7 +149,6 @@ class TranscriptionError(AppError):
 
     @classmethod
     def missing_model_config(cls, model: str, config_type: str) -> "TranscriptionError":
-        """Raised when a model is missing required configuration."""
         return cls(
             code=ErrorCode.INVALID_INPUT,
             message=f"Missing {config_type} configuration for model '{model}'",
@@ -137,11 +157,9 @@ class TranscriptionError(AppError):
                 "config_type": config_type
             }
         )
-    
 
     @classmethod
     def invalid_model_size(cls, model: str) -> "TranscriptionError":
-        """Raised when an invalid model size is requested."""
         return cls(
             code=ErrorCode.INVALID_INPUT,
             message=f"Invalid model size: '{model}'",
