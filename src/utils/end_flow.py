@@ -2,6 +2,7 @@ from tkinter import filedialog
 
 
 from src.errors.handlers import catch_errors
+from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
 from src.utils.transcripting.output_debugger import OutputDebugger
 from src.utils.transcripting.textify import Textify
@@ -12,7 +13,6 @@ from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
 from src.utils.models import MODELS
-
 
 
 class EndFlow:
@@ -37,6 +37,14 @@ class EndFlow:
 
     @catch_errors
     def process_video(self, video_path: str, config_params: dict = None) -> str:
+        print(
+            get_func_call( # Debug logging
+                self.process_video,
+                (video_path,),  
+                {"config_params": config_params},
+            )
+        )
+
         # Update content configuration if parameters are provided
         if config_params:
             self.configure_content(config_params)
