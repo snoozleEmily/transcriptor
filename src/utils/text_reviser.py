@@ -44,7 +44,7 @@ class TextReviser:
 
     def _process_technical_terms(self, text: str) -> str:
         """Enforces consistent capitalization and formatting of technical terms"""
-        for category_terms in self.specific_words.values():
+        for category_terms in self.specific_words:
             for term in category_terms:
                 # Case-insensitive replacement with exact term
                 pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
