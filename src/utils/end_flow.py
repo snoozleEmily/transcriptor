@@ -1,6 +1,6 @@
 import os
 from tkinter import filedialog
-
+from typing import Dict, List, Optional, Union, Any
 
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
@@ -16,42 +16,64 @@ from src.utils.file_handler import save_transcription
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
-    model_size = MODELS[1]  # Default model size
+    model_size = str(MODELS[0])  # Default model size
 
     def __init__(self):
+        if not isinstance(EndFlow.model_size, str): # Ensure correct type
+            raise TypeError(f"model_size must be str, got {type(EndFlow.model_size)}")
+        
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
         self.reviser = TextReviser()
         self.pdf_exporter = PDFExporter()
-        self.content_config = ContentType(words=[], has_odd_names=True)
+        self.content_config = ContentType(words=None, has_odd_names=True)
 
-    def configure_content(self, config_params):
+    def configure_content(self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None) -> None:
         """Update content configuration handling both dict and ContentType"""
         if config_params is None:
             return
             
+        # Process words parameter first to ensure correct type
+        words: Optional[Dict[str, List[str]]] = None
+        
         if isinstance(config_params, ContentType):
-            # If already a ContentType, just copy the relevant attributes
+            # Handle ContentType case
+            if isinstance(config_params.words, list):
+                words = {word: [] for word in config_params.words}
+            elif isinstance(config_params.words, dict):
+                words = config_params.words
+                
             self.content_config = ContentType(
-            words=config_params.words,
-            types=config_params.types,
-            has_code=config_params.has_code,
-            has_odd_names=config_params.has_odd_names,
-            is_multilingual=config_params.is_multilingual
-        )
+                words=words,
+                types=config_params.types,
+                has_code=config_params.has_code,
+                has_odd_names=config_params.has_odd_names,
+                is_multilingual=config_params.is_multilingual
+            )
         elif isinstance(config_params, dict):
-            # If it's a dictionary, unpack it
-            self.content_config = ContentType(**config_params)
+            # Handle dict case
+            config_dict = dict(config_params)
+            if 'words' in config_dict:
+                if isinstance(config_dict['words'], list):
+                    words = {word: [] for word in config_dict['words']}
+
+                elif isinstance(config_dict['words'], dict):
+                    words = config_dict['words']
+                config_dict['words'] = words
+                
+            self.content_config = ContentType(**config_dict)
+
         else:
             raise ValueError("config_params must be either a dict or ContentType")
 
-        if self.content_config.words:
-            self.reviser.specific_words = self.content_config.words
+        # Update reviser's words 
+        # words var is already either None or Dict[str, List[str]]
+        if self.content_config.words is not None: 
+            self.reviser.specific_words = self.content_config.words  # type: ignore
 
     @catch_errors
-    def process_video(self, video_path: str, config_params: dict = None, **kwargs):
+    def process_video(self, video_path: str, config_params: Optional[Dict[str, Any]] = None, **kwargs: Any) -> str:
         """Process video with optional progress callback"""
         if config_params:
             self.configure_content(config_params)
@@ -71,12 +93,12 @@ class EndFlow:
 
         if not revised_text:
             print(get_func_call(
-            self.process_video,
+                self.process_video,
                 (video_path,),
                 {"config_params": config_params, **kwargs}
             ))
 
-        return self._save_result(revised_text)    
+        return self._save_result(revised_text, os.path.basename(video_path))
 
     def _save_result(self, text: str, source_filename: str = "") -> str:
         """Handle file saving with both TXT and PDF options"""
@@ -94,6 +116,7 @@ class EndFlow:
                 code=ErrorCode.FILE_ERROR,
                 message="Save cancelled by user"
             )
+        
         try:
             if save_path.lower().endswith('.pdf'):
                 print("\nExporting to PDF...")
@@ -109,7 +132,7 @@ class EndFlow:
                         message="Failed to save PDF file"
                     )
             else:
-                print("\nSaving as TXT...")
+                print("\nSaved transcription as TXT.")
                 save_transcription(text, save_path)
                 
             return save_path
@@ -119,4 +142,3 @@ class EndFlow:
                 code=ErrorCode.FILE_ERROR,
                 message=f"Error when saving the result: {str(e)}"
             )
-        
