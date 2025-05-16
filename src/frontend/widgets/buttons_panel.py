@@ -3,11 +3,6 @@ from tkinter import ttk
 
 
 
-from src.frontend.constants import THEMES, FONTS
-
-
-
-
 class ButtonsPanel(ttk.Frame):
     """Interactive controls container with Pretty Notes option"""
     def __init__(self, parent, select_handler, github_handler):
@@ -41,7 +36,6 @@ class ButtonsPanel(ttk.Frame):
             text="GITHUB REPO",
             command=github_handler
         )
-
         
         # --------------------- Layout ---------------------
         self.select_btn.pack(side=tk.LEFT, padx=(0, 15)) 
