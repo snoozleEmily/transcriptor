@@ -1,33 +1,41 @@
-LOGO_COLOR = "#EBAC36" # Video emoji
+# Color Constants
+LOGO_COLOR = "#EBAC36"  # Primary brand color used for the app logo (golden yellow)
+PLACEHOLDER_TEXT = "#334345"  # Color for placeholder text in input fields (dark teal blue)
 
-PLACEHOLDER_TEXT = "#334345"
-
+# UI Theme Configuration
 THEMES = {
+    # Light theme configuration - suitable for daytime/well-lit environments
     "default": {
-        "bg": "#F5F5F5",
-        "fg": "#333333",
-        "button_bg": "#A5D9F1",
-        "active_bg": "#6CA0B8",
-        "active_fg": "#000000",
-        "message": "#00707D", # For copy button 
+        "bg": "#F5F5F5",          # Main background color (light gray)
+        "fg": "#333333",          # Primary text color (dark gray)
+        "button_bg": "#A5D9F1",   # Default button background (light blue)
+        "active_bg": "#6CA0B8",   # Active/selected button background (medium blue)
+        "active_fg": "#000000",   # Text color for active elements (black)
+        "message": "#00707D",     # Notification/copy confirmation color (teal blue)
     },
+    # Dark theme configuration - reduces eye strain in low-light conditions
     "dark": {
-        "bg": "#2E3B4E",
-        "fg": "#FFFFFF",
-        "button_bg": "#3C8DBC",
-        "active_bg": "#367FA6",
-        "active_fg": "#FFFFFF",
-        "message": "#FFFF00", # For copy button 
+        "bg": "#2E3B4E",          # Main background color (dark navy blue)
+        "fg": "#FFFFFF",          # Primary text color (white)
+        "button_bg": "#3C8DBC",   # Default button background (medium blue)
+        "active_bg": "#367FA6",   # Active/selected button background (darker blue)
+        "active_fg": "#FFFFFF",   # Text color for active elements (white)
+        "message": "#FFFF00",     # Notification/copy confirmation color (yellow)
     }
 }
 
+# Font Configuration
 FONTS = {
-    "title": ("Courier New", 16),
-    "default": ("Courier New", 10),
-    "console": ("Consolas", 10),  
-    "emoji_large": ("Segoe UI Emoji", 64),  
-    "emoji_medium": ("Segoe UI Emoji", 36), 
-    "emoji_small": ("Segoe UI Emoji", 12)
+    "title": ("Courier New", 16),       # Main title font (monospace, medium size)
+    "default": ("Courier New", 10),     # Primary text font (monospace, standard size)
+    "console": ("Consolas", 10),        # Terminal/console output font (clean monospace)
+    "emoji_large": ("Segoe UI Emoji", 64),  # Large emoji display (presentation size)
+    "emoji_medium": ("Segoe UI Emoji", 36), # Medium emoji (button/header size)
+    "emoji_small": ("Segoe UI Emoji", 12)   # Small emoji (inline text size)
 }
 
-GT_REPO = "https://github.com/snoozleEmily/transcriptor"
+# External Resources
+GT_REPO = "https://github.com/author/transcriptor"  # GitHub repository URL for:
+                                                    # - Issue reporting
+                                                    # - Documentation
+                                                    # - APKs
