@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Optional, Dict, Any
 
+
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
@@ -9,7 +10,10 @@ class ErrorCode(Enum):
     FFMPEG_ERROR = "ffmpeg_error"
     UNKNOWN_ERROR = "unknown_error"
     UNEXPECTED_ERROR = "unexpected_error"
-
+    PDF_GENERATION_ERROR = "pdf_generation_error"
+    DIRECTORY_CREATION_ERROR = "directory_creation_error"
+    INVALID_PDF_CONTENT = "invalid_pdf_content"
+    USER_CANCELLED = "user_cancelled"
 
 class AppError(Exception):
     """Base application exception type with emoji support"""
@@ -44,6 +48,22 @@ class FileError(AppError):
     """File operation errors"""
 
     @classmethod
+    def user_cancelled(cls) -> "FileError":
+        return cls(
+            code=ErrorCode.FILE_ERROR,
+            message="Save cancelled by user",
+            context={},
+        )
+    
+    @classmethod
+    def empty_text(cls) -> "FileError":
+        return cls(
+            code=ErrorCode.FILE_ERROR,
+            message="Empty transcription text",
+            context={},
+        )
+
+    @classmethod
     def save_failed(cls, error: Exception) -> "FileError":
         return cls(
             code=ErrorCode.FILE_ERROR,
@@ -52,11 +72,33 @@ class FileError(AppError):
         )
 
     @classmethod
-    def empty_text(cls) -> "FileError":
+    def pdf_creation_failed(cls, error: Exception = None) -> "FileError":
+        return cls(
+            code=ErrorCode.PDF_GENERATION_ERROR,
+            message="PDF creation failed",
+            context={"original_error": str(error) if error else "Unknown error"}
+        )
+
+    @classmethod
+    def pdf_permission_denied(cls, path: str, error: Exception) -> "FileError":
         return cls(
             code=ErrorCode.FILE_ERROR,
-            message="Empty transcription text",
-            context={},
+            message=f"PDF write permission denied at: {path}",
+            context={
+                "path": path,
+                "original_error": str(error)
+            }
+        )
+
+    @classmethod
+    def pdf_invalid_content(cls, content_length: int) -> "FileError":
+        return cls(
+            code=ErrorCode.INVALID_PDF_CONTENT,
+            message="Invalid content for PDF generation",
+            context={
+                "content_length": content_length,
+                "minimum_required": 1
+            }
         )
 
 
