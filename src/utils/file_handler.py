@@ -7,6 +7,7 @@ from pathlib import Path
 from src.errors.exceptions import FileError
 
 
+
 def save_transcription(text: str, save_path: str = None) -> str:
     """Save transcription text to file with fallback naming"""
     try:

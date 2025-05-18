@@ -1,5 +1,9 @@
 import tkinter as tk
+
+
 from ..constants import THEMES, FONTS
+
+
 
 def create_branding(parent):
     """Build branding elements for the application"""

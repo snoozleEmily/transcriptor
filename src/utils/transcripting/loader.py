@@ -6,11 +6,7 @@ from typing import Optional, Callable
 
 from src.utils.transcripting.info_dump import InfoDump
 
-# Do I need this?
-# Add this to prevent zombie threads
-# def __del__(self):
-#    self.active = False
-
+# TODO: Refactor this module to remove tqdm adding a simple count up to 100 based on the estimation
 
 class Loader:
     """Handles progress visualization and timing for transcription pipeline"""

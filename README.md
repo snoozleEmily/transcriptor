@@ -70,6 +70,8 @@ If you're working on a different operating system `or want to manually arrange y
    ```bash
    pip install -r requirements.txt
    ```
+
+   python -m textblob.download_corpora  # Downloads NLTK data for TextBlob
   
 6.  [there is another step to add for the newer versions - how to setup `pydub`]
 

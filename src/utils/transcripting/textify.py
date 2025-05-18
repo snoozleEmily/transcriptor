@@ -84,7 +84,7 @@ class Textify:
                                if k in supported_args}
 
             result = self.model.transcribe(**whisper_args, **filtered_kwargs)
-
+            
             # Finalize
             return self.progress.complete(result, duration)
 
@@ -98,3 +98,5 @@ class Textify:
                 if (time.time() - pipeline_start) > 0 
                 else 0
             )
+
+        

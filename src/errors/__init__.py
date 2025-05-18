@@ -16,6 +16,8 @@ from .logging import (
     log_unexpected_error
 )
 
+from .func_printer import get_func_call
+
 __all__ = [
     # Error Types
     "AppError",
@@ -32,5 +34,8 @@ __all__ = [
     
     # Logging
     "configure_logging",
-    "log_unexpected_error"
+    "log_unexpected_error",
+
+    # Function call log
+    get_func_call
 ]

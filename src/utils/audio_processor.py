@@ -3,7 +3,6 @@ import numpy as np
 import noisereduce as nr
 from io import BytesIO
 from pydub import AudioSegment
-from pydub.silence import split_on_silence
 from pydub.exceptions import CouldntDecodeError
 
 
@@ -22,6 +21,7 @@ def check_ffmpeg() -> None:
             stderr=subprocess.DEVNULL,  # Hide error messages
             timeout=5,  # Wait max 5 seconds
         )
+
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         raise FFmpegError(
             code=ErrorCode.FFMPEG_ERROR,
@@ -117,5 +117,6 @@ def clean_audio(audio: AudioSegment) -> AudioSegment:
             sample_width=2,  # Standard 16-bit audio (2 bytes per sample)
             channels=1,  # Mono audio
         )
+    
     except Exception as e:
         raise TranscriptionError.preprocessing_failed(error=e) from e

@@ -1,108 +1,53 @@
-# First Development imports (might delete)
-import numpy as np
-from nltk.tree import Tree
-from nltk import pos_tag, ne_chunk, word_tokenize, sent_tokenize
-from sumy.summarizers.lex_rank import LexRankSummarizer
-from sumy.parsers.plaintext import PlaintextParser
-from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
-from scipy.special import softmax
-
-
-# Second Development imports
 import re
-from typing import Dict, List
-from .content_type import ContentType
+from typing import Dict, List, Optional
 
 
-class TextReviser:
+class TextReviser:   
     def __init__(
         self,
-        specific_words: Dict[str, List[str]] = None,
-        content: ContentType = ContentType(),
+        specific_words: Optional[Dict[str, List[str]]] = None,
+        transcription_result: Optional[dict] = None
     ):
-        self.specific_words = specific_words or {} # Handled in EndFlow
-        self.content = content
+        # Handle different input formats for specific_words
+        if isinstance(specific_words, str):
+            self.specific_words = {"default": [specific_words]}
+
+        elif isinstance(specific_words, list):
+            self.specific_words = {"default": specific_words}
+
+        else:
+            self.specific_words = specific_words or {}
+        
+        # Initialize language detection
+        self.detected_language = None
+        if transcription_result and 'language' in transcription_result:
+            print(f"Language detected: {transcription_result['language']}\n")
+            self.set_detected_language(transcription_result['language'])
+
+    def set_detected_language(self, lang_code: str):
+        """Extracts and stores the base language code from Whisper's detection"""
+        if lang_code and isinstance(lang_code, str):
+            self.detected_language = lang_code.lower().split('-')[0]  # Convert to ISO 639-1
 
     def revise_text(self, text: str) -> str:
-        """Apply revisions based on content configuration"""
+        """Main text processing pipeline"""
+        if not text:
+            return text
+
         revised_text = text
-
-        if self.content.types:
-            # Get relevant technical terms from selected categories
-            selected_terms = [
-                term
-                for category in self.content.categories
-                for term in self.specific_words.get(category, [])
-            ]
-
-            # Apply technical term enforcement
-            revised_text = self._enforce_technical_terms(revised_text, selected_terms)
-
-        if self.content.has_code:
-            revised_text = self._code_formatting(revised_text)
+        
+        # Only process technical terms if they exist
+        if self.specific_words:
+            revised_text = self._process_technical_terms(revised_text)
 
         return revised_text
 
-    def _enforce_technical_terms(self, text: str, terms: List[str]) -> str:
-        for term in terms:
-            pattern = re.compile(rf"\b{re.escape(term)}\b", re.IGNORECASE)
-            text = pattern.sub(term, text)
-
+    def _process_technical_terms(self, text: str) -> str:
+        """Enforces consistent capitalization and formatting of technical terms"""
+        for category_terms in self.specific_words:
+            for term in category_terms:
+                # Case-insensitive replacement with exact term
+                pattern = re.compile(rf'\b{re.escape(term)}\b', re.IGNORECASE)
+                text = pattern.sub(term, text)
+                
         return text
-
-    def _code_formatting(self, text: str) -> str:
-        # Add code formatting preservation logic here
-        
-        return text
-
-""" 
-    # --------------------- WIP Bellow ---------------------
-    def _fix_structure(self, text):
-        
-        PHASE 3: CONTENT-AWARE REPAIRS
-        
-        Tech considerations:
-        - Code snippet detection using CamelCase/snake_case patterns
-        - Variable preservation regex: (?<!\\)\b([A-Za-z_]\w*(?:\.\w+)*)\b
-        - Avoid modifying quoted strings or bracketed content
-
-        Multilingual handling:
-        - Language boundary detection via character set analysis
-        - Script-specific normalization (CJK vs Latin vs Cyrillic)
-        
-        # Fallback strategy if language detection fails
-        # Minimum impact processing for unrecognized scripts
-
-    def _validate_linguistics(self, text):
-        PHASE 4: DYNAMIC VALIDATION
-
-        Tech content:
-        - Validate code term presence without case distortion
-        - Allow higher entity density for technical documents
-        - Relax verb presence requirements for code comments
-
-        Poetry/Lyrics: # Is this really worth it?
-        - Disable standard linguistic checks
-        - Rhythm pattern validation (syllable counting)
-        - Rhyme scheme detection (end-line pattern matching)
-
-        # Fail-safe: Minimum validation for mixed/unknown content
-
-    def _context_repair(self, text, validation_report):
-        PHASE 5: CONSERVATIVE CORRECTION
-
-        Repair priorities:
-        1. Preserve original casing in technical terms
-        2. Maintain line breaks in poetry/lyrics
-        3. Isolate multilingual segments without translation
-
-        Recovery protocol:
-        - Fallback to raw text + confidence markers if repairs fail
-        - Preserve original timestamps when available
-        - Never delete content - only annotate uncertainties
-        
-        # Last-resort fragment extraction uses:
-        # 1. Proper noun clustering
-        # 2. High-confidence term proximity
-        # 3. ASR timestamp anchoring
-"""
