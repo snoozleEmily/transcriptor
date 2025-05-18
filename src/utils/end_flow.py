@@ -1,5 +1,4 @@
 import os
-from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
@@ -17,30 +16,49 @@ from src.utils.file_handler import save_transcription
 from src.utils.models import MODELS
 
 
+
 class EndFlow:
-    """Main transcription workflow controller"""
+    """Main transcription workflow controller responsible for:
+    - Audio extraction and cleaning
+    - Speech-to-text transcription
+    - Text revision and formatting
+    - Final export in specified format
+    
+    Attributes:
+        model_size: Whisper model version used for transcription
+    """
 
-    model_size = str(MODELS[0])  # Default model size
+    model_size = str(MODELS[0])  # Default model | it will be set to 3
 
-    def __init__(self):
+    def __init__(self) -> None:
+        """Initialize workflow components with default configuration"""
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
         self.reviser = TextReviser()
         self.pdf_exporter = PDFExporter()
         self.content_config = ContentType(words=None, has_odd_names=True)
-        # TODO: make has_odd_names dynamic
+        # TODO: Implement dynamic has_odd_names detection
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
     ) -> None:
-        """Configure content processing parameters"""
-        if config_params is None:
+        """Update content processing configuration parameters
+        
+        Args:
+            config_params: Either a ContentType instance or dictionary containing:
+                - words: Custom vocabulary mapping/list
+                - types: Content categories (e.g., technical, medical)
+                - has_code: Boolean flag for code presence
+                - has_odd_names: Boolean flag for unusual proper nouns
+                - is_multilingual: Boolean flag for multiple languages
+        """
+        if not config_params:
             return
 
         if isinstance(config_params, ContentType):
-            words = self._process_words(config_params.words)
+            # Directly use ContentType instance after processing words
             self.content_config = ContentType(
-                words=words,
+                words=self._process_words(config_params.words),
                 types=config_params.types,
                 has_code=config_params.has_code,
                 has_odd_names=config_params.has_odd_names,
@@ -48,21 +66,38 @@ class EndFlow:
             )
 
         elif isinstance(config_params, dict):
-            config_dict = dict(config_params)
-            if "words" in config_dict:
-                config_dict["words"] = self._process_words(config_dict["words"])
+            # Convert dictionary to ContentType with proper validation
+            processed_params = dict(config_params)
 
-            self.content_config = ContentType(**config_dict)
+            if "words" in processed_params:
+                processed_params["words"] = self._process_words(
+                    processed_params["words"]
+                )
+            self.content_config = ContentType(**processed_params)
 
+        # Update text reviser with custom vocabulary if provided
         if self.content_config.words:
             self.reviser.specific_words = self.content_config.words  # type: ignore
 
-    def _process_words(self, words: Any) -> Optional[Dict[str, List[str]]]:
-        """Convert words to proper dict format if needed"""
+    def _process_words(
+        self, words: Optional[Union[List[str], Dict[str, List[str]]]]
+    ) -> Optional[Dict[str, List[str]]]:
+        """Normalize custom vocabulary input to expected dictionary format
+        
+        Args:
+            words: Can be either:
+                - List of terms (converted to {term: []})
+                - Dictionary of {term: [alternatives]}
+                - None (returns None)
+        
+        Returns:
+            Properly formatted dictionary or None if invalid input
+        """
         if isinstance(words, list):
-            return {word: [] for word in words}
-
-        return words if isinstance(words, dict) else None
+            return {word.strip(): [] for word in words if word.strip()}
+        if isinstance(words, dict):
+            return words
+        return None
 
     @catch_errors
     def process_video(
@@ -72,23 +107,42 @@ class EndFlow:
         pretty_notes: bool = False,
         **kwargs
     ) -> str:
-        """Process video file through full transcription pipeline"""
+        """Execute complete video processing pipeline
+        
+        Args:
+            video_path: Path to source video file
+            config_params: Content configuration parameters
+            pretty_notes: Flag for PDF output format (False=TXT)
+            **kwargs: Additional transcription parameters
+            
+        Returns:
+            Path to generated output file
+            
+        Raises:
+            FileError: If any processing stage fails
+        """
+        # Update content configuration if provided
         if config_params:
             self.configure_content(config_params)
 
+        # Audio processing pipeline
         audio = extract_audio(video_path)
-        cleaned = clean_audio(audio)
-        prompt = self.debugger.generate_content_prompt(self.content_config)
-
-        result = self.transcriber.transcribe(
-            cleaned,
-            initial_prompt=prompt,
+        cleaned_audio = clean_audio(audio)
+        
+        # Generate transcription context prompt
+        context_prompt = self.debugger.generate_content_prompt(self.content_config)
+        
+        # Perform speech-to-text transcription
+        transcription_result = self.transcriber.transcribe(
+            cleaned_audio,
+            initial_prompt=context_prompt,
             temperature=0.2 if self.content_config.types else 0.5,
             **kwargs,
         )
 
-        revised_text = self.reviser.revise_text(result["text"])
-        if not revised_text:
+        # Post-process transcribed text
+        revised_text = self.reviser.revise_text(transcription_result["text"])
+        if not revised_text.strip():
             print(
                 get_func_call(
                     self.process_video,
@@ -96,6 +150,7 @@ class EndFlow:
                     {"config_params": config_params, **kwargs},
                 )
             )
+            raise FileError.empty_text()
 
         return self._save_result(
             revised_text, 
@@ -104,53 +159,67 @@ class EndFlow:
         )
 
     def _save_result(
-    self, 
-    text: str, 
-    source_filename: str = "", 
-    pretty_notes: bool = False
-) -> str:
-        """Save results with consistent error handling"""
-        try:
-            if not text.strip():
-                raise FileError.empty_text()
-
-            # Determine file extension and format based on pretty_notes flag
-            extension = ".pdf" if pretty_notes else ".txt"
-            base_name = os.path.splitext(source_filename)[0]
-            default_filename = f"{base_name}_transcription{extension}"
-
-            # Automatically generate the save path without dialog
-            save_path = os.path.join(os.path.expanduser("~"), "Downloads", default_filename)
+        self, 
+        text: str, 
+        source_filename: str = "", 
+        pretty_notes: bool = False
+    ) -> str:
+        """Save processed text to appropriate format with conflict resolution
+        
+        Args:
+            text: Processed text content to save
+            source_filename: Original video filename for naming
+            pretty_notes: Output format flag (True=PDF, False=TXT)
             
-            # Ensure unique filename if file already exists
-            counter = 1
-            while os.path.exists(save_path):
-                save_path = os.path.join(
-                    os.path.expanduser("~"), 
-                    "Downloads",
-                    f"{base_name}_transcription_{counter}{extension}"
-                )
-                counter += 1
+        Returns:
+            Absolute path to created file
+            
+        Raises:
+            FileError: If save operation fails
+        """
+        if not text.strip():
+            raise FileError.empty_text()
 
+        # Generate base filename from source
+        base_name = os.path.splitext(os.path.basename(source_filename))[0]
+        extension = ".pdf" if pretty_notes else ".txt"
+        
+        # Create output directory path
+        output_dir = os.path.expanduser("~/Downloads")
+        base_filename = f"{base_name}_transcription{extension}"
+        
+        # Handle filename conflicts
+        save_path = os.path.join(output_dir, base_filename)
+        conflict_num = 1
+
+        while os.path.exists(save_path):
+            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
+            save_path = os.path.join(output_dir, new_filename)
+            conflict_num += 1
+
+        try:
             if pretty_notes:
-                # Save as PDF
-                if not self.pdf_exporter.export_to_pdf(
-                    text,
-                    save_path,
-                    f"Transcription: {base_name}",
-                ):
+                # PDF generation workflow
+                doc_title = f"Transcription: {base_name}"
+                if not self.pdf_exporter.export_to_pdf(text, save_path, doc_title):
                     raise FileError.pdf_creation_failed()
+                
             else:
-                # Save as TXT
+                # Plain text output
                 save_transcription(text, save_path)
+                
+            return os.path.abspath(save_path)
 
-            return save_path
-
-        except FileError:
-            raise
-        except Exception as e:
+        except PermissionError as perm_err:
+            raise FileError.pdf_permission_denied(save_path, perm_err) from perm_err
+        
+        except Exception as generic_err:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
-                message="Unexpected save error",
-                context={"error_type": type(e).__name__, "error_details": str(e)},
-            ) from e
+                message="Unexpected save operation failure",
+                context={
+                    "error_type": type(generic_err).__name__,
+                    "error_details": str(generic_err),
+                    "output_path": save_path
+                }
+            ) from generic_err
