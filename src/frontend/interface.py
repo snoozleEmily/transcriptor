@@ -313,28 +313,39 @@ class Interface(tk.Tk):
             filetypes=[("Video Files", "*.mp4 *.avi *.mov")]
         )
         if path:
-            # Get custom words from the text console
-            custom_words = self.custom_words_raw.get("1.0", tk.END).strip()
+            # Get format preference before processing
+            pretty_notes = self.buttons_panel.get_pretty_notes_flag()
 
-            has_odd = bool(custom_words)
+            # Get custom words from the text console and process them
+            custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
+            custom_words = None
+
+            # Only process if user entered actual words (not the example text)
+            if custom_words_raw and custom_words_raw != self.C_WORDS_EX:
+                # Split by commas or newlines, strip whitespace, remove empty entries
+                word_list = [
+                    word.strip()
+                    for word in custom_words_raw.replace("\n", ",").split(",")
+                    if word.strip()
+                ]
+                # Convert to expected dict format {word: []}
+                custom_words = {word: [] for word in word_list}
+
+            has_odd = bool(custom_words)  # True if we have custom words
             config = ContentType(
-                words=custom_words,
+                words=custom_words,  # This is now either None or a proper dict
                 has_odd_names=has_odd,
                 has_code=False,
                 types=[],
                 is_multilingual=False,
             )
-
-            # Process the words (remove example text if present, split by commas, clean)
-            if custom_words != self.C_WORDS_EX:
-                custom_words = [
-                    word.strip() # Split by commas or newlines, strip whitespace, remove empty entries
-                    for word in custom_words.replace("\n", ",").split(",")
-                    if word.strip()
-                ]
                 
             self.running = True
-            self.async_mgr.get_busy(path, config_params=config)
+            self.async_mgr.get_busy(
+                path, 
+                config_params=config,
+                pretty_notes=pretty_notes
+            )
 
     # --------------------- System Operations ---------------------
     def _bind_cleanup(self):
