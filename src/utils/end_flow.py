@@ -17,7 +17,6 @@ from src.utils.file_handler import save_transcription
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Main transcription workflow controller"""
 
@@ -29,6 +28,7 @@ class EndFlow:
         self.reviser = TextReviser()
         self.pdf_exporter = PDFExporter()
         self.content_config = ContentType(words=None, has_odd_names=True)
+        # TODO: make has_odd_names dynamic
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
@@ -51,6 +51,7 @@ class EndFlow:
             config_dict = dict(config_params)
             if "words" in config_dict:
                 config_dict["words"] = self._process_words(config_dict["words"])
+
             self.content_config = ContentType(**config_dict)
 
         if self.content_config.words:
@@ -65,7 +66,11 @@ class EndFlow:
 
     @catch_errors
     def process_video(
-        self, video_path: str, config_params: Optional[Dict[str, Any]] = None, **kwargs
+        self, 
+        video_path: str, 
+        config_params: Optional[Dict[str, Any]] = None, 
+        pretty_notes: bool = False,
+        **kwargs
     ) -> str:
         """Process video file through full transcription pipeline"""
         if config_params:
@@ -92,63 +97,60 @@ class EndFlow:
                 )
             )
 
-        return self._save_result(revised_text, os.path.basename(video_path))
+        return self._save_result(
+            revised_text, 
+            os.path.basename(video_path),
+            pretty_notes=pretty_notes
+        )
 
-    def _save_result(self, text: str, source_filename: str = "") -> str:
+    def _save_result(
+    self, 
+    text: str, 
+    source_filename: str = "", 
+    pretty_notes: bool = False
+) -> str:
         """Save results with consistent error handling"""
         try:
             if not text.strip():
                 raise FileError.empty_text()
-                
-            save_path = filedialog.asksaveasfilename(
-                defaultextension=".txt",
-                filetypes=[("Text Files", "*.txt"), ("PDF Files", "*.pdf")],
-                title="Save Transcription As",
-                initialfile=os.path.splitext(source_filename)[0],
-            )
 
-            if not save_path:
-                raise FileError.user_cancelled()
+            # Determine file extension and format based on pretty_notes flag
+            extension = ".pdf" if pretty_notes else ".txt"
+            base_name = os.path.splitext(source_filename)[0]
+            default_filename = f"{base_name}_transcription{extension}"
 
-            if save_path.lower().endswith(".pdf"):
-                try:
-                    if not self.pdf_exporter.export_to_pdf(
-                        text,
-                        save_path,
-                        f"Transcription: {os.path.splitext(source_filename)[0]}",
-                    ):
-                        raise FileError.pdf_creation_failed()
-                
-                except FileError as e:
-                    raise FileError(
-                        code=ErrorCode.PDF_GENERATION_ERROR,
-                        message="Failed to generate PDF",
-                        context={
-                            "path": save_path,
-                            "original_error": e.message
-                        }
-                    ) from e
+            # Automatically generate the save path without dialog
+            save_path = os.path.join(os.path.expanduser("~"), "Downloads", default_filename)
+            
+            # Ensure unique filename if file already exists
+            counter = 1
+            while os.path.exists(save_path):
+                save_path = os.path.join(
+                    os.path.expanduser("~"), 
+                    "Downloads",
+                    f"{base_name}_transcription_{counter}{extension}"
+                )
+                counter += 1
+
+            if pretty_notes:
+                # Save as PDF
+                if not self.pdf_exporter.export_to_pdf(
+                    text,
+                    save_path,
+                    f"Transcription: {base_name}",
+                ):
+                    raise FileError.pdf_creation_failed()
             else:
-                try:
-                    save_transcription(text, save_path)
-
-                except PermissionError as e:
-                    raise FileError.pdf_permission_denied(save_path, e) from e
-                
-                except Exception as e:
-                    raise FileError.save_failed(e) from e
+                # Save as TXT
+                save_transcription(text, save_path)
 
             return save_path
 
         except FileError:
             raise
-
         except Exception as e:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
                 message="Unexpected save error",
-                context={
-                    "error_type": type(e).__name__,
-                    "error_details": str(e)
-                }
+                context={"error_type": type(e).__name__, "error_details": str(e)},
             ) from e
