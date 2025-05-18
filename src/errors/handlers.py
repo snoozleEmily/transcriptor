@@ -5,17 +5,13 @@ from typing import Any, Callable
 
 from .func_printer import get_func_call
 from .logging import log_unexpected_error
-from .exceptions import AppError, ErrorCode, TranscriptionError
+from .exceptions import AppError, ErrorCode, FileError, TranscriptionError
 
 
 
 def catch_errors(func: Callable) -> Callable:
     """
-    Error handling decorator for controller methods.
-    
-    Catches specific speech recognition errors and general exceptions, converting them
-    to application-specific error types while preserving the original traceback.
-    Also prints detailed function call information before execution.
+    Enhanced error handling decorator with file operation support
     """
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> Any:
@@ -35,6 +31,26 @@ def catch_errors(func: Callable) -> Callable:
             raise TranscriptionError(
                 code=ErrorCode.SERVICE_UNAVAILABLE,
                 message="Speech service unavailable"
+            ) from e
+            
+        except PermissionError as e:
+            log_unexpected_error(e)
+            raise FileError.permission_denied(str(e.filename)) from e
+            
+        except FileNotFoundError as e:
+            log_unexpected_error(e)
+            raise FileError(
+                code=ErrorCode.FILE_ERROR,
+                message="File or directory not found",
+                context={"path": str(e.filename)}
+            ) from e
+            
+        except OSError as e:
+            log_unexpected_error(e)
+            raise FileError(
+                code=ErrorCode.FILE_ERROR,
+                message="OS error during file operation",
+                context={"error": str(e)}
             ) from e
             
         except Exception as e:
