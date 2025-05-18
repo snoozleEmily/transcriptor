@@ -95,32 +95,60 @@ class EndFlow:
         return self._save_result(revised_text, os.path.basename(video_path))
 
     def _save_result(self, text: str, source_filename: str = "") -> str:
-        """Save results to user-selected file format"""
-        save_path = filedialog.asksaveasfilename(
-            defaultextension=".txt",
-            filetypes=[("Text Files", "*.txt"), ("PDF Files", "*.pdf")],
-            title="Save Transcription As",
-            initialfile=os.path.splitext(source_filename)[0],
-        )
-
-        if not save_path:
-            raise FileError(code=ErrorCode.FILE_ERROR, message="Save cancelled by user")
-
+        """Save results with consistent error handling"""
         try:
+            if not text.strip():
+                raise FileError.empty_text()
+                
+            save_path = filedialog.asksaveasfilename(
+                defaultextension=".txt",
+                filetypes=[("Text Files", "*.txt"), ("PDF Files", "*.pdf")],
+                title="Save Transcription As",
+                initialfile=os.path.splitext(source_filename)[0],
+            )
+
+            if not save_path:
+                raise FileError.user_cancelled()
+
             if save_path.lower().endswith(".pdf"):
-                success = self.pdf_exporter.export_to_pdf(
-                    text,
-                    save_path,
-                    f"Transcription: {os.path.splitext(source_filename)[0]}",
-                )
-                if not success:
+                try:
+                    if not self.pdf_exporter.export_to_pdf(
+                        text,
+                        save_path,
+                        f"Transcription: {os.path.splitext(source_filename)[0]}",
+                    ):
+                        raise FileError.pdf_creation_failed()
+                
+                except FileError as e:
                     raise FileError(
-                        code=ErrorCode.FILE_ERROR, message="PDF creation failed"
-                    )
+                        code=ErrorCode.PDF_GENERATION_ERROR,
+                        message="Failed to generate PDF",
+                        context={
+                            "path": save_path,
+                            "original_error": e.message
+                        }
+                    ) from e
             else:
-                save_transcription(text, save_path)
+                try:
+                    save_transcription(text, save_path)
+
+                except PermissionError as e:
+                    raise FileError.pdf_permission_denied(save_path, e) from e
+                
+                except Exception as e:
+                    raise FileError.save_failed(e) from e
 
             return save_path
 
+        except FileError:
+            raise
+
         except Exception as e:
-            raise FileError(code=ErrorCode.FILE_ERROR, message=f"Save failed: {str(e)}")
+            raise FileError(
+                code=ErrorCode.FILE_ERROR,
+                message="Unexpected save error",
+                context={
+                    "error_type": type(e).__name__,
+                    "error_details": str(e)
+                }
+            ) from e
