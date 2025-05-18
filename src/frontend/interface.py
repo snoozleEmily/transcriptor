@@ -261,8 +261,9 @@ class Interface(tk.Tk):
 
     def _on_focus_out(self):
         """Handle focus out event"""
-        if (not self.custom_words_modified 
-            and not self.custom_words_raw.get("1.0", "end-1c")):
+        if not self.custom_words_modified and not self.custom_words_raw.get(
+            "1.0", "end-1c"
+        ):
             self._show_placeholder_text()
 
     def _on_key_press(self):
@@ -322,12 +323,12 @@ class Interface(tk.Tk):
 
             # Only process if user entered actual words (not the example text)
             if custom_words_raw and custom_words_raw != self.C_WORDS_EX:
-                # Split by commas or newlines, strip whitespace, remove empty entries
-                word_list = [
-                    word.strip()
+                word_list = [  # Split by commas or newlines,
+                    word.strip()  # strip whitespace, remove empty entries
                     for word in custom_words_raw.replace("\n", ",").split(",")
                     if word.strip()
                 ]
+
                 # Convert to expected dict format {word: []}
                 custom_words = {word: [] for word in word_list}
 
@@ -339,12 +340,10 @@ class Interface(tk.Tk):
                 types=[],
                 is_multilingual=False,
             )
-                
+
             self.running = True
             self.async_mgr.get_busy(
-                path, 
-                config_params=config,
-                pretty_notes=pretty_notes
+                path, config_params=config, pretty_notes=pretty_notes
             )
 
     # --------------------- System Operations ---------------------
@@ -377,7 +376,7 @@ class Interface(tk.Tk):
         self.gui_queue.queue.clear()
         self.destroy()
 
-# --------------------- Async Completion Handler ---------------------
+    # --------------------- Async Completion Handler ---------------------
     def _complete_processing(self):
         """Handle completion of async processing"""
         self.running = False
