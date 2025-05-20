@@ -124,6 +124,14 @@ class TranscriptionError(AppError):
             message=message,
             context={"original_error": str(error)},
         )
+    
+    @classmethod
+    def progress_tracking(cls, error: Exception) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Progress tracking error",
+            context={"original_error": str(error) if error else ""},
+        )
 
     @classmethod
     def from_whisper_error(cls, error: Exception) -> "TranscriptionError":
@@ -150,10 +158,10 @@ class TranscriptionError(AppError):
         )
 
     @classmethod
-    def preprocessing_failed(cls, error: Exception = None) -> "TranscriptionError":
+    def processing_failed(cls, error: Exception = None) -> "TranscriptionError":
         return cls(
             code=ErrorCode.UNEXPECTED_ERROR,
-            message="Audio preprocessing failed",
+            message="Progress tracking error",
             context={"original_error": str(error) if error else ""},
         )
 
