@@ -56,10 +56,10 @@ class FileError(AppError):
         )
     
     @classmethod
-    def empty_text(cls) -> "FileError":
+    def empty_text(cls, message: str = "Empty transcription text" ) -> "FileError":
         return cls(
             code=ErrorCode.FILE_ERROR,
-            message="Empty transcription text",
+            message=message,
             context={},
         )
 
