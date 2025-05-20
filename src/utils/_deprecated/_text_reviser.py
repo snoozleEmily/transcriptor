@@ -1,3 +1,5 @@
+# Deprecated
+
 import re
 import numpy as np
 from nltk import pos_tag, ne_chunk, word_tokenize, sent_tokenize
@@ -6,6 +8,7 @@ from sumy.summarizers.lex_rank import LexRankSummarizer
 from sumy.parsers.plaintext import PlaintextParser
 from sumy.nlp.tokenizers import Tokenizer as SumyTokenizer
 from scipy.special import softmax
+
 
 
 class AdvancedTextReviser:
