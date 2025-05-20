@@ -23,12 +23,11 @@ class EndFlow:
     - Speech-to-text transcription
     - Text revision and formatting
     - Final export in specified format
-    
+
     Attributes:
         model_size: Whisper model version used for transcription
     """
-
-    model_size = str(MODELS[0])  # Default model | it will be set to 3
+    model_size = str(MODELS[2])  # Default model | it will be set to 3
 
     def __init__(self) -> None:
         """Initialize workflow components with default configuration"""
@@ -43,7 +42,7 @@ class EndFlow:
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
     ) -> None:
         """Update content processing configuration parameters
-        
+
         Args:
             config_params: Either a ContentType instance or dictionary containing:
                 - words: Custom vocabulary mapping/list
@@ -83,41 +82,43 @@ class EndFlow:
         self, words: Optional[Union[List[str], Dict[str, List[str]]]]
     ) -> Optional[Dict[str, List[str]]]:
         """Normalize custom vocabulary input to expected dictionary format
-        
+
         Args:
             words: Can be either:
                 - List of terms (converted to {term: []})
                 - Dictionary of {term: [alternatives]}
                 - None (returns None)
-        
+
         Returns:
             Properly formatted dictionary or None if invalid input
         """
         if isinstance(words, list):
             return {word.strip(): [] for word in words if word.strip()}
+
         if isinstance(words, dict):
             return words
+
         return None
 
     @catch_errors
     def process_video(
-        self, 
-        video_path: str, 
-        config_params: Optional[Dict[str, Any]] = None, 
+        self,
+        video_path: str,
+        config_params: Optional[Dict[str, Any]] = None,
         pretty_notes: bool = False,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Execute complete video processing pipeline
-        
+
         Args:
             video_path: Path to source video file
             config_params: Content configuration parameters
             pretty_notes: Flag for PDF output format (False=TXT)
             **kwargs: Additional transcription parameters
-            
+
         Returns:
             Path to generated output file
-            
+
         Raises:
             FileError: If any processing stage fails
         """
@@ -128,10 +129,10 @@ class EndFlow:
         # Audio processing pipeline
         audio = extract_audio(video_path)
         cleaned_audio = clean_audio(audio)
-        
+
         # Generate transcription context prompt
         context_prompt = self.debugger.generate_content_prompt(self.content_config)
-        
+
         # Perform speech-to-text transcription
         transcription_result = self.transcriber.transcribe(
             cleaned_audio,
@@ -153,27 +154,22 @@ class EndFlow:
             raise FileError.empty_text()
 
         return self._save_result(
-            revised_text, 
-            os.path.basename(video_path),
-            pretty_notes=pretty_notes
+            revised_text, os.path.basename(video_path), pretty_notes=pretty_notes
         )
 
     def _save_result(
-        self, 
-        text: str, 
-        source_filename: str = "", 
-        pretty_notes: bool = False
+        self, text: str, source_filename: str = "", pretty_notes: bool = False
     ) -> str:
         """Save processed text to appropriate format with conflict resolution
-        
+
         Args:
             text: Processed text content to save
             source_filename: Original video filename for naming
             pretty_notes: Output format flag (True=PDF, False=TXT)
-            
+
         Returns:
             Absolute path to created file
-            
+
         Raises:
             FileError: If save operation fails
         """
@@ -183,11 +179,11 @@ class EndFlow:
         # Generate base filename from source
         base_name = os.path.splitext(os.path.basename(source_filename))[0]
         extension = ".pdf" if pretty_notes else ".txt"
-        
+
         # Create output directory path
         output_dir = os.path.expanduser("~/Downloads")
         base_filename = f"{base_name}_transcription{extension}"
-        
+
         # Handle filename conflicts
         save_path = os.path.join(output_dir, base_filename)
         conflict_num = 1
@@ -203,16 +199,16 @@ class EndFlow:
                 doc_title = f"Transcription: {base_name}"
                 if not self.pdf_exporter.export_to_pdf(text, save_path, doc_title):
                     raise FileError.pdf_creation_failed()
-                
+
             else:
                 # Plain text output
                 save_transcription(text, save_path)
-                
+
             return os.path.abspath(save_path)
 
         except PermissionError as perm_err:
             raise FileError.pdf_permission_denied(save_path, perm_err) from perm_err
-        
+
         except Exception as generic_err:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
@@ -220,6 +216,6 @@ class EndFlow:
                 context={
                     "error_type": type(generic_err).__name__,
                     "error_details": str(generic_err),
-                    "output_path": save_path
-                }
+                    "output_path": save_path,
+                },
             ) from generic_err
