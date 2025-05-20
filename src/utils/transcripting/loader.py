@@ -1,12 +1,14 @@
 import time
 import threading
 from typing import Optional, Callable
-from src.utils.transcripting.info_dump import InfoDump
+
+
+from .info_dump import InfoDump
+from src.errors.exceptions import TranscriptionError, ErrorCode
 
 
 class Loader:
     """Handles real-time progress tracking for audio transcription processes."""
-
     def __init__(self):
         self.active = False  # Control flag for background threads
         self.handler = None  # Optional progress callback function
@@ -77,9 +79,10 @@ class Loader:
             # Safety completion if we reach 100% naturally
             if self.current_progress >= 99 and self.active:
                 self._update_display(100 - self.current_progress)
-
+        
         except Exception as e:
-            print(f"\nProgress tracking error: {str(e)}\n")
+            raise TranscriptionError.progress_tracking(error=e) from e
+
 
     def _watch_for_delays(self) -> None:
         """Monitor for processing delays and handle timeout cases."""
@@ -93,12 +96,11 @@ class Loader:
             # Start delay notification
             delay_start = time.time()
             self.info.log_delay_warning()
-            print("\n[System] Almost there...\n")
 
             # Show elapsed time since delay began
             while self.active:
                 elapsed = int(time.time() - delay_start)
-                print(f"Elapsed: {elapsed}ss\n", end="\r")
+                print(f"Elapsed: {elapsed}ss || Still Transcripting\n", end="\r")
                 time.sleep(1)
 
     def _update_display(self, increment: float) -> None:
