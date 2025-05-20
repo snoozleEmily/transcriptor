@@ -10,6 +10,7 @@ from src.utils.transcripting.textify import Textify
 from src.utils.pdf_exporter import PDFExporter
 from src.utils.content_type import ContentType
 from src.utils.text_reviser import TextReviser
+from src.utils.notes_generator import NotesGenerator
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
@@ -31,12 +32,14 @@ class EndFlow:
 
     def __init__(self) -> None:
         """Initialize workflow components with default configuration"""
+        # TODO: Implement dynamic has_odd_names detection
+
         self.transcriber = Textify(EndFlow.model_size)
         self.debugger = OutputDebugger()
         self.reviser = TextReviser()
         self.pdf_exporter = PDFExporter()
-        self.content_config = ContentType(words=None, has_odd_names=True)
-        # TODO: Implement dynamic has_odd_names detection
+        self.content_config = ContentType(words=None, has_odd_names=True) 
+        self.notes_generator = NotesGenerator(self.content_config)
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
@@ -197,7 +200,11 @@ class EndFlow:
             if pretty_notes:
                 # PDF generation workflow
                 doc_title = f"Transcription: {base_name}"
-                if not self.pdf_exporter.export_to_pdf(text, save_path, doc_title):
+                print(f"Original text length: {len(text)}")
+                notes_text = self.notes_generator.create_notes(text)
+                print(f"Notes text length: {len(notes_text)}")
+
+                if not self.pdf_exporter.export_to_pdf(notes_text, save_path, doc_title):
                     raise FileError.pdf_creation_failed()
 
             else:
