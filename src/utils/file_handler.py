@@ -1,40 +1,48 @@
 import os
 import textwrap
-import datetime
 from pathlib import Path
+from typing import Optional
+from datetime import datetime
 
 
 from src.errors.exceptions import FileError
 
 
 
-def save_transcription(text: str, save_path: str = None) -> str:
-    """Save transcription text to file with fallback naming"""
+def save_transcription(text: str, save_path: Optional[str] = None) -> str:
+    """Saves transcribed text to a file, with automatic naming if path not provided.
+    
+    Args:
+        text: The transcribed text to save
+        save_path: Optional path for the output file. If None, generates a timestamped filename.
+    
+    Returns:
+        Path where the file was saved
+    
+    Raises:
+        FileError: If text is empty or file cannot be written
+    """
     try:
+        # Validate we have content to save
         if not text.strip():
-            raise FileError.empty_text(
-                f"It seems like the transcription was not made: {e}"
-            ) from e
+            raise FileError.empty_text("Transcription text cannot be empty")
 
-        # Generate default filename if not provided
-        if not save_path:
-            save_path = os.path.join(
-                os.getcwd(),  # Current working directory
-                f"transcription_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt",  # Timestamp filename
-            )
+        # Generate default filename using current timestamp if no path provided
+        if save_path is None:
+            timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+            save_path = os.path.join(os.getcwd(), f"transcription_{timestamp}.txt")
 
-        # Create parent directories if needed
+        # Ensure parent directories exist
         Path(save_path).parent.mkdir(parents=True, exist_ok=True)
 
-        # Format and save text
-        wrapped = textwrap.fill(text, width=80)
+        # Save with text wrapping at 80 characters
         with open(save_path, "w", encoding="utf-8") as f:
-            f.write(wrapped)
+            f.write(textwrap.fill(text, width=80))
 
         return save_path
 
-    except PermissionError as e:
-        raise FileError.save_failed(f"Permission denied: {save_path}") from e
-
-    except Exception as e:
-        raise FileError.save_failed(str(e)) from e
+    except PermissionError as err:
+        raise FileError.save_failed(error=err) from err
+    
+    except Exception as err:
+        raise FileError.save_failed(error=err) from err

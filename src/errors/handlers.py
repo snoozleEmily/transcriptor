@@ -35,7 +35,7 @@ def catch_errors(func: Callable) -> Callable:
             
         except PermissionError as e:
             log_unexpected_error(e)
-            raise FileError.permission_denied(str(e.filename)) from e
+            raise FileError.pdf_permission_denied(str(e.filename), e) from e
             
         except FileNotFoundError as e:
             log_unexpected_error(e)

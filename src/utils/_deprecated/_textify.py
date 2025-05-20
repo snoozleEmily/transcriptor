@@ -1,3 +1,5 @@
+# Deprecated
+
 import time
 import whisper
 import threading
@@ -11,7 +13,6 @@ from src.errors.exceptions import TranscriptionError
 from src.utils.content_type import ContentType
 from src.utils.models import MODELS, MODEL_SPEEDS, SETUP_TIMES
 
-# TODO: Split Textify into smaller module chunks
 
 
 class Textify:  # called Transcriptor before

@@ -56,7 +56,6 @@ def extract_audio(video_path: str) -> AudioSegment:
             "-y",  # Auto-overwrite output files without asking
             "-i",
             video_path,  # Input file path
-            
             # Audio extraction options:
             "-vn",  # Disable video processing (video no)
             "-acodec",
@@ -65,7 +64,6 @@ def extract_audio(video_path: str) -> AudioSegment:
             "16000",  # Audio sample rate: 16kHz (optimal for speech)
             "-ac",
             "1",  # Audio channels: 1 (mono)
-
             # Output format:
             "-f",
             "wav",  # Output format: WAV container
@@ -117,6 +115,6 @@ def clean_audio(audio: AudioSegment) -> AudioSegment:
             sample_width=2,  # Standard 16-bit audio (2 bytes per sample)
             channels=1,  # Mono audio
         )
-    
+
     except Exception as e:
-        raise TranscriptionError.preprocessing_failed(error=e) from e
+        raise TranscriptionError.progress_tracking(error=e) from e
