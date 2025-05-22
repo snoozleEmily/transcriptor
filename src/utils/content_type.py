@@ -12,6 +12,7 @@ class ContentType:
         has_code: bool = False,            # Whether content contains code snippets/commands
         has_odd_names: bool = False,       # Whether content contains unusual names/identifiers
         is_multilingual: bool = False,     # Whether content contains multiple languages
+        note_style: str = "general"
     ):
         """
         Initialize content type configuration with processing flags.
@@ -29,6 +30,11 @@ class ContentType:
         self.has_code = has_code          # Code content flag
         self.has_odd_names = has_odd_names or bool(words)  # Unusual names flag
         self.is_multilingual = is_multilingual  # Multilingual content flag
+        self.note_style = note_style,  # 'technical', 'lecture', 'meeting'
+        self.sections = {  # 🔼 INTEGRATION: Template control
+            "technical": ["Key Terms", "Definitions", "Procedures"],
+            "lecture": ["Main Ideas", "Examples", "Questions"]
+        }
 
     # --------------------- Organizational Storage  ---------------------
     def get_active_categories(self) -> List[str]:
