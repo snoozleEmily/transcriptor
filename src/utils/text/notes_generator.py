@@ -5,8 +5,8 @@ from sumy.parsers.plaintext import PlaintextParser
 from sumy.summarizers.text_rank import TextRankSummarizer
 
 
-from src.utils.language import Language
-from src.utils.content_type import ContentType
+from .language import Language
+from .content_type import ContentType
 from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 
 # NOTE: Wrap in conditional check for enhanced mode
@@ -14,7 +14,6 @@ from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 #     from llama_cpp import Llama
 # except ImportError:
 #     pass  ?
-
 
 class NotesGenerator:
     def __init__(self, language: Language, config: ContentType):
@@ -24,21 +23,23 @@ class NotesGenerator:
 
     def create_notes(self, transcription_result: Dict[str, Any]) -> Dict[str, Any]:
         """Generate structured notes from Whisper transcription output"""
-        self.language.process_whisper_output(transcription_result)  # Updated method call
-        
-        segments = transcription_result.get('segments', [])
-        
+        self.language.process_whisper_output(
+            transcription_result
+        )  # Updated method call
+
+        segments = transcription_result.get("segments", [])
+
         return {
-            "Summary": self._generate_summary(transcription_result.get('text', '')),
+            "Summary": self._generate_summary(transcription_result.get("text", "")),
             "Key Terms": self._extract_key_terms(segments),
             "Definitions": self._extract_definitions(segments),
             "Questions": self._extract_questions(segments),
-            "Timestamps": self._generate_timestamps(segments)
+            "Timestamps": self._generate_timestamps(segments),
         }
 
-            # TINYLLAMA INTEGRATION POINT ^^^^
-            # if self.config.note_style == "enhanced":
-            #     return self._llm_polish_notes(return(obj))
+        # TINYLLAMA INTEGRATION POINT ^^^^
+        # if self.config.note_style == "enhanced":
+        #     return self._llm_polish_notes(return(obj))
 
     def _validate_nltk_resources(self) -> None:
         """Ensure required NLTK resources are available."""

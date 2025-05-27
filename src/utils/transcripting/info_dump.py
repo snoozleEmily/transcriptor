@@ -1,6 +1,7 @@
 from typing import Optional, Union
 
 
+
 class InfoDump:
     """Handles all logging, progress reporting, and output formatting"""
 

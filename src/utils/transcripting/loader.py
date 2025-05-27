@@ -4,7 +4,8 @@ from typing import Optional, Callable
 
 
 from .info_dump import InfoDump
-from src.errors.exceptions import TranscriptionError, ErrorCode
+from src.errors.exceptions import TranscriptionError
+
 
 
 class Loader:

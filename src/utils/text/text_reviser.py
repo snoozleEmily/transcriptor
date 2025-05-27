@@ -3,7 +3,7 @@ from typing import Dict, List, Optional, Tuple
 
 
 from src.errors import LanguageError
-from src.utils.language import Language
+from src.utils.text.language import Language
 from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 
 
