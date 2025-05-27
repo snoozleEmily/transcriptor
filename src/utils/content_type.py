@@ -31,7 +31,7 @@ class ContentType:
         self.has_odd_names = has_odd_names or bool(words)  # Unusual names flag
         self.is_multilingual = is_multilingual  # Multilingual content flag
         self.note_style = note_style,  # 'technical', 'lecture', 'meeting'
-        self.sections = {  # 🔼 INTEGRATION: Template control
+        self.sections = {  # Template control
             "technical": ["Key Terms", "Definitions", "Procedures"],
             "lecture": ["Main Ideas", "Examples", "Questions"]
         }
@@ -63,6 +63,14 @@ class ContentType:
         return any([
             self.types,
             self.words,
+            self.has_code,
+            self.has_odd_names,
+            self.is_multilingual
+        ])
+    
+    def is_peculiar(self) -> bool:
+        """Check if any specific processing flags are enabled."""
+        return any([
             self.has_code,
             self.has_odd_names,
             self.is_multilingual
