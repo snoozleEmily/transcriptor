@@ -5,12 +5,13 @@ from typing import Dict, List, Optional, Union, Any
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
-from src.utils.transcripting.output_debugger import OutputDebugger
-from src.utils.transcripting.textify import Textify
+from src.utils.language import Language
 from src.utils.pdf_exporter import PDFExporter
 from src.utils.content_type import ContentType
 from src.utils.text_reviser import TextReviser
 from src.utils.notes_generator import NotesGenerator
+from src.utils.transcripting.output_debugger import OutputDebugger
+from src.utils.transcripting.textify import Textify
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
@@ -28,6 +29,7 @@ class EndFlow:
     Attributes:
         model_size: Whisper model version used for transcription
     """
+
     model_size = str(MODELS[2])  # Default model | it will be set to 3
 
     def __init__(self) -> None:
@@ -35,11 +37,12 @@ class EndFlow:
         # TODO: Implement dynamic has_odd_names detection
 
         self.transcriber = Textify(EndFlow.model_size)
-        self.debugger = OutputDebugger()
-        self.reviser = TextReviser()
+        self.language = Language()
+        self.reviser = TextReviser(language=self.language)
+        self.content_config = ContentType(words=None, has_odd_names=True)
+        self.notes_generator = NotesGenerator(language=self.language, config=self.content_config)
         self.pdf_exporter = PDFExporter()
-        self.content_config = ContentType(words=None, has_odd_names=True) 
-        self.notes_generator = NotesGenerator(self.content_config)
+        self.debugger = OutputDebugger()
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
@@ -111,20 +114,6 @@ class EndFlow:
         pretty_notes: bool = False,
         **kwargs,
     ) -> str:
-        """Execute complete video processing pipeline
-
-        Args:
-            video_path: Path to source video file
-            config_params: Content configuration parameters
-            pretty_notes: Flag for PDF output format (False=TXT)
-            **kwargs: Additional transcription parameters
-
-        Returns:
-            Path to generated output file
-
-        Raises:
-            FileError: If any processing stage fails
-        """
         # Update content configuration if provided
         if config_params:
             self.configure_content(config_params)
@@ -143,6 +132,9 @@ class EndFlow:
             temperature=0.2 if self.content_config.types else 0.5,
             **kwargs,
         )
+
+        # Process the language from Whisper output
+        self.language.process_whisper_output(transcription_result)
 
         # Post-process transcribed text
         revised_text = self.reviser.revise_text(transcription_result["text"])
@@ -163,19 +155,6 @@ class EndFlow:
     def _save_result(
         self, text: str, source_filename: str = "", pretty_notes: bool = False
     ) -> str:
-        """Save processed text to appropriate format with conflict resolution
-
-        Args:
-            text: Processed text content to save
-            source_filename: Original video filename for naming
-            pretty_notes: Output format flag (True=PDF, False=TXT)
-
-        Returns:
-            Absolute path to created file
-
-        Raises:
-            FileError: If save operation fails
-        """
         if not text.strip():
             raise FileError.empty_text()
 
@@ -201,12 +180,25 @@ class EndFlow:
                 # PDF generation workflow
                 doc_title = f"Transcription: {base_name}"
                 print(f"Original text length: {len(text)}")
-                notes_text = self.notes_generator.create_notes(text)
-                print(f"Notes text length: {len(notes_text)}")
-
+                
+                # Create a dict with text for notes generator
+                notes_input = {
+                    "text": text,
+                    "language": self.language.get_language(),
+                    "segments": []  # Add empty segments if your notes generator expects them
+                }
+                
+                notes_content = self.notes_generator.create_notes(notes_input)
+                print(f"Notes content length: {len(str(notes_content))}")
+                
+                # Convert notes content to string for PDF export
+                notes_text = "\n".join(
+                    f"{section}:\n{content}\n" 
+                    for section, content in notes_content.items()
+                )
+                
                 if not self.pdf_exporter.export_to_pdf(notes_text, save_path, doc_title):
                     raise FileError.pdf_creation_failed()
-
             else:
                 # Plain text output
                 save_transcription(text, save_path)
@@ -215,7 +207,7 @@ class EndFlow:
 
         except PermissionError as perm_err:
             raise FileError.pdf_permission_denied(save_path, perm_err) from perm_err
-
+        
         except Exception as generic_err:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
