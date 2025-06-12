@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, Dict, Any
 
 
+
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
