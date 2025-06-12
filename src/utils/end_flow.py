@@ -18,7 +18,6 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Main transcription workflow controller responsible for:
     - Audio extraction and cleaning
@@ -40,7 +39,9 @@ class EndFlow:
         self.language = Language()
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
-        self.notes_generator = NotesGenerator(language=self.language, config=self.content_config)
+        self.notes_generator = NotesGenerator(
+            language=self.language, config=self.content_config
+        )
         self.pdf_exporter = PDFExporter()
         self.debugger = OutputDebugger()
 
@@ -180,41 +181,42 @@ class EndFlow:
                 # PDF generation workflow
                 doc_title = f"Transcription: {base_name}"
                 print(f"Original text length: {len(text)}")
-                
-                # Create a dict with text for notes generator
-                notes_input = {
+
+                notes_content = {
                     "text": text,
                     "language": self.language.get_language(),
-                    "segments": []  # Add empty segments if your notes generator expects them
+                    "segments": [],  # Should I remove this?
                 }
-                
-                notes_content = self.notes_generator.create_notes(notes_input)
-                print(f"Notes content length: {len(str(notes_content))}")
-                
-                # Convert notes content to string for PDF export
-                notes_text = "\n".join(
-                    f"{section}:\n{content}\n" 
+
+                # Convert notes content to formatted string for PDF export
+                notes_text = "\n\n".join(
+                    f"=== {section.upper()} ===\n{content}"
                     for section, content in notes_content.items()
                 )
-                
-                if not self.pdf_exporter.export_to_pdf(notes_text, save_path, doc_title):
+
+                print(f"Notes content length: {len(notes_text)}")
+
+                if not self.pdf_exporter.export_to_pdf(
+                    notes_text, save_path, doc_title
+                ):
                     raise FileError.pdf_creation_failed()
+
             else:
                 # Plain text output
                 save_transcription(text, save_path)
 
             return os.path.abspath(save_path)
 
-        except PermissionError as perm_err:
-            raise FileError.pdf_permission_denied(save_path, perm_err) from perm_err
-        
-        except Exception as generic_err:
+        except PermissionError as e:
+            raise FileError.pdf_permission_denied(save_path, e) from e
+
+        except Exception as e:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
                 message="Unexpected save operation failure",
                 context={
-                    "error_type": type(generic_err).__name__,
-                    "error_details": str(generic_err),
+                    "error_type": type(e).__name__,
+                    "error_details": str(e),
                     "output_path": save_path,
                 },
-            ) from generic_err
+            ) from e
