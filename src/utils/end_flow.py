@@ -163,9 +163,15 @@ class EndFlow:
         base_name = os.path.splitext(os.path.basename(source_filename))[0]
         extension = ".pdf" if pretty_notes else ".txt"
 
+        save_canceled = NotImplementedError("save_canceled not implemented")
+
         # Create output directory path
-        output_dir = os.path.expanduser("~/Downloads")
-        base_filename = f"{base_name}_transcription{extension}"
+        if save_canceled:  
+            output_dir = os.path.expanduser("~/Downloads") 
+            base_filename = f"{base_name}_transcription{extension}"
+        
+        else:
+            raise NotImplementedError("let user chose where to save_path")
 
         # Handle filename conflicts
         save_path = os.path.join(output_dir, base_filename)
@@ -195,6 +201,8 @@ class EndFlow:
                 )
 
                 print(f"Notes content length: {len(notes_text)}")
+
+                # notes_text not appearing
 
                 if not self.pdf_exporter.export_to_pdf(
                     notes_text, save_path, doc_title
