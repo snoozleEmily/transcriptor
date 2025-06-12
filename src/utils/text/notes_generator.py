@@ -28,7 +28,7 @@ class NotesGenerator:
         )  # Updated method call
 
         segments = transcription_result.get("segments", [])
-
+        """
         return {
             "Summary": self._generate_summary(transcription_result.get("text", "")),
             "Key Terms": self._extract_key_terms(segments),
@@ -36,6 +36,8 @@ class NotesGenerator:
             "Questions": self._extract_questions(segments),
             "Timestamps": self._generate_timestamps(segments),
         }
+        """
+        return {"Test": "Hi I work!!!!!!"} # testing
 
         # TINYLLAMA INTEGRATION POINT ^^^^
         # if self.config.note_style == "enhanced":
