@@ -9,11 +9,6 @@ from .language import Language
 from .content_type import ContentType
 from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 
-# NOTE: Wrap in conditional check for enhanced mode
-# try:
-#     from llama_cpp import Llama
-# except ImportError:
-#     pass  ?
 
 
 class NotesGenerator:
@@ -25,47 +20,47 @@ class NotesGenerator:
     def create_notes(self, transcription_result: Dict[str, Any]) -> str:
         """Generate structured notes from Whisper transcription output and return formatted string"""
         self.language.process_whisper_output(transcription_result)
-
-        # Generate notes content
-        notes_content = {"Test": "Hi I work!!!!!!"}
+        
+        text = transcription_result.get("text", "")
+        segments = transcription_result.get("segments", [])
+        
+        notes_content = { # Generate all note sections
+            "Summary": self._generate_summary(text),
+            "Key Terms": self._extract_key_terms(segments), 
+            "Definitions": self._extract_definitions(segments),
+            "Questions": self._extract_questions(segments),
+            "Timestamps": self._generate_timestamps(segments),
+        }
 
         # Format the content as markdown-style text
         formatted_notes = ""
         for section, content in notes_content.items():
             formatted_notes += f"# {section}\n\n"  # Section heading
-
+            
             if isinstance(content, list):
-                for item in content:
-                    if isinstance(item, dict):
-                        # Format dictionary items
-                        formatted_notes += (
-                            "• "
-                            + ", ".join(f"{k}: {v}" for k, v in item.items())
-                            + "\n"
-                        )
-                    else:
+                if not content:  # Empty list
+                    formatted_notes += "No items found\n\n"
+                    continue
+                    
+                if isinstance(content[0], dict):
+                    # Format list of dictionaries
+                    for item in content:
+                        formatted_notes += "• " + "\n  ".join(
+                            f"{k}: {v}" for k, v in item.items()
+                        ) + "\n"
+                else:
+                    for item in content: # Format simple list
                         formatted_notes += f"• {item}\n"
+
                 formatted_notes += "\n"
+
             elif isinstance(content, str):
                 formatted_notes += f"{content}\n\n"
+
             else:
                 formatted_notes += f"{str(content)}\n\n"
-
-        """
-        return {
-            "Summary": self._generate_summary(transcription_result.get("text", "")),
-            "Key Terms": self._extract_key_terms(segments),
-            "Definitions": self._extract_definitions(segments),
-            "Questions": self._extract_questions(segments),
-            "Timestamps": self._generate_timestamps(segments),
-        }
-        """
-
+        
         return formatted_notes
-
-        # TINYLLAMA INTEGRATION POINT ^^^^
-        # if self.config.note_style == "enhanced":
-        #     return self._llm_polish_notes(return(obj))
 
     def _validate_nltk_resources(self) -> None:
         """Ensure required NLTK resources are available."""
@@ -108,6 +103,8 @@ class NotesGenerator:
         seen_terms = set()
         language = self.language.get_language()
 
+        # it should consider words: Optional[Dict[str, List[str]]] from ContentType
+
         for segment in segments:
             text = segment["text"]
             timestamp = self._format_time(segment["start"])
@@ -126,8 +123,8 @@ class NotesGenerator:
                             {
                                 "term": word,
                                 "timestamp": timestamp,
-                                "context": text[:100]
-                                + "...",  # First 100 chars as context
+                                "context": text[:150]
+                                + "...",  # First 150 chars as context
                             }
                         )
             else:
@@ -222,32 +219,5 @@ class NotesGenerator:
             for segment in segments
             if len(segment["text"].split()) > 8  # Only segments with 8+ words
         ][
-            :10
-        ]  # Limit to 10 key timestamps
-
-    # TINYLLAMA INTEGRATION POINT
-    # def _init_llm(self):
-    #     """Load 4-bit quantized model (~2GB RAM) on first use"""
-    #     model_path = "models/tinyllama-1.1b-chat-v1.0.Q4_K_M.gguf"
-    #     self.llm = Llama(
-    #         model_path=model_path,
-    #         n_ctx=2048,  # Adjust based on avg transcript length
-    #         n_threads=4  # Limit CPU cores used
-    #     )
-
-    # TINYLLAMA INTEGRATION POINT
-    # def _llm_polish_notes(self, sections: Dict[str, Any]) -> Dict[str, Any]:
-    #     """Apply light LLM polishing to improve readability"""
-    #     try:
-    #         if not hasattr(self, 'llm'):
-    #             self._init_llm()
-
-    #         prompt = f"Improve these notes' organization:\n{str(sections)}"
-    #         response = self.llm.create_chat_completion(
-    #             messages=[{"role": "user", "content": prompt}],
-    #             temperature=0.3,
-    #             max_tokens=1024
-    #         )
-    #         return eval(response['choices'][0]['message']['content'])  # Convert back to dict
-    #     except Exception:
-    #         return sections  # Fallback to original
+            :20
+        ]  # Limit to 20 key timestamps
