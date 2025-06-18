@@ -22,7 +22,7 @@ class Loader:
         self._MIN_SLEEP = 0.05  # Minimum sleep interval (50ms)
         self._SAFETY_BUFFER = 1.0  # Extra time before watchdog triggers
 
-    def setup(self, setup_time: float, transcribe_estimate: float) -> None:
+    def setup(self, transcribe_estimate: float) -> None:
         """Configure time estimates for accurate progress tracking.
 
         Args:
@@ -30,24 +30,6 @@ class Loader:
             transcribe_estimate: Expected transcription duration in seconds
         """
         self.estimated_total = max(0.1, transcribe_estimate)  # Prevent zero-division
-
-    def show_setup_progress(self, setup_time: float) -> float:
-        """Display and handle the initialization countdown.
-
-        Returns:
-            Timestamp when initialization completed
-        """
-        start = time.time()
-        if setup_time <= 0:
-            return start
-
-        print(f"\nSystem initialization: {int(setup_time)}s estimated")
-        for remaining in range(int(setup_time), 0, -1):
-            print(f"Ready in {remaining}ss...\n", end="\r")
-            time.sleep(1)
-
-        print("Initialization complete\n")
-        return time.time()
 
     def start_transcription_progress(
         self, handler: Optional[Callable[[int], None]] = None
