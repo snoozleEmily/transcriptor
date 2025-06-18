@@ -30,7 +30,7 @@ class EndFlow:
         model_size: Whisper model version used for transcription
     """
 
-    model_size = str(MODELS[2])  # Default model | it will be set to 3
+    model_size = str(MODELS[2])  # Default model | it will be set to 3, smaller for debug
 
     def __init__(self) -> None:
         """Initialize workflow components with default configuration"""
