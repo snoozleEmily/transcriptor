@@ -19,7 +19,6 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Main transcription workflow controller responsible for:
     - Audio extraction and cleaning
@@ -115,8 +114,10 @@ class EndFlow:
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
         pretty_notes: bool = False,
+        use_original_segments: bool = True,
         **kwargs,
     ) -> str:
+        """Main transcription workflow controller"""
         # Update content configuration if provided
         if config_params:
             self.configure_content(config_params)
@@ -151,43 +152,71 @@ class EndFlow:
             )
             raise FileError.empty_text()
 
+        # Save result with new parameters
         return self._save_result(
-            revised_text, os.path.basename(video_path), pretty_notes=pretty_notes
+            transcription_result,
+            revised_text,
+            os.path.basename(video_path),
+            pretty_notes=pretty_notes,
+            use_original_segments=use_original_segments,
         )
 
     def _save_result(
-    self, text: str, source_filename: str = "", pretty_notes: bool = False
-) -> str:
-        if not text.strip():
+        self,
+        transcription_result: Dict[str, Any],
+        revised_text: str,
+        source_filename: str = "",
+        pretty_notes: bool = False,
+        use_original_segments: bool = True,
+    ) -> str:
+        """Save transcription result with new segment handling"""
+        if not revised_text.strip():
             raise FileError.empty_text()
 
         # Generate base filename from source
         base_name = os.path.splitext(os.path.basename(source_filename))[0]
         extension = ".pdf" if pretty_notes else ".txt"
 
-        # Try to get save path from user with fallback to desktop
+        # Get save path (keep existing logic)
         save_path = self._get_save_path(base_name, extension)
 
         try:
             if pretty_notes:
-                # Get formatted notes from NotesGenerator
-                formatted_notes = self.notes_generator.create_notes(
-                    {"text": text, "segments": []}
+                # Determine segments based on configuration
+                segments = (
+                    transcription_result.get("segments", [])
+                    if use_original_segments
+                    else []
                 )
-                
-                # Generate PDF
+
+                # Generate notes with new skip_empty_sections parameter
+                formatted_notes = self.notes_generator.create_notes(
+                    {"text": revised_text, "segments": segments},
+                )
+
+                has_content = any(
+                    (content.strip() and not content.startswith("No "))
+                    for content in formatted_notes.split("# ")[1:]
+                )
+
+                if not has_content:
+                    raise FileError.pdf_invalid_content(len(formatted_notes))
+
+                # Generate PDF (keep existing)
                 doc_title = f"Transcription: {base_name}"
-                if not self.pdf_exporter.export_to_pdf(formatted_notes, save_path, doc_title):
+                if not self.pdf_exporter.export_to_pdf(
+                    formatted_notes, save_path, doc_title
+                ):
                     raise FileError.pdf_creation_failed()
             else:
-                # Save plain text
-                save_transcription(text, save_path)
+                # Save plain text (keep existing)
+                save_transcription(revised_text, save_path)
 
             return os.path.abspath(save_path)
 
         except PermissionError as e:
             raise FileError.pdf_permission_denied(save_path, e) from e
-        
+
         except Exception as e:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
@@ -202,17 +231,21 @@ class EndFlow:
     def _get_save_path(self, base_name: str, extension: str) -> str:
         """Get save path from user dialog or fall back to desktop with numbered files"""
         # First try to get path from file dialog
-        try:            
-            file_types = [("PDF Files", "*.pdf")] if extension == ".pdf" else [("Text Files", "*.txt")]
+        try:
+            file_types = (
+                [("PDF Files", "*.pdf")]
+                if extension == ".pdf"
+                else [("Text Files", "*.txt")]
+            )
             initial_file = f"{base_name}_transcription{extension}"
-            
+
             save_path = filedialog.asksaveasfilename(
                 title="Save transcription",
                 defaultextension=extension,
                 initialfile=initial_file,
-                filetypes=file_types
+                filetypes=file_types,
             )
-            
+
             if save_path:  # User selected a path
                 return save_path
         except Exception:
@@ -221,12 +254,12 @@ class EndFlow:
         # Fallback to desktop with numbered files if needed
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         save_path = os.path.join(desktop, f"{base_name}_transcription{extension}")
-        
+
         # Handle filename conflicts
         conflict_num = 1
         while os.path.exists(save_path):
             new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
             save_path = os.path.join(desktop, new_filename)
             conflict_num += 1
-        
+
         return save_path
