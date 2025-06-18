@@ -10,7 +10,6 @@ from .content_type import ContentType
 from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 
 
-
 class NotesGenerator:
     def __init__(self, language: Language, config: ContentType):
         self.config = config
@@ -20,13 +19,13 @@ class NotesGenerator:
     def create_notes(self, transcription_result: Dict[str, Any]) -> str:
         """Generate structured notes from Whisper transcription output and return formatted string"""
         self.language.process_whisper_output(transcription_result)
-        
+
         text = transcription_result.get("text", "")
         segments = transcription_result.get("segments", [])
-        
-        notes_content = { # Generate all note sections
+
+        notes_content = {  # Generate all note sections
             "Summary": self._generate_summary(text),
-            "Key Terms": self._extract_key_terms(segments), 
+            "Key Terms": self._extract_key_terms(segments),
             "Definitions": self._extract_definitions(segments),
             "Questions": self._extract_questions(segments),
             "Timestamps": self._generate_timestamps(segments),
@@ -35,21 +34,28 @@ class NotesGenerator:
         # Format the content as markdown-style text
         formatted_notes = ""
         for section, content in notes_content.items():
+            # Skip empty sections if configured
+            if (isinstance(content, list) and not content) or (
+                isinstance(content, str) and content.startswith("No ")):
+                continue
+
             formatted_notes += f"# {section}\n\n"  # Section heading
-            
+
             if isinstance(content, list):
                 if not content:  # Empty list
                     formatted_notes += "No items found\n\n"
                     continue
-                    
+
                 if isinstance(content[0], dict):
                     # Format list of dictionaries
                     for item in content:
-                        formatted_notes += "• " + "\n  ".join(
-                            f"{k}: {v}" for k, v in item.items()
-                        ) + "\n"
+                        formatted_notes += (
+                            "• "
+                            + "\n  ".join(f"{k}: {v}" for k, v in item.items())
+                            + "\n"
+                        )
                 else:
-                    for item in content: # Format simple list
+                    for item in content:  # Format simple list
                         formatted_notes += f"• {item}\n"
 
                 formatted_notes += "\n"
@@ -59,7 +65,7 @@ class NotesGenerator:
 
             else:
                 formatted_notes += f"{str(content)}\n\n"
-        
+
         return formatted_notes
 
     def _validate_nltk_resources(self) -> None:
