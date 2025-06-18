@@ -15,19 +15,42 @@ from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 # except ImportError:
 #     pass  ?
 
+
 class NotesGenerator:
     def __init__(self, language: Language, config: ContentType):
         self.config = config
         self.language = language
         self._validate_nltk_resources()
 
-    def create_notes(self, transcription_result: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate structured notes from Whisper transcription output"""
-        self.language.process_whisper_output(
-            transcription_result
-        )  # Updated method call
+    def create_notes(self, transcription_result: Dict[str, Any]) -> str:
+        """Generate structured notes from Whisper transcription output and return formatted string"""
+        self.language.process_whisper_output(transcription_result)
 
-        segments = transcription_result.get("segments", [])
+        # Generate notes content
+        notes_content = {"Test": "Hi I work!!!!!!"}
+
+        # Format the content as markdown-style text
+        formatted_notes = ""
+        for section, content in notes_content.items():
+            formatted_notes += f"# {section}\n\n"  # Section heading
+
+            if isinstance(content, list):
+                for item in content:
+                    if isinstance(item, dict):
+                        # Format dictionary items
+                        formatted_notes += (
+                            "• "
+                            + ", ".join(f"{k}: {v}" for k, v in item.items())
+                            + "\n"
+                        )
+                    else:
+                        formatted_notes += f"• {item}\n"
+                formatted_notes += "\n"
+            elif isinstance(content, str):
+                formatted_notes += f"{content}\n\n"
+            else:
+                formatted_notes += f"{str(content)}\n\n"
+
         """
         return {
             "Summary": self._generate_summary(transcription_result.get("text", "")),
@@ -37,7 +60,8 @@ class NotesGenerator:
             "Timestamps": self._generate_timestamps(segments),
         }
         """
-        return {"Test": "Hi I work!!!!!!"} # testing
+
+        return formatted_notes
 
         # TINYLLAMA INTEGRATION POINT ^^^^
         # if self.config.note_style == "enhanced":
