@@ -1,4 +1,5 @@
 import os
+from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
@@ -16,6 +17,7 @@ from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
 from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
+
 
 
 class EndFlow:
@@ -154,8 +156,8 @@ class EndFlow:
         )
 
     def _save_result(
-        self, text: str, source_filename: str = "", pretty_notes: bool = False
-    ) -> str:
+    self, text: str, source_filename: str = "", pretty_notes: bool = False
+) -> str:
         if not text.strip():
             raise FileError.empty_text()
 
@@ -163,61 +165,29 @@ class EndFlow:
         base_name = os.path.splitext(os.path.basename(source_filename))[0]
         extension = ".pdf" if pretty_notes else ".txt"
 
-        save_canceled = NotImplementedError("save_canceled not implemented")
-
-        # Create output directory path
-        if save_canceled:  
-            output_dir = os.path.expanduser("~/Downloads") 
-            base_filename = f"{base_name}_transcription{extension}"
-        
-        else:
-            raise NotImplementedError("let user chose where to save_path")
-
-        # Handle filename conflicts
-        save_path = os.path.join(output_dir, base_filename)
-        conflict_num = 1
-
-        while os.path.exists(save_path):
-            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
-            save_path = os.path.join(output_dir, new_filename)
-            conflict_num += 1
+        # Try to get save path from user with fallback to desktop
+        save_path = self._get_save_path(base_name, extension)
 
         try:
             if pretty_notes:
-                # PDF generation workflow
-                doc_title = f"Transcription: {base_name}"
-                print(f"Original text length: {len(text)}")
-
-                notes_content = {
-                    "text": text,
-                    "language": self.language.get_language(),
-                    "segments": [],  # Should I remove this?
-                }
-
-                # Convert notes content to formatted string for PDF export
-                notes_text = "\n\n".join(
-                    f"=== {section.upper()} ===\n{content}"
-                    for section, content in notes_content.items()
+                # Get formatted notes from NotesGenerator
+                formatted_notes = self.notes_generator.create_notes(
+                    {"text": text, "segments": []}
                 )
-
-                print(f"Notes content length: {len(notes_text)}")
-
-                # notes_text not appearing
-
-                if not self.pdf_exporter.export_to_pdf(
-                    notes_text, save_path, doc_title
-                ):
+                
+                # Generate PDF
+                doc_title = f"Transcription: {base_name}"
+                if not self.pdf_exporter.export_to_pdf(formatted_notes, save_path, doc_title):
                     raise FileError.pdf_creation_failed()
-
             else:
-                # Plain text output
+                # Save plain text
                 save_transcription(text, save_path)
 
             return os.path.abspath(save_path)
 
         except PermissionError as e:
             raise FileError.pdf_permission_denied(save_path, e) from e
-
+        
         except Exception as e:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
@@ -228,3 +198,35 @@ class EndFlow:
                     "output_path": save_path,
                 },
             ) from e
+
+    def _get_save_path(self, base_name: str, extension: str) -> str:
+        """Get save path from user dialog or fall back to desktop with numbered files"""
+        # First try to get path from file dialog
+        try:            
+            file_types = [("PDF Files", "*.pdf")] if extension == ".pdf" else [("Text Files", "*.txt")]
+            initial_file = f"{base_name}_transcription{extension}"
+            
+            save_path = filedialog.asksaveasfilename(
+                title="Save transcription",
+                defaultextension=extension,
+                initialfile=initial_file,
+                filetypes=file_types
+            )
+            
+            if save_path:  # User selected a path
+                return save_path
+        except Exception:
+            pass  # Fall through to desktop fallback
+
+        # Fallback to desktop with numbered files if needed
+        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+        save_path = os.path.join(desktop, f"{base_name}_transcription{extension}")
+        
+        # Handle filename conflicts
+        conflict_num = 1
+        while os.path.exists(save_path):
+            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
+            save_path = os.path.join(desktop, new_filename)
+            conflict_num += 1
+        
+        return save_path
