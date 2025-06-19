@@ -10,6 +10,7 @@ from .content_type import ContentType
 from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
 
 
+
 class NotesGenerator:
     def __init__(self, language: Language, config: ContentType):
         self.config = config
