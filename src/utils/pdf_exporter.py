@@ -6,6 +6,7 @@ from src.errors.exceptions import ErrorCode, FileError
 from src.frontend.constants import THEMES
 
 
+
 class CustomPDF(FPDF):
     """Custom PDF generator with consistent styling and layout.
 
@@ -153,14 +154,15 @@ class PDFExporter:
             try:
                 if os.path.exists(filename) and not os.access(filename, os.W_OK):
                     raise PermissionError(f"Write permission denied: {filename}")
+                
             except PermissionError as e:
                 raise FileError.pdf_permission_denied(filename, e) from e
                 
-            # Generate PDF
-            try:
-                self.pdf.output(filename)
+            try: # Generate PDF
+                self.pdf.output(filename) 
             except RuntimeError as e:  # Common FPDF error
                 raise FileError.pdf_creation_failed(e) from e
+            
             except Exception as e:
                 raise FileError(
                     code=ErrorCode.PDF_GENERATION_ERROR,
@@ -178,4 +180,4 @@ class PDFExporter:
             return True
             
         except FileError:
-            raise  # Re-raise our custom errors
+            raise  # Re-raise custom errors

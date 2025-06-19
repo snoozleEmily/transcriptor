@@ -1,7 +1,7 @@
 from typing import Optional
 
 
-from src.utils.content_type import ContentType
+from src.utils.text.content_type import ContentType
 
 
 

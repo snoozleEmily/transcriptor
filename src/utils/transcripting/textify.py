@@ -8,7 +8,7 @@ from .set_model import SetModel
 from .info_dump import InfoDump
 from .estimator import TimeEstimator
 from .convert_audio import ConvertAudio
-from src.utils.content_type import ContentType
+from src.utils.text.content_type import ContentType
 
 
 class Textify:

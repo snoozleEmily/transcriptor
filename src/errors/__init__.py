@@ -3,7 +3,8 @@ from .exceptions import (
     FFmpegError,
     TranscriptionError,
     FileError,
-    ErrorCode
+    ErrorCode,
+    LanguageError
 )
 
 from .handlers import (
@@ -24,6 +25,7 @@ __all__ = [
     "FFmpegError",
     "TranscriptionError",
     "FileError",
+    "LanguageError"
     
     # Error Codes
     "ErrorCode",

@@ -3,7 +3,6 @@ from typing import List, Dict, Optional
 
 
 class ContentType:
-    """Configuration for content type characteristics and processing rules."""
     def __init__(
         self,
         *,
@@ -12,6 +11,8 @@ class ContentType:
         has_code: bool = False,            # Whether content contains code snippets/commands
         has_odd_names: bool = False,       # Whether content contains unusual names/identifiers
         is_multilingual: bool = False,     # Whether content contains multiple languages
+        note_style: str = "general",
+        use_original_segments: bool = True, # Whether to use raw Whisper segments for note generation
     ):
         """
         Initialize content type configuration with processing flags.
@@ -22,13 +23,24 @@ class ContentType:
             has_code: Whether content contains code snippets/commands
             has_odd_names: Whether content contains unusual names/identifiers
             is_multilingual: Whether content contains multiple languages
+            note_style: 'technical', 'lecture', 'meeting'
+            use_original_segments: Preserve original Whisper segments for notes
+            generate_empty_pdf: Allow PDF export with empty sections
         """
-        # Core content characteristics
+        # Core content characteristics 
         self.types = types or []          # List of content types
         self.words = words or []          # List of specific terms
         self.has_code = has_code          # Code content flag
         self.has_odd_names = has_odd_names or bool(words)  # Unusual names flag
         self.is_multilingual = is_multilingual  # Multilingual content flag
+        self.note_style = note_style,  # 'technical', 'lecture', 'meeting'
+        
+        self.use_original_segments = use_original_segments
+        
+        self.sections = {  # Template control
+            "technical": ["Key Terms", "Definitions", "Procedures"],
+            "lecture": ["Main Ideas", "Examples", "Questions"]
+        }
 
     # --------------------- Organizational Storage  ---------------------
     def get_active_categories(self) -> List[str]:
@@ -57,6 +69,14 @@ class ContentType:
         return any([
             self.types,
             self.words,
+            self.has_code,
+            self.has_odd_names,
+            self.is_multilingual
+        ])
+    
+    def is_peculiar(self) -> bool:
+        """Check if any specific processing flags are enabled."""
+        return any([
             self.has_code,
             self.has_odd_names,
             self.is_multilingual

@@ -2,6 +2,7 @@ from enum import Enum
 from typing import Optional, Dict, Any
 
 
+
 class ErrorCode(Enum):
     NO_SPEECH = "no_speech_detected"
     SERVICE_UNAVAILABLE = "service_unavailable"
@@ -42,7 +43,26 @@ class AppError(Exception):
         """Formats the message with appropriate emoji"""
         emoji = self.EMOJI_MAP.get(self.code, self.DEFAULT_EMOJI)
         return f"{emoji} {message}"
+    
 
+class LanguageError(AppError):
+    """Errors related to text‑analysis / language processing."""
+
+    @classmethod
+    def pos_tagging_failed(cls, original_exception: Exception) -> "LanguageError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Part‑of‑speech tagging failed during question detection",
+            context={"original_error": str(original_exception)},
+        )
+
+    @classmethod
+    def sentence_split_failed(cls, original_exception: Exception) -> "LanguageError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Sentence splitting failed during question detection",
+            context={"original_error": str(original_exception)},
+        )
 
 class FileError(AppError):
     """File operation errors"""

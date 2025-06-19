@@ -1,21 +1,22 @@
 import os
+from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
+from src.utils.text.language import Language
+from src.utils.text.content_type import ContentType
+from src.utils.text.text_reviser import TextReviser
+from src.utils.text.notes_generator import NotesGenerator
 from src.utils.transcripting.output_debugger import OutputDebugger
 from src.utils.transcripting.textify import Textify
-from src.utils.pdf_exporter import PDFExporter
-from src.utils.content_type import ContentType
-from src.utils.text_reviser import TextReviser
-from src.utils.notes_generator import NotesGenerator
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
+from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
-
 
 
 class EndFlow:
@@ -28,18 +29,22 @@ class EndFlow:
     Attributes:
         model_size: Whisper model version used for transcription
     """
-    model_size = str(MODELS[2])  # Default model | it will be set to 3
+
+    model_size = str(MODELS[2])  # Default model | it will be set to 3, smaller for debug
 
     def __init__(self) -> None:
         """Initialize workflow components with default configuration"""
         # TODO: Implement dynamic has_odd_names detection
 
         self.transcriber = Textify(EndFlow.model_size)
-        self.debugger = OutputDebugger()
-        self.reviser = TextReviser()
+        self.language = Language()
+        self.reviser = TextReviser(language=self.language)
+        self.content_config = ContentType(words=None, has_odd_names=True)
+        self.notes_generator = NotesGenerator(
+            language=self.language, config=self.content_config
+        )
         self.pdf_exporter = PDFExporter()
-        self.content_config = ContentType(words=None, has_odd_names=True) 
-        self.notes_generator = NotesGenerator(self.content_config)
+        self.debugger = OutputDebugger()
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
@@ -109,22 +114,10 @@ class EndFlow:
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
         pretty_notes: bool = False,
+        use_original_segments: bool = True,
         **kwargs,
     ) -> str:
-        """Execute complete video processing pipeline
-
-        Args:
-            video_path: Path to source video file
-            config_params: Content configuration parameters
-            pretty_notes: Flag for PDF output format (False=TXT)
-            **kwargs: Additional transcription parameters
-
-        Returns:
-            Path to generated output file
-
-        Raises:
-            FileError: If any processing stage fails
-        """
+        """Main transcription workflow controller"""
         # Update content configuration if provided
         if config_params:
             self.configure_content(config_params)
@@ -144,6 +137,9 @@ class EndFlow:
             **kwargs,
         )
 
+        # Process the language from Whisper output
+        self.language.process_whisper_output(transcription_result)
+
         # Post-process transcribed text
         revised_text = self.reviser.revise_text(transcription_result["text"])
         if not revised_text.strip():
@@ -156,73 +152,114 @@ class EndFlow:
             )
             raise FileError.empty_text()
 
+        # Save result with new parameters
         return self._save_result(
-            revised_text, os.path.basename(video_path), pretty_notes=pretty_notes
+            transcription_result,
+            revised_text,
+            os.path.basename(video_path),
+            pretty_notes=pretty_notes,
+            use_original_segments=use_original_segments,
         )
 
     def _save_result(
-        self, text: str, source_filename: str = "", pretty_notes: bool = False
+        self,
+        transcription_result: Dict[str, Any],
+        revised_text: str,
+        source_filename: str = "",
+        pretty_notes: bool = False,
+        use_original_segments: bool = True,
     ) -> str:
-        """Save processed text to appropriate format with conflict resolution
-
-        Args:
-            text: Processed text content to save
-            source_filename: Original video filename for naming
-            pretty_notes: Output format flag (True=PDF, False=TXT)
-
-        Returns:
-            Absolute path to created file
-
-        Raises:
-            FileError: If save operation fails
-        """
-        if not text.strip():
+        """Save transcription result with new segment handling"""
+        if not revised_text.strip():
             raise FileError.empty_text()
 
         # Generate base filename from source
         base_name = os.path.splitext(os.path.basename(source_filename))[0]
         extension = ".pdf" if pretty_notes else ".txt"
 
-        # Create output directory path
-        output_dir = os.path.expanduser("~/Downloads")
-        base_filename = f"{base_name}_transcription{extension}"
-
-        # Handle filename conflicts
-        save_path = os.path.join(output_dir, base_filename)
-        conflict_num = 1
-
-        while os.path.exists(save_path):
-            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
-            save_path = os.path.join(output_dir, new_filename)
-            conflict_num += 1
+        # Get save path (keep existing logic)
+        save_path = self._get_save_path(base_name, extension)
 
         try:
             if pretty_notes:
-                # PDF generation workflow
+                # Determine segments based on configuration
+                segments = (
+                    transcription_result.get("segments", [])
+                    if use_original_segments
+                    else []
+                )
+
+                # Generate notes with new skip_empty_sections parameter
+                formatted_notes = self.notes_generator.create_notes(
+                    {"text": revised_text, "segments": segments},
+                )
+
+                has_content = any(
+                    (content.strip() and not content.startswith("No "))
+                    for content in formatted_notes.split("# ")[1:]
+                )
+
+                if not has_content:
+                    raise FileError.pdf_invalid_content(len(formatted_notes))
+
+                # Generate PDF (keep existing)
                 doc_title = f"Transcription: {base_name}"
-                print(f"Original text length: {len(text)}")
-                notes_text = self.notes_generator.create_notes(text)
-                print(f"Notes text length: {len(notes_text)}")
-
-                if not self.pdf_exporter.export_to_pdf(notes_text, save_path, doc_title):
+                if not self.pdf_exporter.export_to_pdf(
+                    formatted_notes, save_path, doc_title
+                ):
                     raise FileError.pdf_creation_failed()
-
             else:
-                # Plain text output
-                save_transcription(text, save_path)
+                # Save plain text (keep existing)
+                save_transcription(revised_text, save_path)
 
             return os.path.abspath(save_path)
 
-        except PermissionError as perm_err:
-            raise FileError.pdf_permission_denied(save_path, perm_err) from perm_err
+        except PermissionError as e:
+            raise FileError.pdf_permission_denied(save_path, e) from e
 
-        except Exception as generic_err:
+        except Exception as e:
             raise FileError(
                 code=ErrorCode.FILE_ERROR,
                 message="Unexpected save operation failure",
                 context={
-                    "error_type": type(generic_err).__name__,
-                    "error_details": str(generic_err),
+                    "error_type": type(e).__name__,
+                    "error_details": str(e),
                     "output_path": save_path,
                 },
-            ) from generic_err
+            ) from e
+
+    def _get_save_path(self, base_name: str, extension: str) -> str:
+        """Get save path from user dialog or fall back to desktop with numbered files"""
+        # First try to get path from file dialog
+        try:
+            file_types = (
+                [("PDF Files", "*.pdf")]
+                if extension == ".pdf"
+                else [("Text Files", "*.txt")]
+            )
+            initial_file = f"{base_name}_transcription{extension}"
+
+            save_path = filedialog.asksaveasfilename(
+                title="Save transcription",
+                defaultextension=extension,
+                initialfile=initial_file,
+                filetypes=file_types,
+            )
+
+            if save_path:  # User selected a path
+                return save_path
+        except Exception:
+            pass  # Fall through to desktop fallback
+
+        # Fallback to desktop with numbered files if needed
+        desktop = os.path.join(os.path.expanduser("~"), "Desktop")
+        save_path = os.path.join(desktop, f"{base_name}_transcription{extension}")
+
+        # Handle filename conflicts
+        conflict_num = 1
+        while os.path.exists(save_path):
+            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
+            save_path = os.path.join(desktop, new_filename)
+            conflict_num += 1
+
+        return save_path
