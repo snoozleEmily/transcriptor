@@ -18,13 +18,13 @@ class NotesGenerator:
         self._validate_nltk_resources()
 
     def create_notes(self, transcription_result: Dict[str, Any]) -> str:
-        """Generate structured notes from Whisper transcription output and return formatted string"""
+        """Generate human-friendly notes from Whisper transcription output."""
         self.language.process_whisper_output(transcription_result)
 
         text = transcription_result.get("text", "")
         segments = transcription_result.get("segments", [])
 
-        notes_content = {  # Generate all note sections
+        notes_content = {
             "Summary": self._generate_summary(text),
             "Key Terms": self._extract_key_terms(segments),
             "Definitions": self._extract_definitions(segments),
@@ -32,42 +32,62 @@ class NotesGenerator:
             "Timestamps": self._generate_timestamps(segments),
         }
 
-        # Format the content as markdown-style text
-        formatted_notes = ""
-        for section, content in notes_content.items():
-            # Skip empty sections if configured
-            if (isinstance(content, list) and not content) or (
-                isinstance(content, str) and content.startswith("No ")):
-                continue
+        # Format as human-style notes
+        return self._format_as_human_notes(notes_content)
 
-            formatted_notes += f"# {section}\n\n"  # Section heading
+    def _format_as_human_notes(self, notes_content: Dict[str, Any]) -> str:
+        output = []
+        # Summary
+        summary = notes_content.get("Summary")
+        if summary and not summary.startswith("No "):
+            output.append(f"# 📝 Summary\n\n{summary}\n")
 
-            if isinstance(content, list):
-                if not content:  # Empty list
-                    formatted_notes += "No items found\n\n"
-                    continue
+        # Key Knowledge (terms + definitions)
+        knowledge = []
+        for term in notes_content.get("Key Terms", []):
+            knowledge.append(
+                f"\u2022 **{term['term']}** ({term['timestamp']}): {self._clean_text(term['context'])}"
+            )
+        for definition in notes_content.get("Definitions", []):
+            knowledge.append(
+                f"\u2022 **{definition['term']}** → {definition['definition']} ({definition['timestamp']})"
+            )
+        if knowledge:
+            output.append("# 🔑 Key Knowledge\n\n" + "\n".join(knowledge) + "\n")
 
-                if isinstance(content[0], dict):
-                    # Format list of dictionaries
-                    for item in content:
-                        formatted_notes += (
-                            "• "
-                            + "\n  ".join(f"{k}: {v}" for k, v in item.items())
-                            + "\n"
-                        )
-                else:
-                    for item in content:  # Format simple list
-                        formatted_notes += f"• {item}\n"
+        # Questions & Answers
+        questions = notes_content.get("Questions", [])
+        if questions:
+            qna = ["# ❓ Questions & Answers"]
+            for q in questions:
+                full_q = self._complete_sentence(q["question"])
+                context = self._clean_text(q.get("answer_context", ""))
+                qna.append(
+                    f"\n**Q:** {full_q}\n**Context:** {context} ({q['timestamp']})"
+                )
+            output.append("\n".join(qna) + "\n")
 
-                formatted_notes += "\n"
+        return "\n".join(output)
 
-            elif isinstance(content, str):
-                formatted_notes += f"{content}\n\n"
+    def _clean_text(self, text: str) -> str:
+        """Clean and format text snippets: single line, end punctuation."""
+        txt = text.replace("\n", " ").strip()
+        if not txt:
+            return ""
+        
+        if not txt.endswith((".", "!", "?")):
+            txt = txt.rstrip(",") + "..."
 
-            else:
-                formatted_notes += f"{str(content)}\n\n"
+        return txt
 
-        return formatted_notes
+    def _complete_sentence(self, fragment: str) -> str:
+        """Ensure question fragments form a complete readable sentence."""
+        frag = fragment.strip()
+        if frag.endswith((".", "!", "?")):
+            return frag
+        
+        frag = frag.rstrip(",")
+        return frag[0].upper() + frag[1:] + "..."
 
     def _validate_nltk_resources(self) -> None:
         """Ensure required NLTK resources are available."""
@@ -83,7 +103,6 @@ class NotesGenerator:
         """Generate a concise summary of the text."""
         if not text.strip():
             return "No summary available."
-
         try:
             language = self.language.get_language()
             parser = PlaintextParser.from_string(
@@ -92,15 +111,13 @@ class NotesGenerator:
             summarizer = TextRankSummarizer()
             summary_sentences = summarizer(parser.document, sentences_count=3)
             return " ".join(str(s) for s in summary_sentences)
-
+        
         except Exception:
-            return text[:300] + "..."  # Fallback to first 300 chars
+            return text[:300] + "..."
 
     def _get_sumy_tokenizer(self, language: str) -> str:
         """Get appropriate tokenizer language for Sumy."""
-        return (
-            "english" if language.startswith("en") else "czech"
-        )  # Sumy's default fallback
+        return "english" if language.startswith("en") else "czech"
 
     def _extract_key_terms(
         self, segments: List[Dict[str, Any]]
@@ -110,14 +127,11 @@ class NotesGenerator:
         seen_terms = set()
         language = self.language.get_language()
 
-        # it should consider words: Optional[Dict[str, List[str]]] from ContentType
-
         for segment in segments:
             text = segment["text"]
             timestamp = self._format_time(segment["start"])
 
             if language.startswith("en"):
-                # English-specific POS tagging
                 tokens = nltk.word_tokenize(text)
                 for word, pos in nltk.pos_tag(tokens):
                     if (
@@ -130,13 +144,11 @@ class NotesGenerator:
                             {
                                 "term": word,
                                 "timestamp": timestamp,
-                                "context": text[:150]
-                                + "...",  # First 150 chars as context
+                                "context": text[:150] + "...",
                             }
                         )
             else:
-                # Non-English fallback
-                for word in re.findall(r"\w{4,}", text):  # Words with 4+ chars
+                for word in re.findall(r"\w{4,}", text):
                     if word.lower() not in seen_terms:
                         seen_terms.add(word.lower())
                         key_terms.append(
@@ -147,7 +159,7 @@ class NotesGenerator:
                             }
                         )
 
-        return key_terms[:15]  # Return top 15 terms
+        return key_terms[:15]
 
     def _extract_definitions(
         self, segments: List[Dict[str, Any]]
@@ -185,17 +197,11 @@ class NotesGenerator:
             text = segment["text"].strip()
             timestamp = self._format_time(segment["start"])
 
-            # Check for question marks or question words in the first three tokens
             lower_tokens = text.lower().split()
             if text.endswith("?") or any(q in lower_tokens[:3] for q in question_words):
-
-                # Get next 2 segments as potential answers
                 answer_context = " ".join(
                     s["text"] for s in segments[i : i + 3] if s != segment
-                )[
-                    :200
-                ]  # Limit to 200 chars
-
+                )[:200]
                 questions.append(
                     {
                         "question": text,
@@ -220,11 +226,9 @@ class NotesGenerator:
         """Generate important timestamps for key content."""
         return [
             {
-                "text": segment["text"][:150] + "...",  # Truncate long text
+                "text": segment["text"][:150] + "...",
                 "timestamp": self._format_time(segment["start"]),
             }
             for segment in segments
-            if len(segment["text"].split()) > 8  # Only segments with 8+ words
-        ][
-            :20
-        ]  # Limit to 20 key timestamps
+            if len(segment["text"].split()) > 8
+        ][:20]
