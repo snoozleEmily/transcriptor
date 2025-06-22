@@ -40,7 +40,7 @@ class NotesGenerator:
         # Summary
         summary = notes_content.get("Summary")
         if summary and not summary.startswith("No "):
-            output.append(f"# 📝 Summary\n\n{summary}\n")
+            output.append(f"# Summary\n\n{summary}\n")
 
         # Key Knowledge (terms + definitions)
         knowledge = []
@@ -53,12 +53,12 @@ class NotesGenerator:
                 f"\u2022 **{definition['term']}** → {definition['definition']} ({definition['timestamp']})"
             )
         if knowledge:
-            output.append("# 🔑 Key Knowledge\n\n" + "\n".join(knowledge) + "\n")
+            output.append("# Key Knowledge\n\n" + "\n".join(knowledge) + "\n")
 
         # Questions & Answers
         questions = notes_content.get("Questions", [])
         if questions:
-            qna = ["# ❓ Questions & Answers"]
+            qna = ["# Questions & Answers"]
             for q in questions:
                 full_q = self._complete_sentence(q["question"])
                 context = self._clean_text(q.get("answer_context", ""))
