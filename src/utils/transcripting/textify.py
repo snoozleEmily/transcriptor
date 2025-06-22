@@ -52,8 +52,9 @@ class Textify:
         setup_time = self.estimator.get_setup_time()
 
         # Progress setup
-        self.progress.setup(setup_time, mean_t)
-        pipeline_start = self.progress.show_setup_progress(setup_time)
+        pipeline_start = self.progress.setup(setup_time)
+        if pipeline_start is None:
+            pipeline_start = time.time()
 
         # Start transcription
         self.progress.start_transcription_progress(progress_handler)
@@ -64,7 +65,6 @@ class Textify:
                 "audio": audio_array,
                 "temperature": kwargs.get("temperature", 0.2),
             }
-
             # Connect progress callback based on Whisper version
 
             # Safe callback assignment with handler capture
