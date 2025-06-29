@@ -132,7 +132,7 @@ class NotesGenerator:
 
     def _select_key_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """Heuristic: choose segments with instructional keywords or longer text."""
-        keywords = {"install", "setup", "note", "important", "tip", "step"}
+        keywords = {"install", "setup", "note", "important", "tip", "step"} # CHANGE
         selected = []
         for seg in segments:
             txt = seg.get("text", "")
@@ -162,6 +162,7 @@ class NotesGenerator:
         try:
             nltk.data.find("tokenizers/punkt")
             nltk.data.find("taggers/averaged_perceptron_tagger")
+
         except LookupError:
             nltk.download("punkt")
             nltk.download("averaged_perceptron_tagger")
