@@ -65,7 +65,6 @@ class Textify:
                 "audio": audio_array,
                 "temperature": kwargs.get("temperature", 0.2),
             }
-            # Connect progress callback based on Whisper version
 
             # Safe callback assignment with handler capture
             if self.progress.handler:
