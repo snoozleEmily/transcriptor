@@ -19,7 +19,6 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Main transcription workflow controller responsible for:
     - Audio extraction and cleaning
@@ -31,7 +30,9 @@ class EndFlow:
         model_size: Whisper model version used for transcription
     """
 
-    model_size = str(MODELS[2])  # Default model | it will be set to 3, smaller for debug
+    model_size = str(
+        MODELS[2]
+    )  # Default model | it will be set to 3, smaller for debug
 
     def __init__(self) -> None:
         """Initialize workflow components with default configuration"""
@@ -41,11 +42,14 @@ class EndFlow:
         self.language = Language()
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
-        self.notes_generator = NotesGenerator(
-            language=self.language, config=self.content_config
-        )
         self.pdf_exporter = PDFExporter()
         self.debugger = OutputDebugger()
+        self.notes_generator = NotesGenerator(
+            language=self.language,
+            config=self.content_config,
+            keywords=self.content_config.words,
+        )
+        
 
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
