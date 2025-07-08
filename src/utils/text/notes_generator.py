@@ -7,38 +7,34 @@ from src.errors.exceptions import FileError, TranscriptionError
 from src.errors.logging import log_unexpected_error
 
 
-
 class NotesGenerator:
     def __init__(
         self,
         language,
         config,
-        llm_model_path: Optional[str] = None
+        keywords: Optional[List[str]] = None,
+        llm_model_path: Optional[str] = None,
     ):
         self.language = language
         self.config = config
         self.llm = None
         # Initialize NLTK resources
         self._validate_nltk_resources()
+        self.keywords = keywords or []
 
         # Lazy-load TinyLlama if requested
         if llm_model_path:
             try:
                 from llama_cpp import Llama
-                self.llm = Llama(
-                    model_path=llm_model_path,
-                    n_ctx=2048,
-                    n_threads=4
-                )
+                self.llm = Llama(model_path=llm_model_path, n_ctx=2048, n_threads=4)
+
             except ImportError as e:
                 raise TranscriptionError.generic_error(
-                    message="TinyLlama library not installed",
-                    error=e
+                    message="TinyLlama library not installed", error=e
                 )
             except Exception as e:
                 raise TranscriptionError.generic_error(
-                    message="Failed to initialize LLM",
-                    error=e
+                    message="Failed to initialize LLM", error=e
                 )
 
     def create_notes(self, transcription_result: Dict[str, Any]) -> str:
@@ -49,6 +45,7 @@ class NotesGenerator:
         try:
             text = transcription_result.get("text", "").strip()
             segments = transcription_result.get("segments", [])
+            
             if not text:
                 raise FileError.empty_text()
 
@@ -60,19 +57,21 @@ class NotesGenerator:
             # LLM refine if available
             if self.llm:
                 try:
-                    prompt = f"Refine this summary to be concise and human-like:\n{summary}"  
+                    prompt = (
+                        f"Refine this summary to be concise and human-like:\n{summary}"
+                    )
                     resp = self.llm.create_completion(prompt=prompt, max_tokens=150)
-                    refined = getattr(resp.choices[0], 'text', '').strip()
+                    refined = getattr(resp.choices[0], "text", "").strip()
                     if refined:
                         summary = refined
+
                 except Exception as e:
                     raise TranscriptionError.generic_error(
-                        message="LLM enhancement failed",
-                        error=e
+                        message="LLM enhancement failed", error=e
                     )
 
             # Key segments for bullets & timestamps
-            key_segs = self._select_key_segments(segments)
+            key_segs = self._select_key_segments(segments, keywords=self.keywords)
             bullets = [self._clean_text(seg["text"]) for seg in key_segs]
             timestamps = [
                 f"{self._format_time(seg['start'])}: {self._clean_text(seg['text'])}"
@@ -126,39 +125,47 @@ class NotesGenerator:
 
         except FileError:
             raise
+
         except Exception as e:
             log_unexpected_error(e)
             raise TranscriptionError.generic_error("Notes generation failed", e)
 
-    def _select_key_segments(self, segments: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _select_key_segments(
+        self, segments: List[Dict[str, Any]], keywords
+    ) -> List[Dict[str, Any]]:
         """Heuristic: choose segments with instructional keywords or longer text."""
-        keywords = {"install", "setup", "note", "important", "tip", "step"} # CHANGE
         selected = []
+        keywords = keywords or self.keywords or []
+
         for seg in segments:
             txt = seg.get("text", "")
             lt = txt.lower()
             if any(kw in lt for kw in keywords) or len(txt.split()) > 15:
+
                 selected.append(seg)
+
         return selected
 
     def _clean_text(self, text: str) -> str:
         """Single-line and end punctuation."""
         t = text.replace("\n", " ").strip()
-        if t and not t.endswith(('.', '!', '?')):
-            t = t.rstrip(',') + '...'
+        if t and not t.endswith((".", "!", "?")):
+            t = t.rstrip(",") + "..."
         return t
 
     def _complete_sentence(self, frag: str) -> str:
         """Ensure readable sentence fragments."""
         f = frag.strip()
         if not f:
-            return ''
-        if f[-1] in '.!?':
+            return ""
+
+        if f[-1] in ".!?":
             return f
-        return f.rstrip(',').capitalize() + '...'
+        return f.rstrip(",").capitalize() + "..."
 
     def _validate_nltk_resources(self) -> None:
         import nltk
+
         try:
             nltk.data.find("tokenizers/punkt")
             nltk.data.find("taggers/averaged_perceptron_tagger")
@@ -170,59 +177,78 @@ class NotesGenerator:
     def _generate_summary(self, text: str) -> str:
         from sumy.parsers.plaintext import PlaintextParser
         from sumy.summarizers.text_rank import TextRankSummarizer
+
         parser = PlaintextParser.from_string(
             text, self._get_sumy_tokenizer(self.language.get_language())
         )
         summarizer = TextRankSummarizer()
         sentences = summarizer(parser.document, sentences_count=2)
-        return ' '.join(str(s) for s in sentences)
+        return " ".join(str(s) for s in sentences)
 
     def _get_sumy_tokenizer(self, lang: str) -> str:
-        return 'english' if lang.startswith('en') else 'czech'
+        return "english" if lang.startswith("en") else "czech"
 
-    def _extract_key_terms(self, segments: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    def _extract_key_terms(
+        self, segments: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
         import nltk
+
         key_terms, seen = [], set()
         lang = self.language.get_language()
         for seg in segments:
-            txt = seg.get('text', '')
-            ts = self._format_time(seg.get('start', 0))
-            if lang.startswith('en'):
+            txt = seg.get("text", "")
+            ts = self._format_time(seg.get("start", 0))
+
+            if lang.startswith("en"):
                 tokens = nltk.word_tokenize(txt)
                 tags = nltk.pos_tag(tokens)
+
                 for w, pos in tags:
-                    if pos.startswith('NN') and len(w) > 3 and w.lower() not in seen:
+                    if pos.startswith("NN") and len(w) > 3 and w.lower() not in seen:
                         seen.add(w.lower())
-                        key_terms.append({'term': w, 'timestamp': ts})
+                        key_terms.append({"term": w, "timestamp": ts})
             else:
                 for w in re.findall(r"\w{4,}", txt):
                     if w.lower() not in seen:
                         seen.add(w.lower())
-                        key_terms.append({'term': w, 'timestamp': ts})
+                        key_terms.append({"term": w, "timestamp": ts})
         return key_terms
 
-    def _extract_definitions(self, segments: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    def _extract_definitions(
+        self, segments: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
         defs, pats = [], self.language.get_definition_patterns(DEFINITION_PAT)
         for seg in segments:
-            txt = seg.get('text', '')
-            ts = self._format_time(seg.get('start', 0))
+            txt = seg.get("text", "")
+            ts = self._format_time(seg.get("start", 0))
             for p in pats:
                 for m in re.finditer(p, txt, re.IGNORECASE):
-                    defs.append({'term': m.group(1), 'definition': m.group(2), 'timestamp': ts})
+                    defs.append(
+                        {"term": m.group(1), "definition": m.group(2), "timestamp": ts}
+                    )
+
         return defs
 
-    def _extract_questions(self, segments: List[Dict[str, Any]]) -> List[Dict[str, str]]:
+    def _extract_questions(
+        self, segments: List[Dict[str, Any]]
+    ) -> List[Dict[str, str]]:
         qs, qwords = [], set(self.language.get_question_words(QUESTION_WRD))
+
         for i, seg in enumerate(segments):
-            txt = seg.get('text','').strip()
-            ts = self._format_time(seg.get('start', 0))
+            txt = seg.get("text", "").strip()
+            ts = self._format_time(seg.get("start", 0))
             tokens = txt.lower().split()[:3]
-            if txt.endswith('?') or any(q in tokens for q in qwords):
-                ans = ' '.join(s.get('text','') for s in segments[i+1:i+3])
-                qs.append({'question': txt, 'timestamp': ts, 'answer_context': ans[:200]})
+
+            if txt.endswith("?") or any(q in tokens for q in qwords):
+                ans = " ".join(s.get("text", "") for s in segments[i + 1 : i + 3])
+                qs.append(
+                    {"question": txt, "timestamp": ts, "answer_context": ans[:200]}
+                )
+
         return qs
 
     def _format_time(self, seconds: float) -> str:
         m, s = divmod(int(seconds), 60)
         h, m = divmod(m, 60)
+
         return f"{h:02d}:{m:02d}:{s:02d}"
