@@ -61,7 +61,8 @@ class NotesGenerator:
                         f"Refine this summary to be concise and human-like:\n{summary}"
                     )
                     resp = self.llm.create_completion(prompt=prompt, max_tokens=150)
-                    refined = getattr(resp.choices[0], "text", "").strip()
+                    refined = getattr(resp.choic
+                                      es[0], "text", "").strip()
                     if refined:
                         summary = refined
 
