@@ -2,7 +2,6 @@ import os
 from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
-
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
@@ -18,26 +17,13 @@ from src.utils.file_handler import save_transcription
 from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
-
 class EndFlow:
-    """Main transcription workflow controller responsible for:
-    - Audio extraction and cleaning
-    - Speech-to-text transcription
-    - Text revision and formatting
-    - Final export in specified format
-
-    Attributes:
-        model_size: Whisper model version used for transcription
-    """
-
-    model_size = str(
-        MODELS[2]
-    )  # Default model | it will be set to 3, smaller for debug
+    """Main transcription workflow controller with enhanced content processing."""
+    
+    model_size = str(MODELS[2])  # Default model
 
     def __init__(self) -> None:
-        """Initialize workflow components with default configuration"""
-        # TODO: Implement dynamic has_odd_names detection
-
+        """Initialize with dependency injection-ready components."""
         self.transcriber = Textify(EndFlow.model_size)
         self.language = Language()
         self.reviser = TextReviser(language=self.language)
@@ -46,72 +32,67 @@ class EndFlow:
         self.debugger = OutputDebugger()
         self.notes_generator = NotesGenerator(
             language=self.language,
-            config=self.content_config,
-            keywords=self.content_config.words,
+            config=self.content_config
         )
-        
 
     def configure_content(
-        self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
+        self, 
+        config_params: Optional[Union[Dict[str, Any], ContentType]] = None
     ) -> None:
-        """Update content processing configuration parameters
-
-        Args:
-            config_params: Either a ContentType instance or dictionary containing:
-                - words: Custom vocabulary mapping/list
-                - types: Content categories (e.g., technical, medical)
-                - has_code: Boolean flag for code presence
-                - has_odd_names: Boolean flag for unusual proper nouns
-                - is_multilingual: Boolean flag for multiple languages
-        """
+        """Enhanced content configuration with validation."""
         if not config_params:
             return
 
-        if isinstance(config_params, ContentType):
-            # Directly use ContentType instance after processing words
-            self.content_config = ContentType(
-                words=self._process_words(config_params.words),
-                types=config_params.types,
-                has_code=config_params.has_code,
-                has_odd_names=config_params.has_odd_names,
-                is_multilingual=config_params.is_multilingual,
+        try:
+            if isinstance(config_params, ContentType):
+                self.content_config = self._process_content_type(config_params)
+            else:
+                self.content_config = self._process_config_dict(config_params)
+                
+            self._update_dependencies()
+                
+        except Exception as e:
+            raise FileError(
+                code=ErrorCode.UNEXPECTED_ERROR,
+                message="Invalid content configuration",
+                context={"error_details": str(e)}
             )
 
-        elif isinstance(config_params, dict):
-            # Convert dictionary to ContentType with proper validation
-            processed_params = dict(config_params)
+    def _process_content_type(self, config: ContentType) -> ContentType:
+        """Process ContentType instance with word normalization."""
+        return ContentType(
+            words=self._normalize_words(config.words),
+            types=config.types,
+            has_code=config.has_code,
+            has_odd_names=config.has_odd_names,
+            is_multilingual=config.is_multilingual
+        )
 
-            if "words" in processed_params:
-                processed_params["words"] = self._process_words(
-                    processed_params["words"]
-                )
-            self.content_config = ContentType(**processed_params)
+    def _process_config_dict(self, config: Dict[str, Any]) -> ContentType:
+        """Process dictionary config with validation."""
+        processed = config.copy()
+        if "words" in processed:
+            processed["words"] = self._normalize_words(processed["words"])
+        return ContentType(**processed)
 
-        # Update text reviser with custom vocabulary if provided
-        if self.content_config.words:
-            self.reviser.specific_words = self.content_config.words  # type: ignore
-
-    def _process_words(
-        self, words: Optional[Union[List[str], Dict[str, List[str]]]]
+    def _normalize_words(
+        self, 
+        words: Optional[Union[List[str], Dict[str, List[str]]]]
     ) -> Optional[Dict[str, List[str]]]:
-        """Normalize custom vocabulary input to expected dictionary format
-
-        Args:
-            words: Can be either:
-                - List of terms (converted to {term: []})
-                - Dictionary of {term: [alternatives]}
-                - None (returns None)
-
-        Returns:
-            Properly formatted dictionary or None if invalid input
-        """
+        """Standardize word input format with cleaning."""
+        if not words:
+            return None
+            
         if isinstance(words, list):
-            return {word.strip(): [] for word in words if word.strip()}
+            return {w.strip(): [] for w in words if w.strip()}
+        return words
 
-        if isinstance(words, dict):
-            return words
+    def _update_dependencies(self) -> None:
+        """Update dependent components with new config."""
+        if self.content_config.words:
+            self.reviser.specific_words = self.content_config.words
 
-        return None
+        self.notes_generator.config = self.content_config
 
     @catch_errors
     def process_video(
@@ -119,152 +100,134 @@ class EndFlow:
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
         pretty_notes: bool = False,
-        use_original_segments: bool = True,
-        **kwargs,
+        **kwargs
     ) -> str:
-        """Main transcription workflow controller"""
-        # Update content configuration if provided
-        if config_params:
-            self.configure_content(config_params)
+        """Enhanced transcription pipeline with better error context."""
+        self.configure_content(config_params)
+        
+        try:
+            # Audio processing
+            audio = extract_audio(video_path)
+            cleaned_audio = clean_audio(audio)
+            
+            # Transcription
+            context_prompt = self.debugger.generate_content_prompt(self.content_config)
+            result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
+            
+            # Post-processing
+            revised_text = self.reviser.revise_text(result["text"])
+            if not revised_text.strip():
+                raise FileError.empty_text()
+                
+            return self._save_output(
+                result,
+                revised_text,
+                os.path.basename(video_path),
+                pretty_notes
+            )
+            
+        except Exception as e:
+            self._log_error_context(video_path, config_params, kwargs)
+            raise
 
-        # Audio processing pipeline
-        audio = extract_audio(video_path)
-        cleaned_audio = clean_audio(audio)
-
-        # Generate transcription context prompt
-        context_prompt = self.debugger.generate_content_prompt(self.content_config)
-
-        # Perform speech-to-text transcription
-        transcription_result = self.transcriber.transcribe(
-            cleaned_audio,
+    def _transcribe_audio(
+        self,
+        audio: Any,
+        context_prompt: str,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """Execute transcription with proper error context."""
+        return self.transcriber.transcribe(
+            audio,
             initial_prompt=context_prompt,
             temperature=0.2 if self.content_config.types else 0.5,
-            **kwargs,
+            **kwargs
         )
 
-        # Process the language from Whisper output
-        self.language.process_whisper_output(transcription_result)
-
-        # Post-process transcribed text
-        revised_text = self.reviser.revise_text(transcription_result["text"])
-        if not revised_text.strip():
-            print(
-                get_func_call(
-                    self.process_video,
-                    (video_path,),
-                    {"config_params": config_params, **kwargs},
-                )
-            )
-            raise FileError.empty_text()
-
-        # Save result with new parameters
-        return self._save_result(
-            transcription_result,
-            revised_text,
-            os.path.basename(video_path),
-            pretty_notes=pretty_notes,
-            use_original_segments=use_original_segments,
-        )
-
-    def _save_result(
+    def _save_output(
         self,
-        transcription_result: Dict[str, Any],
+        result: Dict[str, Any],
         revised_text: str,
-        source_filename: str = "",
-        pretty_notes: bool = False,
-        use_original_segments: bool = True,
+        source_name: str,
+        pretty_notes: bool
     ) -> str:
-        """Save transcription result with new segment handling"""
-        if not revised_text.strip():
-            raise FileError.empty_text()
+        """Handle output saving with validation."""
+        save_path = self._get_save_path(
+            os.path.splitext(source_name)[0],
+            ".pdf" if pretty_notes else ".txt"
+        )
+        
+        if pretty_notes:
+            self._export_pdf_notes(result, revised_text, save_path)
+        else:
+            save_transcription(revised_text, save_path)
+            
+        return os.path.abspath(save_path)
 
-        # Generate base filename from source
-        base_name = os.path.splitext(os.path.basename(source_filename))[0]
-        extension = ".pdf" if pretty_notes else ".txt"
-
-        # Get save path (keep existing logic)
-        save_path = self._get_save_path(base_name, extension)
-
-        try:
-            if pretty_notes:
-                # Determine segments based on configuration
-                segments = (
-                    transcription_result.get("segments", [])
-                    if use_original_segments
-                    else []
-                )
-
-                # Generate notes with new skip_empty_sections parameter
-                formatted_notes = self.notes_generator.create_notes(
-                    {"text": revised_text, "segments": segments},
-                )
-
-                has_content = any(
-                    (content.strip() and not content.startswith("No "))
-                    for content in formatted_notes.split("# ")[1:]
-                )
-
-                if not has_content:
-                    raise FileError.pdf_invalid_content(len(formatted_notes))
-
-                # Generate PDF (keep existing)
-                doc_title = f"Transcription: {base_name}"
-                if not self.pdf_exporter.export_to_pdf(
-                    formatted_notes, save_path, doc_title
-                ):
-                    raise FileError.pdf_creation_failed()
-            else:
-                # Save plain text (keep existing)
-                save_transcription(revised_text, save_path)
-
-            return os.path.abspath(save_path)
-
-        except PermissionError as e:
-            raise FileError.pdf_permission_denied(save_path, e) from e
-
-        except Exception as e:
-            raise FileError(
-                code=ErrorCode.FILE_ERROR,
-                message="Unexpected save operation failure",
-                context={
-                    "error_type": type(e).__name__,
-                    "error_details": str(e),
-                    "output_path": save_path,
-                },
-            ) from e
+    def _export_pdf_notes(
+        self,
+        result: Dict[str, Any],
+        text: str,
+        save_path: str
+    ) -> None:
+        """Handle PDF export with validation."""
+        notes = self.notes_generator.create_notes({
+            "text": text,
+            "segments": result.get("segments", [])
+        })
+        
+        if not any(
+            content.strip() and not content.startswith("No ")
+            for content in notes.split("# ")[1:]
+        ):
+            raise FileError.pdf_invalid_content(len(notes))
+            
+        if not self.pdf_exporter.export_to_pdf(
+            notes, 
+            save_path, 
+            f"Transcription: {os.path.basename(save_path)}"
+        ):
+            raise FileError.pdf_creation_failed()
 
     def _get_save_path(self, base_name: str, extension: str) -> str:
-        """Get save path from user dialog or fall back to desktop with numbered files"""
-        # First try to get path from file dialog
+        """Improved path handling with better fallbacks."""
         try:
-            file_types = (
-                [("PDF Files", "*.pdf")]
-                if extension == ".pdf"
-                else [("Text Files", "*.txt")]
-            )
+            file_types = [("PDF Files", "*.pdf")] if extension == ".pdf" else [("Text Files", "*.txt")]
             initial_file = f"{base_name}_transcription{extension}"
-
-            save_path = filedialog.asksaveasfilename(
+            
+            if path := filedialog.asksaveasfilename(
                 title="Save transcription",
                 defaultextension=extension,
                 initialfile=initial_file,
-                filetypes=file_types,
-            )
-
-            if save_path:  # User selected a path
-                return save_path
+                filetypes=file_types
+            ):
+                return path
         except Exception:
-            pass  # Fall through to desktop fallback
+            pass
+            
+        return self._generate_desktop_path(base_name, extension)
 
-        # Fallback to desktop with numbered files if needed
+    def _generate_desktop_path(self, base_name: str, extension: str) -> str:
+        """Generate numbered fallback paths on desktop."""
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
-        save_path = os.path.join(desktop, f"{base_name}_transcription{extension}")
+        counter = 1
+        path = os.path.join(desktop, f"{base_name}_transcription{extension}")
+        
+        while os.path.exists(path):
+            path = os.path.join(desktop, f"{base_name}_transcription_{counter}{extension}")
+            counter += 1
+            
+        return path
 
-        # Handle filename conflicts
-        conflict_num = 1
-        while os.path.exists(save_path):
-            new_filename = f"{base_name}_transcription_{conflict_num}{extension}"
-            save_path = os.path.join(desktop, new_filename)
-            conflict_num += 1
-
-        return save_path
+    def _log_error_context(
+        self,
+        video_path: str,
+        config_params: Dict[str, Any],
+        kwargs: Dict[str, Any]
+    ) -> None:
+        """Log detailed error context for debugging."""
+        print(get_func_call(
+            self.process_video,
+            (video_path,),
+            {"config_params": config_params, **kwargs}
+        ))
