@@ -15,6 +15,7 @@ class ErrorCode(Enum):
     DIRECTORY_CREATION_ERROR = "directory_creation_error"
     INVALID_PDF_CONTENT = "invalid_pdf_content"
     USER_CANCELLED = "user_cancelled"
+    # INVALID_CONFIG = 
 
 class AppError(Exception):
     """Base application exception type with emoji support"""
