@@ -18,8 +18,7 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 class EndFlow:
-    """Main transcription workflow controller with enhanced content processing."""
-    
+    """Pipeline: audio → text → PDF"""
     model_size = str(MODELS[2])  # Default model
 
     def __init__(self) -> None:
