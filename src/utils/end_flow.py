@@ -114,6 +114,7 @@ class EndFlow:
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
             
             # Post-processing
+            
             revised_text = self.reviser.revise_text(result["text"])
             if not revised_text.strip():
                 raise FileError.empty_text()
@@ -175,10 +176,7 @@ class EndFlow:
             "segments": result.get("segments", [])
         })
         
-        if not any(
-            content.strip() and not content.startswith("No ")
-            for content in notes.split("# ")[1:]
-        ):
+        if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
             
         if not self.pdf_exporter.export_to_pdf(
