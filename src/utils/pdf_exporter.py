@@ -76,26 +76,7 @@ class PDFExporter:
         self.pdf = CustomPDF()
 
     def export_to_pdf(self, text: str, filename: str, title: str) -> bool:
-        """Convert text content to styled PDF document.
-
-        Process:
-        1. Creates new PDF instance
-        2. Adds title page
-        3. Parses and formats content structure
-        4. Ensures output directory exists
-        5. Saves PDF file
-
-        Args:
-            text: Content to export (with markdown-like formatting)
-            filename: Output file path
-            title: Document title
-
-        Returns:
-            True if PDF was successfully created
-
-        Raises:
-            FileError: If PDF generation fails
-        """
+        """Convert text content to styled PDF document"""
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
