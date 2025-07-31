@@ -175,6 +175,7 @@ class EndFlow:
             "text": text,
             "segments": result.get("segments", [])
         })
+        print(f"Notes content: {notes}")  # DEBUG
         
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
