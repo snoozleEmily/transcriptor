@@ -77,9 +77,88 @@ class PDFExporter:
 
     def export_to_pdf(self, text: str, filename: str, title: str) -> bool:
         """Convert text content to styled PDF document"""
-        self.pdf = CustomPDF()
-        self.pdf.add_page()
-        self.pdf.set_font("Arial", size=12)
-        self.pdf.multi_cell(0, 5, text)  # Simple text dump
-        self.pdf.output(filename)
-        return True
+        try:
+            if not text.strip():
+                raise FileError.pdf_invalid_content(len(text))
+
+            # Start fresh PDF for each export
+            self.pdf = CustomPDF()
+            self.pdf.add_page()
+
+            # Add document title (centered, bold, large font)
+            self.pdf.set_font(size=18, style="B")
+            self.pdf.cell(0, 10, title, ln=1, align="C")
+            self.pdf.ln(10)  # Add spacing after title
+
+            # Process content line by line with formatting rules
+            self.pdf.set_font(size=12)
+            for line in text.split("\n"):
+                line = line.strip()
+
+                # Heading detection (lines starting with "# ")
+                if line.startswith("# "):
+                    self.pdf.set_font(size=14, style="B")
+                    self.pdf.cell(0, 10, line[2:], ln=1)
+                    self.pdf.set_font(size=12)
+
+                # Bullet points (lines starting with "• ")
+                elif line.startswith("• "):
+                    self.pdf.cell(10)  # Add left indent
+                    self.pdf.cell(0, 10, line[2:], ln=1)
+
+                # Sub-items (lines starting with "  - ")
+                elif line.startswith("  - "):
+                    self.pdf.cell(20)
+                    self.pdf.cell(0, 10, line[4:], ln=1)
+
+                else:  # Regular paragraphs (add spacing between blocks)
+                    self.pdf.ln(5)
+
+            # Handle directory creation
+            try:
+                os.makedirs(os.path.dirname(filename), exist_ok=True)
+            
+            except PermissionError as e:
+                raise FileError.pdf_permission_denied(filename, e) from e
+            
+            except OSError as e:
+                raise FileError(
+                    code=ErrorCode.DIRECTORY_CREATION_ERROR,
+                    message=f"Failed to create directory for PDF",
+                    context={
+                        "path": filename,
+                        "original_error": str(e)
+                    }
+                ) from e
+                
+            # Verify write permissions
+            try:
+                if os.path.exists(filename) and not os.access(filename, os.W_OK):
+                    raise PermissionError(f"Write permission denied: {filename}")
+                
+            except PermissionError as e:
+                raise FileError.pdf_permission_denied(filename, e) from e
+                
+            try: # Generate PDF
+                self.pdf.output(filename) 
+            except RuntimeError as e:  # Common FPDF error
+                raise FileError.pdf_creation_failed(e) from e
+            
+            except Exception as e:
+                raise FileError(
+                    code=ErrorCode.PDF_GENERATION_ERROR,
+                    message="Unexpected PDF generation error",
+                    context={
+                        "error_type": type(e).__name__,
+                        "error_details": str(e)
+                    }
+                ) from e
+                
+            # Verify output
+            if not os.path.exists(filename):
+                raise FileError.pdf_creation_failed()
+                
+            return True
+            
+        except FileError:
+            raise  # Re-raise custom errors
