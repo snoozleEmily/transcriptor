@@ -1,0 +1,30 @@
+Traceback (most recent call last):
+  File "src/utils/transcripting/set_model.py", line 16, in load
+    return whisper.load_model(model_size)
+  File "whisper/__init__.py", line 150, in load_model
+    model = Whisper(dims)
+  File "whisper/model.py", line 232, in __init__
+    self.decoder = TextDecoder(
+  File "whisper/model.py", line 186, in __init__
+    [
+  File "whisper/model.py", line 187, in <listcomp>
+    ResidualAttentionBlock(n_state, n_head, cross_attention=True)
+  File "whisper/model.py", line 125, in __init__
+    Linear(n_state, n_mlp), nn.GELU(), Linear(n_mlp, n_state)
+  File "torch/nn/modules/linear.py", line 96, in __init__
+    self.weight = Parameter(torch.empty((out_features, in_features)))
+RuntimeError: [enforce fail at alloc_cpu.cpp:72] data. DefaultCPUAllocator: not enough memory: you tried to allocate 9437184 bytes.
+
+Caused by:
+Traceback (most recent call last):
+  File "main.py", line 15, in <module>
+    main()
+  File "main.py", line 10, in main
+    flow = EndFlow()
+  File "src/utils/end_flow.py", line 26, in __init__
+    self.transcriber = Textify(EndFlow.model_size)
+  File "src/utils/transcripting/textify.py", line 22, in __init__
+    self.model = SetModel().load(model_size)
+  File "src/utils/transcripting/set_model.py", line 19, in load
+    raise TranscriptionError.load_failed() from e
+TranscriptionError: 🛠️ Failed to load audio file
