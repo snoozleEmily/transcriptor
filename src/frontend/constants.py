@@ -53,7 +53,4 @@ FONTS = {
 }
 
 # External Resources
-GT_REPO = "https://github.com/author/transcriptor"  # GitHub repository URL for:
-                                                    # - Issue reporting
-                                                    # - Documentation
-                                                    # - APKs
+BUG_REPORTS_GT = "https://github.com/snoozleEmily/transcriptor/issues" 
