@@ -7,7 +7,6 @@ from src.frontend.constants import THEMES, FONT_FALLBACKS
 
 class CustomPDF(FPDF):
     """Custom PDF generator with consistent styling and layout."""
-
     def __init__(self):
         super().__init__()
         self.set_auto_page_break(auto=True, margin=15)
@@ -38,11 +37,10 @@ class CustomPDF(FPDF):
 
 class PDFExporter:
     """Main PDF export handler that processes content and generates files."""
-
     def __init__(self):
-        self.font_family = self._init_system_font()
         self.pdf = CustomPDF()
-
+        self.font_family = self._init_system_font()
+        
     def _init_system_font(self) -> str:
         """Try common system fonts, fail fast if none work."""
         for font in FONT_FALLBACKS:
