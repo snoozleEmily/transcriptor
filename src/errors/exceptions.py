@@ -247,3 +247,11 @@ class TranscriptionError(AppError):
                 "model": model
             }
         )
+    
+    @classmethod
+    def sentence_split_failed(cls, original_exception: Exception) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Failed to split text into sentences",
+            context={"original_exception": str(original_exception)}
+        )
