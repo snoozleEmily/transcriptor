@@ -11,7 +11,7 @@ from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from src.utils.text.content_type import ContentType
-from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, GT_REPO
+from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 
 
 # TODO: Refactor this class into smaller modules
@@ -146,7 +146,7 @@ class Interface(tk.Tk):
 
         # Buttons panel
         self.buttons_panel = ButtonsPanel(
-            main_frame, self._start_processing, lambda: open_browser(GT_REPO)
+            main_frame, self._start_processing, lambda: open_browser(BUG_REPORTS_GT)
         )
         self.buttons_panel.pack(pady=(0, 2))
 
