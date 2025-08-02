@@ -17,6 +17,7 @@ from src.utils.file_handler import save_transcription
 from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
+
 class EndFlow:
     """Pipeline: audio → text → PDF"""
     model_size = str(MODELS[2])  # Default model
@@ -114,7 +115,6 @@ class EndFlow:
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
             
             # Post-processing
-            
             revised_text = self.reviser.revise_text(result["text"])
             if not revised_text.strip():
                 raise FileError.empty_text()
@@ -125,7 +125,6 @@ class EndFlow:
                 os.path.basename(video_path),
                 pretty_notes
             )
-            
         except Exception as e:
             self._log_error_context(video_path, config_params, kwargs)
             raise
@@ -164,13 +163,30 @@ class EndFlow:
             
         return os.path.abspath(save_path)
 
+    def _normalize_notes_md(self, md: str) -> str:
+        """Standardize markdown for PDF rendering"""
+        lines = []
+        for line in md.splitlines():
+            line = line.rstrip()
+            
+            # Convert bullets
+            if line.lstrip().startswith("•"):
+                line = line.replace("•", "-", 1)
+
+            # Normalize headers
+            if line.startswith(("#", "##", "###")):
+                line = f"# {line.lstrip('# ')}"
+            lines.append(line)
+
+        return "\n".join(lines)
+
     def _export_pdf_notes(
         self,
         result: Dict[str, Any],
         text: str,
         save_path: str
     ) -> None:
-        """Handle PDF export with validation."""
+        """Handle PDF export with normalization and validation."""
         notes = self.notes_generator.create_notes({
             "text": text,
             "segments": result.get("segments", [])
@@ -179,9 +195,11 @@ class EndFlow:
         
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
-            
+
+        normalized = self._normalize_notes_md(notes)
+        
         if not self.pdf_exporter.export_to_pdf(
-            notes, 
+            normalized, 
             save_path, 
             f"Transcription: {os.path.basename(save_path)}"
         ):
