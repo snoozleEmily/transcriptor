@@ -15,6 +15,8 @@ class ErrorCode(Enum):
     DIRECTORY_CREATION_ERROR = "directory_creation_error"
     INVALID_PDF_CONTENT = "invalid_pdf_content"
     USER_CANCELLED = "user_cancelled"
+    PDF_FONT_ERROR = "pdf_font_error"
+    # INVALID_CONFIG = 
 
 class AppError(Exception):
     """Base application exception type with emoji support"""
@@ -119,6 +121,14 @@ class FileError(AppError):
                 "content_length": content_length,
                 "minimum_required": 1
             }
+        )
+    
+    @classmethod
+    def pdf_font_error(cls, tried_fonts: list[str]) -> "FileError":
+        return cls(
+            code=ErrorCode.PDF_FONT_ERROR,
+            message="No compatible system font found for PDF export",
+            context={"tried_fonts": tried_fonts}
         )
 
 
@@ -236,4 +246,12 @@ class TranscriptionError(AppError):
             context={
                 "model": model
             }
+        )
+    
+    @classmethod
+    def sentence_split_failed(cls, original_exception: Exception) -> "TranscriptionError":
+        return cls(
+            code=ErrorCode.UNEXPECTED_ERROR,
+            message="Failed to split text into sentences",
+            context={"original_exception": str(original_exception)}
         )

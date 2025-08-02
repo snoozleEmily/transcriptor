@@ -3,6 +3,7 @@ from typing import List, Dict
 
 from src.errors.exceptions import TranscriptionError
 
+
 # --------------------- Constants For User ---------------------
 # Implement this info for the user on the interface
 MODELS_INFO = {

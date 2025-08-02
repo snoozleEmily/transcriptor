@@ -56,6 +56,7 @@ def extract_audio(video_path: str) -> AudioSegment:
             "-y",  # Auto-overwrite output files without asking
             "-i",
             video_path,  # Input file path
+
             # Audio extraction options:
             "-vn",  # Disable video processing (video no)
             "-acodec",
@@ -64,6 +65,7 @@ def extract_audio(video_path: str) -> AudioSegment:
             "16000",  # Audio sample rate: 16kHz (optimal for speech)
             "-ac",
             "1",  # Audio channels: 1 (mono)
+            
             # Output format:
             "-f",
             "wav",  # Output format: WAV container

@@ -4,8 +4,6 @@ from typing import Any, Callable
 
 from .exceptions import FileError, ErrorCode
 
-
-
 def _sanitize_path(path: str) -> str:
     """Sanitize file paths to show only filename"""
     try:
@@ -30,14 +28,12 @@ def _format_config(config: Any) -> list[str]:
         return [
             f"  Config: {type(config).__name__}",
             f"    - Categories: {getattr(config, 'categories', 'N/A')}",
-            f"    - Types: {getattr(config, 'types', 'N/A')}",
             f"    - Words: {getattr(config, 'words', 'N/A')}",
         ]
     elif isinstance(config, dict):
         return [
             f"  Config: dict",
             f"    - Categories: {config.get('categories', 'N/A')}",
-            f"    - Types: {config.get('types', 'N/A')}",
             f"    - Words: {config.get('words', 'N/A')}",
         ]
     
