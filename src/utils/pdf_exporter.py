@@ -49,12 +49,11 @@ class PDFExporter:
             try:
                 self.pdf.add_font(font, "", f"{font}.ttf", uni=True)
                 return font
-            
+
             except RuntimeError:
                 continue
 
         raise FileError.pdf_font_error(FONT_FALLBACKS)
-
 
     def export_to_pdf(self, text: str, filename: str, title: str) -> bool:
         """Render normalized text as a clean, readable PDF."""
@@ -79,29 +78,36 @@ class PDFExporter:
             # Ensure output path is valid
             try:
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
+                
             except PermissionError as e:
                 raise FileError.pdf_permission_denied(filename, e) from e
+            
             except OSError as e:
                 raise FileError(
                     code=ErrorCode.DIRECTORY_CREATION_ERROR,
                     message="Failed to create directory for PDF",
-                    context={"path": filename, "original_error": str(e)}
+                    context={"path": filename, "original_error": str(e)},
                 ) from e
 
             # Check write access
-            if os.path.exists(filename) and not os.access(filename, os.W_OK):
-                raise FileError.pdf_permission_denied(filename)
+            try:
+                if os.path.exists(filename) and not os.access(filename, os.W_OK):
+                    raise PermissionError(f"Write permission denied: {filename}")
+
+            except PermissionError as e:
+                raise FileError.pdf_permission_denied(filename, e)
 
             # Attempt PDF generation
             try:
                 self.pdf.output(filename)
             except RuntimeError as e:
                 raise FileError.pdf_creation_failed(e) from e
+
             except Exception as e:
                 raise FileError(
                     code=ErrorCode.PDF_GENERATION_ERROR,
                     message="Unexpected PDF generation error",
-                    context={"error_type": type(e).__name__, "error_details": str(e)}
+                    context={"error_type": type(e).__name__, "error_details": str(e)},
                 ) from e
 
             if not os.path.exists(filename):
