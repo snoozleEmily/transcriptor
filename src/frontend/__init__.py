@@ -1,4 +1,4 @@
-from .constants import THEMES, FONTS
+from .constants import THEMES, FONTS, FONT_FALLBACKS
 from .interface import Interface
 from .theme import configure_theme
 from .url_opener import open_browser
@@ -10,8 +10,8 @@ from .widgets import Header, ButtonsPanel, MainWindow
 __all__ = [
     "Interface",
     "MainWindow",
-    "COLOR_SCHEME",
-    "FONTS"
+    "FONTS",
+    "FONT_FALLBACKS",
     "open_browser",
     "WarningPopup",
     "configure_theme",
@@ -19,5 +19,4 @@ __all__ = [
     "Header",
     "ButtonsPanel",
     "StyleManager",
-    "create_branding",
 ]
