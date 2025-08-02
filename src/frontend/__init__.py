@@ -1,4 +1,4 @@
-from .constants import THEMES, FONTS, FONT_FALLBACKS
+from .constants import THEMES, FONTS, FONT_FALLBACKS, CORE_FONTS
 from .interface import Interface
 from .theme import configure_theme
 from .url_opener import open_browser
@@ -12,6 +12,7 @@ __all__ = [
     "MainWindow",
     "FONTS",
     "FONT_FALLBACKS",
+    "CORE_FONTS",
     "open_browser",
     "WarningPopup",
     "configure_theme",

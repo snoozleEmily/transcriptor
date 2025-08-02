@@ -14,6 +14,8 @@ FONT_FALLBACKS = [
     "Geneva",         # ✅ Older macOS systems
 ]
 
+CORE_FONTS = ("Courier", "Helvetica", "Times")
+
 # Color Constants
 LOGO_COLOR = "#EBAC36"  # Primary brand color used for the app logo (golden yellow)
 PLACEHOLDER_TEXT = "#334345"  # Color for placeholder text in input fields (dark teal blue)

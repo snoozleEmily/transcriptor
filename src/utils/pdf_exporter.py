@@ -1,8 +1,9 @@
 import os
 from fpdf import FPDF
 
-from src.errors.exceptions import ErrorCode, FileError
-from src.frontend.constants import THEMES, FONT_FALLBACKS
+from src.errors.exceptions import FileError, ErrorCode
+from src.frontend.constants import THEMES, FONT_FALLBACKS, CORE_FONTS
+
 
 
 class CustomPDF(FPDF):
@@ -12,7 +13,7 @@ class CustomPDF(FPDF):
         self.set_auto_page_break(auto=True, margin=15)
 
     def header(self):
-        self.set_font("Arial", size=12)
+        self.set_font("Helvetica", size=12)
         self.set_draw_color(*self._hex_to_rgb(THEMES["dark"]["bg"]))
         self.set_line_width(0.5)
         self.line(10, 10, 200, 10)
@@ -20,7 +21,7 @@ class CustomPDF(FPDF):
 
     def footer(self):
         self.set_y(-15)
-        self.set_font("Arial", size=8)
+        self.set_font("Helvetica", size=8)
         self.set_draw_color(*self._hex_to_rgb(THEMES["dark"]["bg"]))
         self.set_line_width(0.5)
         self.line(10, self.get_y() - 2, 200, self.get_y() - 2)
@@ -40,18 +41,13 @@ class PDFExporter:
     def __init__(self):
         self.pdf = CustomPDF()
         self.font_family = self._init_system_font()
-        
+
     def _init_system_font(self) -> str:
-        """Try common system fonts, fail fast if none work."""
-        for font in FONT_FALLBACKS:
-            try:
-                self.pdf.add_font(font, "", f"{font}.ttf", uni=True)
-                return font
-
-            except RuntimeError:
-                continue
-
-        raise FileError.pdf_font_error(FONT_FALLBACKS)
+        """Select the first fallback font that is a built-in FPDF font."""
+        for fam in FONT_FALLBACKS:
+            if fam in CORE_FONTS:
+                return fam
+        return "Helvetica"  # fallback default
 
     def export_to_pdf(self, text: str, filename: str, title: str) -> bool:
         """Render normalized text as a clean, readable PDF."""
@@ -76,10 +72,10 @@ class PDFExporter:
             # Ensure output path is valid
             try:
                 os.makedirs(os.path.dirname(filename), exist_ok=True)
-                
+
             except PermissionError as e:
                 raise FileError.pdf_permission_denied(filename, e) from e
-            
+
             except OSError as e:
                 raise FileError(
                     code=ErrorCode.DIRECTORY_CREATION_ERROR,
