@@ -18,8 +18,10 @@ from src.utils.pdf_exporter import PDFExporter
 from src.utils.models import MODELS
 
 
+
 class EndFlow:
     """Pipeline: audio → text → PDF"""
+    # -------------------------- Class Setup --------------------------
     model_size = str(MODELS[2])  # Default model
 
     def __init__(self) -> None:
@@ -35,6 +37,7 @@ class EndFlow:
             config=self.content_config
         )
 
+    # -------------------- Content Configuration ---------------------
     def configure_content(
         self, 
         config_params: Optional[Union[Dict[str, Any], ContentType]] = None
@@ -89,11 +92,12 @@ class EndFlow:
 
     def _update_dependencies(self) -> None:
         """Update dependent components with new config."""
-        if self.content_config.words:
+        if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.specific_words = self.content_config.words
 
         self.notes_generator.config = self.content_config
 
+    # ----------------------- Core Processing -----------------------
     @catch_errors
     def process_video(
         self,
@@ -143,6 +147,7 @@ class EndFlow:
             **kwargs
         )
 
+    # ----------------------- Output Handling -----------------------
     def _save_output(
         self,
         result: Dict[str, Any],
@@ -205,6 +210,7 @@ class EndFlow:
         ):
             raise FileError.pdf_creation_failed()
 
+    # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
         """Improved path handling with better fallbacks."""
         try:
@@ -235,15 +241,17 @@ class EndFlow:
             
         return path
 
+    # -------------------------- Debugging -------------------------
     def _log_error_context(
         self,
         video_path: str,
-        config_params: Dict[str, Any],
+        config_params: Optional[Dict[str, Any]],
         kwargs: Dict[str, Any]
     ) -> None:
         """Log detailed error context for debugging."""
+        config_dict = {} if config_params is None else config_params
         print(get_func_call(
             self.process_video,
             (video_path,),
-            {"config_params": config_params, **kwargs}
+            {"config_params": config_dict, **kwargs}
         ))
