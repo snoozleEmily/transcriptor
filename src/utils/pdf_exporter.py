@@ -1,6 +1,7 @@
 import os
 from fpdf import FPDF
 
+
 from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import THEMES, FONT_FALLBACKS, CORE_FONTS
 
