@@ -61,18 +61,3 @@ def catch_errors(func: Callable) -> Callable:
             ) from e
 
     return wrapper
-
-def format_error(error: Exception) -> dict:
-    """Serialize exception details for API/client consumption."""
-    if isinstance(error, AppError):
-        return {
-            "code": error.code.value,
-            "message": error.message,
-            "context": error.context
-        }
-        
-    return {
-        "code": ErrorCode.UNKNOWN_ERROR.value,
-        "message": "An unknown error occurred",
-        "context": str(error)
-    }
