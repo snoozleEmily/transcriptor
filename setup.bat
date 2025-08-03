@@ -138,6 +138,8 @@ if exist requirements.txt (
     pip install -r requirements.txt >nul 2>&1
 )
 
+:: TODO -> ajust the instaliation of llama
+
 :: ---------------------------------------------------------------------
 :: Step 5: Run main() from main.py
 :: ---------------------------------------------------------------------
