@@ -1,21 +1,3 @@
-FONT_FALLBACKS = [
-    "Arial",          # ✅ Widely available (Win/macOS/Linux)
-    "Helvetica",      # ✅ macOS default sans-serif
-    "Calibri",        # ✅ Default on modern Windows (Office)
-    "Courier",        # ✅ Generic monospace fallback
-    "Verdana",        # ✅ Very common, especially on Windows
-    "Times",          # ✅ macOS serif fallback (similar to Times New Roman)
-    "Times New Roman",# ✅ Default serif on Windows
-    "Tahoma",         # ✅ Common sans-serif (Windows XP+)
-    "DejaVu Sans",    # ✅ Linux default for sans-serif
-    "Liberation Sans",# ✅ Red Hat/Fedora/Ubuntu systems
-    "FreeSans",       # ✅ GNOME/older Linux desktops
-    "Lucida Grande",  # ✅ macOS legacy UI font
-    "Geneva",         # ✅ Older macOS systems
-]
-
-CORE_FONTS = ("Courier", "Helvetica", "Times")
-
 # Color Constants
 LOGO_COLOR = "#EBAC36"  # Primary brand color used for the app logo (golden yellow)
 PLACEHOLDER_TEXT = "#334345"  # Color for placeholder text in input fields (dark teal blue)
