@@ -5,7 +5,7 @@ from typing import Dict, List, Any
 from src.utils.text.word_snippets import QUESTION_WRD
 from src.utils.pdf_exporter import PDFExporter
 from src.errors.exceptions import TranscriptionError
-from src.frontend.constants import THEMES
+
 
 
 class NotesGenerator:
