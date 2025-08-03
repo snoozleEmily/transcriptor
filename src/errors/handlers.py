@@ -63,13 +63,7 @@ def catch_errors(func: Callable) -> Callable:
     return wrapper
 
 def format_error(error: Exception) -> dict:
-    """
-    Serialize exception details for API/client consumption.
-    
-    Returns:
-        dict: Structured error information containing error code, message, 
-              and context details.
-    """
+    """Serialize exception details for API/client consumption."""
     if isinstance(error, AppError):
         return {
             "code": error.code.value,
