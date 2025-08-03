@@ -31,13 +31,12 @@ class EndFlow:
         self.pdf_exporter = PDFExporter()
         self.debugger = OutputDebugger()
         self.notes_generator = NotesGenerator(
-            language=self.language,
-            config=self.content_config
+            language=self.language, config=self.content_config
         )
 
+    # -------------------- Content Configuration ---------------------
     def configure_content(
-        self, 
-        config_params: Optional[Union[Dict[str, Any], ContentType]] = None
+        self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
     ) -> None:
         """Enhanced content configuration with validation."""
         if not config_params:
@@ -46,16 +45,17 @@ class EndFlow:
         try:
             if isinstance(config_params, ContentType):
                 self.content_config = self._process_content_type(config_params)
+
             else:
                 self.content_config = self._process_config_dict(config_params)
-                
+
             self._update_dependencies()
-                
+
         except Exception as e:
             raise FileError(
                 code=ErrorCode.UNEXPECTED_ERROR,
                 message="Invalid content configuration",
-                context={"error_details": str(e)}
+                context={"error_details": str(e)},
             )
 
     def _process_content_type(self, config: ContentType) -> ContentType:
@@ -65,7 +65,7 @@ class EndFlow:
             types=config.types,
             has_code=config.has_code,
             has_odd_names=config.has_odd_names,
-            is_multilingual=config.is_multilingual
+            is_multilingual=config.is_multilingual,
         )
 
     def _process_config_dict(self, config: Dict[str, Any]) -> ContentType:
@@ -73,94 +73,89 @@ class EndFlow:
         processed = config.copy()
         if "words" in processed:
             processed["words"] = self._normalize_words(processed["words"])
+
         return ContentType(**processed)
 
     def _normalize_words(
-        self, 
-        words: Optional[Union[List[str], Dict[str, List[str]]]]
+        self, words: Optional[Union[List[str], Dict[str, List[str]]]]
     ) -> Optional[Dict[str, List[str]]]:
         """Standardize word input format with cleaning."""
         if not words:
             return None
-            
+
         if isinstance(words, list):
             return {w.strip(): [] for w in words if w.strip()}
         return words
 
     def _update_dependencies(self) -> None:
         """Update dependent components with new config."""
-        if self.content_config.words:
+        if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.specific_words = self.content_config.words
 
         self.notes_generator.config = self.content_config
 
+    # ----------------------- Core Processing -----------------------
     @catch_errors
     def process_video(
         self,
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
         pretty_notes: bool = False,
-        **kwargs
+        **kwargs,
     ) -> str:
         """Enhanced transcription pipeline with better error context."""
         self.configure_content(config_params)
-        
+
         try:
             # Audio processing
             audio = extract_audio(video_path)
             cleaned_audio = clean_audio(audio)
-            
+
             # Transcription
             context_prompt = self.debugger.generate_content_prompt(self.content_config)
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
-            
+
             # Post-processing
             revised_text = self.reviser.revise_text(result["text"])
             if not revised_text.strip():
                 raise FileError.empty_text()
-                
+
             return self._save_output(
-                result,
-                revised_text,
-                os.path.basename(video_path),
-                pretty_notes
+                result, revised_text, os.path.basename(video_path), pretty_notes
             )
         except Exception as e:
             self._log_error_context(video_path, config_params, kwargs)
             raise
 
     def _transcribe_audio(
-        self,
-        audio: Any,
-        context_prompt: str,
-        **kwargs
+        self, audio: Any, context_prompt: str, **kwargs
     ) -> Dict[str, Any]:
         """Execute transcription with proper error context."""
         return self.transcriber.transcribe(
             audio,
             initial_prompt=context_prompt,
             temperature=0.2 if self.content_config.types else 0.5,
-            **kwargs
+            **kwargs,
         )
 
+    # ----------------------- Output Handling -----------------------
     def _save_output(
         self,
         result: Dict[str, Any],
         revised_text: str,
         source_name: str,
-        pretty_notes: bool
+        pretty_notes: bool,
     ) -> str:
         """Handle output saving with validation."""
         save_path = self._get_save_path(
-            os.path.splitext(source_name)[0],
-            ".pdf" if pretty_notes else ".txt"
+            os.path.splitext(source_name)[0], ".pdf" if pretty_notes else ".txt"
         )
-        
+
         if pretty_notes:
             self._export_pdf_notes(result, revised_text, save_path)
         else:
             save_transcription(revised_text, save_path)
-            
+
         return os.path.abspath(save_path)
 
     def _normalize_notes_md(self, md: str) -> str:
@@ -168,7 +163,7 @@ class EndFlow:
         lines = []
         for line in md.splitlines():
             line = line.rstrip()
-            
+
             # Convert bullets
             if line.lstrip().startswith("•"):
                 line = line.replace("•", "-", 1)
@@ -181,46 +176,83 @@ class EndFlow:
         return "\n".join(lines)
 
     def _export_pdf_notes(
-        self,
-        result: Dict[str, Any],
-        text: str,
-        save_path: str
+        self, result: Dict[str, Any], text: str, save_path: str
     ) -> None:
         """Handle PDF export with normalization and validation."""
-        notes = self.notes_generator.create_notes({
-            "text": text,
-            "segments": result.get("segments", [])
-        })
-        print(f"Notes content: {notes}")  # DEBUG
-        
+        notes_dict = self.notes_generator.create_notes(
+            {"text": text, "segments": result.get("segments", [])}
+        )
+        print(f"Notes content: {notes_dict}")  # DEBUG
+
+        # Convert dict notes to formatted string
+        notes = self._format_notes_dict(notes_dict)
+
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
 
         normalized = self._normalize_notes_md(notes)
-        
+
         if not self.pdf_exporter.export_to_pdf(
-            normalized, 
-            save_path, 
-            f"Transcription: {os.path.basename(save_path)}"
+            normalized, save_path, f"Transcription: {os.path.basename(save_path)}"
         ):
             raise FileError.pdf_creation_failed()
 
+    def _format_notes_dict(self, notes_dict: Dict[str, Any]) -> str:
+        """Convert notes dictionary to formatted string for PDF."""
+        lines = []
+
+        # Add summary
+        summary = notes_dict.get("Summary", "")
+        if summary:
+            lines.append("Summary\n" + summary + "\n")
+
+        # Add Key Terms as bullet points
+        key_terms = notes_dict.get("Key Terms", [])
+        if key_terms:
+            lines.append("Key Terms")
+            for term in key_terms:
+                lines.append(f"- {term}")
+            lines.append("")
+
+        # Add Questions with timestamps
+        questions = notes_dict.get("Questions", [])
+        if questions:
+            lines.append("Questions")
+            for q in questions:
+                lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
+            lines.append("")
+
+        # Add Timestamps with text
+        timestamps = notes_dict.get("Timestamps", [])
+        if timestamps:
+            lines.append("Timestamps")
+            for t in timestamps:
+                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
+            lines.append("")
+
+        return "\n".join(lines)
+
+    # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
         """Improved path handling with better fallbacks."""
         try:
-            file_types = [("PDF Files", "*.pdf")] if extension == ".pdf" else [("Text Files", "*.txt")]
+            file_types = (
+                [("PDF Files", "*.pdf")]
+                if extension == ".pdf"
+                else [("Text Files", "*.txt")]
+            )
             initial_file = f"{base_name}_transcription{extension}"
-            
+
             if path := filedialog.asksaveasfilename(
                 title="Save transcription",
                 defaultextension=extension,
                 initialfile=initial_file,
-                filetypes=file_types
+                filetypes=file_types,
             ):
                 return path
         except Exception:
             pass
-            
+
         return self._generate_desktop_path(base_name, extension)
 
     def _generate_desktop_path(self, base_name: str, extension: str) -> str:
@@ -228,22 +260,28 @@ class EndFlow:
         desktop = os.path.join(os.path.expanduser("~"), "Desktop")
         counter = 1
         path = os.path.join(desktop, f"{base_name}_transcription{extension}")
-        
+
         while os.path.exists(path):
-            path = os.path.join(desktop, f"{base_name}_transcription_{counter}{extension}")
+            path = os.path.join(
+                desktop, f"{base_name}_transcription_{counter}{extension}"
+            )
             counter += 1
-            
+
         return path
 
+    # -------------------------- Debugging -------------------------
     def _log_error_context(
         self,
         video_path: str,
-        config_params: Dict[str, Any],
-        kwargs: Dict[str, Any]
+        config_params: Optional[Dict[str, Any]],
+        kwargs: Dict[str, Any],
     ) -> None:
         """Log detailed error context for debugging."""
-        print(get_func_call(
-            self.process_video,
-            (video_path,),
-            {"config_params": config_params, **kwargs}
-        ))
+        config_dict = {} if config_params is None else config_params
+        print(
+            get_func_call(
+                self.process_video,
+                (video_path,),
+                {"config_params": config_dict, **kwargs},
+            )
+        )

@@ -4,6 +4,8 @@ from typing import Any, Callable
 
 from .exceptions import FileError, ErrorCode
 
+
+
 def _sanitize_path(path: str) -> str:
     """Sanitize file paths to show only filename"""
     try:

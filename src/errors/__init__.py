@@ -8,8 +8,7 @@ from .exceptions import (
 )
 
 from .handlers import (
-    catch_errors,
-    format_error
+    catch_errors
 )
 
 from .logging import (
@@ -32,7 +31,6 @@ __all__ = [
     
     # Handlers
     "catch_errors",
-    "format_error",
     
     # Logging
     "configure_logging",

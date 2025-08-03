@@ -1,15 +1,10 @@
-import os
 import re
 from typing import Dict, List, Any
-from fpdf import FPDF
+
 
 from src.utils.text.word_snippets import QUESTION_WRD
-from src.errors.exceptions import (
-    TranscriptionError,
-    FileError,
-    ErrorCode,
-)
-from src.errors.logging import log_unexpected_error
+from src.utils.pdf_exporter import PDFExporter
+from src.errors.exceptions import TranscriptionError
 from src.frontend.constants import THEMES
 
 
@@ -17,9 +12,10 @@ class NotesGenerator:
     def __init__(self, language, config):
         self.language = language
         self.config = config
+        self.pdf_exporter = PDFExporter()
 
-    def create_notes(self, data: Dict[str, Any]) -> str:
-        """Guarantees all sections exist, even if empty"""
+    def create_notes(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Prepares all sections as a dict, even if empty"""
         if not data.get("text"):
             raise TranscriptionError.no_result()
 
@@ -33,7 +29,61 @@ class NotesGenerator:
             "Timestamps": self._get_important_timestamps(segments),
         }
 
-        return self._format_as_markdown(sections)
+        return sections
+
+    def export_notes_to_pdf(
+        self,
+        sections: Dict[str, Any],
+        output_path: str,
+        title: str = "Transcription Notes",
+    ):
+        from src.utils.pdf_exporter import CustomPDF  # avoid circular import
+
+        pdf = CustomPDF()
+        pdf.add_page()
+        font = self.pdf_exporter.font_family
+
+        # Title
+        pdf.set_font(font, style="B", size=18)
+        pdf.cell(0, 10, title, ln=True, align="C")
+        pdf.ln(8)
+
+        for section_name, content in sections.items():
+            # Section header
+            pdf.set_font(font, style="B", size=14)
+            pdf.cell(0, 10, section_name, ln=True)
+            pdf.ln(2)
+
+            # Section content
+            pdf.set_font(font, style="", size=12)
+
+            if isinstance(content, list):
+                if not content:
+                    pdf.cell(0, 10, "None found", ln=True)
+                elif isinstance(content[0], dict):
+                    for item in content:
+                        ts = item.get("timestamp", "00:00:00")
+                        txt = item.get("text", "[missing]")
+
+                        # Timestamp in bold
+                        pdf.set_font(font, style="B", size=12)
+                        pdf.cell(0, 10, f"{ts}:", ln=False)
+
+                        # Text normal
+                        pdf.set_font(font, style="", size=12)
+                        pdf.cell(0, 10, f" {txt}", ln=True)
+                else:
+                    for term in content:
+                        pdf.cell(0, 10, f"- {term}", ln=True)
+            else:
+                pdf.multi_cell(0, 8, content.strip() if content else "None found")
+
+            pdf.ln(5)
+
+        self.pdf_exporter.pdf = pdf  # assign custom-formatted PDF to exporter
+        return self.pdf_exporter.export_to_pdf(
+            " ", output_path, title
+        )  # dummy text param for compatibility
 
     def _generate_summary(self, text: str) -> str:
         try:
@@ -64,7 +114,6 @@ class NotesGenerator:
                         "timestamp": self._format_timestamp(seg.get("start", 0)),
                     }
                 )
-
         return qs[:5]
 
     def _get_important_timestamps(self, segments: List[Dict]) -> List[Dict]:
@@ -85,27 +134,3 @@ class NotesGenerator:
         m, s = divmod(seconds, 60)
         h, m = divmod(m, 60)
         return f"{int(h):02}:{int(m):02}:{int(s):02}"
-
-    def _format_as_markdown(self, sections: Dict[str, Any]) -> str:
-        """Convert to markdown with fallbacks"""
-        out = []
-        for sec, content in sections.items():
-            out.append(f"# {sec}\n")
-
-            if isinstance(content, list):
-                if not content:
-                    out.append("None found\n")
-                elif isinstance(content[0], dict):
-                    for item in content:
-                        ts = item.get("timestamp", "00:00:00")
-                        txt = item.get("text", "[missing]")
-                        out.append(f"- **{ts}**: {txt}")
-                else:
-                    for term in content:
-                        out.append(f"- {term}")
-            else:
-                out.append(content if content.strip() else "None found")
-
-            out.append("")  # spacing
-
-        return "\n".join(out)

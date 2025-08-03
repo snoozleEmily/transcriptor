@@ -16,7 +16,7 @@ class ErrorCode(Enum):
     INVALID_PDF_CONTENT = "invalid_pdf_content"
     USER_CANCELLED = "user_cancelled"
     PDF_FONT_ERROR = "pdf_font_error"
-    # INVALID_CONFIG = 
+    
 
 class AppError(Exception):
     """Base application exception type with emoji support"""
@@ -146,7 +146,6 @@ class FFmpegError(AppError):
 
 class TranscriptionError(AppError):
     """Transcription service errors"""
-
     @classmethod
     def generic_error(cls, message: str, error: Exception) -> "TranscriptionError":
         return cls(

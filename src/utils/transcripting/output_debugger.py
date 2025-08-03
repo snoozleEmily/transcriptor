@@ -12,14 +12,7 @@ class OutputDebugger:
 
     def generate_content_prompt(self, content_config: ContentType) -> str:
         """
-        Generate context prompt and debug output based on content configuration
-
-        Args:
-            content_config: ContentType object with configuration
-
-        Returns:
-            Formatted prompt string for the model
-        """
+        Generate context prompt and debug output based on content configuration"""
         prompt_parts = []
 
         self._debug_content_features(content_config)
