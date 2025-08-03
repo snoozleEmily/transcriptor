@@ -13,7 +13,6 @@ from src.utils.text.content_type import ContentType
 
 class Textify:
     """Main transcription controller coordinating all components"""
-
     def __init__(self, model_size: str):
         self.model_size = model_size
         self.progress = Loader()
