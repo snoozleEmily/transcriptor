@@ -50,8 +50,8 @@ class NotesGenerator:
 
         for section_name, content in sections.items():
             # Section header
-            pdf.set_font(font, style="B", size=14)
-            pdf.cell(0, 10, section_name, ln=True)
+            pdf.set_font(font, style="B", size=16)
+            pdf.cell(0, 10, section_name.upper(), ln=True)
             pdf.ln(2)
 
             # Section content
@@ -60,6 +60,7 @@ class NotesGenerator:
             if isinstance(content, list):
                 if not content:
                     pdf.cell(0, 10, "None found", ln=True)
+
                 elif isinstance(content[0], dict):
                     for item in content:
                         ts = item.get("timestamp", "00:00:00")
@@ -72,9 +73,11 @@ class NotesGenerator:
                         # Text normal
                         pdf.set_font(font, style="", size=12)
                         pdf.cell(0, 10, f" {txt}", ln=True)
+
                 else:
                     for term in content:
                         pdf.cell(0, 10, f"- {term}", ln=True)
+
             else:
                 pdf.multi_cell(0, 8, content.strip() if content else "None found")
 
