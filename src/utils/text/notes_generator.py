@@ -39,9 +39,10 @@ class NotesGenerator:
     ):
         from src.utils.pdf_exporter import CustomPDF  # avoid circular import
 
-        pdf = CustomPDF()
+        pdf = self.pdf_exporter.pdf
+        font = self.pdf_exporter.font_family 
+        print(f"font: {font}") # DEBUG
         pdf.add_page()
-        font = self.pdf_exporter.font_family
 
         # Title
         pdf.set_font(font, style="B", size=18)
@@ -83,10 +84,10 @@ class NotesGenerator:
 
             pdf.ln(5)
 
-        self.pdf_exporter.pdf = pdf  # assign custom-formatted PDF to exporter
-        return self.pdf_exporter.export_to_pdf(
-            " ", output_path, title
-        )  # dummy text param for compatibility
+            self.pdf_exporter.pdf = pdf
+            return self.pdf_exporter.export_to_pdf(
+                " ", output_path, title
+            )  # dummy text param
 
     def _generate_summary(self, text: str) -> str:
         try:
@@ -131,9 +132,11 @@ class NotesGenerator:
                         "timestamp": self._format_timestamp(seg.get("start", 0)),
                     }
                 )
+
         return out[:5]
 
     def _format_timestamp(self, seconds: float) -> str:
         m, s = divmod(seconds, 60)
         h, m = divmod(m, 60)
+
         return f"{int(h):02}:{int(m):02}:{int(s):02}"
