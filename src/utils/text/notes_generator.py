@@ -3,7 +3,7 @@ from typing import Dict, List, Any
 
 
 from src.utils.text.word_snippets import QUESTION_WRD
-from src.utils.pdf_exporter import PDFExporter
+from src.utils.pdf_maker import PDFExporter
 from src.errors.exceptions import TranscriptionError
 
 
@@ -37,7 +37,7 @@ class NotesGenerator:
         output_path: str,
         title: str = "Transcription Notes",
     ):
-        from src.utils.pdf_exporter import CustomPDF  # avoid circular import
+        from src.utils.pdf_maker import CustomPDF  # avoid circular import
 
         pdf = self.pdf_exporter.pdf
         font = self.pdf_exporter.font_family 
