@@ -49,8 +49,9 @@ class Interface(tk.Tk):
         )
 
         # Message for Custom Words
-        self.C_WORDS_NOTE = f"Enter custom words here divided by commas:\n"
-        self.C_WORDS_EX = f"{self.C_WORDS_NOTE}\n(e.g.\nEiichiro Oda,\nAvril Lavigne,\nSAP, MLM, Okta,\nPR Flow, DeleteAllLogs)"
+        self.C_WORDS_NOTE = "Enter words here!\n"
+        self.C_WORDS_EX = f"{self.C_WORDS_NOTE}\nTell transcriptor which custom words to look out for in the video.\n" \
+
 
         # Initialization sequence
         self._configure_window()
