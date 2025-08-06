@@ -1,6 +1,7 @@
 import os
 from fpdf import FPDF
 
+
 from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import THEMES
 
@@ -97,7 +98,7 @@ class PDFExporter:
             return True
 
         except FileError:
-            raise
+            raise # Re-raise already formatted error
         
         except Exception as e:
             raise FileError(
