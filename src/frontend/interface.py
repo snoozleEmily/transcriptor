@@ -14,7 +14,7 @@ from src.utils.text.content_type import ContentType
 from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 
 
-# TODO: Refactor this class into smaller modules
+# TODO: Refactor this class into smaller modules?
 
 
 class Interface(tk.Tk):
