@@ -1,7 +1,6 @@
 import os
 from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
-from llama_cpp import Llama, CreateCompletionResponse, CreateCompletionStreamResponse
 
 
 from src.errors.handlers import catch_errors
@@ -20,12 +19,12 @@ from src.utils.pdf_maker import PDFExporter
 from src.utils.models import MODELS
 
 
+
 class EndFlow:
     """Pipeline: audio → text → PDF"""
-
     model_size = str(MODELS[2])  # Default model
 
-    def __init__(self, use_llama: bool = False) -> None:
+    def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
         self.transcriber = Textify(EndFlow.model_size)
         self.language = Language()
@@ -36,55 +35,6 @@ class EndFlow:
         self.notes_generator = NotesGenerator(
             language=self.language, config=self.content_config
         )
-
-    
-    # -------------------- Set up llama for Lazy Loading --------------------
-        self.use_llama = use_llama
-        self._llama_model: Optional[Llama] = None
-
-
-    def _call_llama(self, text: str) -> str:
-        """Get clean text output from Llama."""
-        if not self.use_llama:
-            return text
-            
-        try:
-            if self._llama_model is None:
-                self._llama_model = Llama(
-                    model_path="your_model.bin",
-                    verbose=False
-                )
-            
-            # Get response and handle it as dictionary
-            raw_response = self._llama_model.create_completion(
-                prompt=text,
-                max_tokens=100,
-                temperature=0.2,
-                stop=["\n"],
-                stream=False
-            )
-            
-            if not raw_response: # Type-agnostic response processing
-                return text
-                
-            # Treat response as dictionary
-            response = raw_response if isinstance(raw_response, dict) else {}
-            
-            # Safe extraction with fallbacks
-            choices = response.get("choices", [])
-            if not choices or not isinstance(choices, list):
-                return text
-                
-            first_choice = choices[0] if choices else {}
-            if not isinstance(first_choice, dict):
-                return text
-                
-            result_text = first_choice.get("text", text)
-            return str(result_text).strip()
-            
-        except Exception as e:
-            print(f"Llama error: {e}")
-            return text  # Fallback to original
 
     # -------------------- Content Configuration ---------------------
     def configure_content(
