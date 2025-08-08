@@ -93,6 +93,7 @@ class NotesGenerator:
         try:
             sentences = re.split(r"(?<=[.!?])\s+", text)
             return " ".join(sentences[:2]) if sentences else text[:200] + "..."
+
         except Exception as e:
             raise TranscriptionError.sentence_split_failed(e)
 
@@ -102,6 +103,7 @@ class NotesGenerator:
             for w in re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", "")):
                 if w.lower() not in QUESTION_WRD.get("english", []):
                     terms.add(w)
+                    
         return sorted(terms)[:10]
 
     def _extract_questions(self, segments: List[Dict]) -> List[Dict]:
