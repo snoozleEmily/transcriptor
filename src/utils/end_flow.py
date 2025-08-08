@@ -2,6 +2,7 @@ import os
 from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
+
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
