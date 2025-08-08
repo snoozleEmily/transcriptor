@@ -16,7 +16,7 @@ QUESTION_WRD = {
         "são", "está", "estão", "pode", "poderia", "deve", "será", "há", "têm",
 
         # Colloquial Brazilian forms
-        "que que", "cê", "cês", "tá", "tão", "né"
+        "que que", "cê", "cês", "tá", "tão", "né", "vc", "voce", "tem como", "sabe", "me explica"
     ],
 
     "spanish": [
@@ -50,7 +50,9 @@ DEFINITION_PAT = {
 
     "portuguese": [
         r"(\b[A-ZÀ-Ÿ][a-zà-ÿ]+\b) (?:é definido como|é chamado de|chama|significado) (.+?)(?=[\.\n])",
-        r"(.+?) (?:é definido como|é chamado de|chama|significado) (.+)"
+        r"(.+?) (?:é definido como|é chamado de|chama|significado) (.+)",
+        r"(.+?) (?:quer dizer|significa) (.+?)(?=[\.\n])",
+        r"(.+?) quer dizer (.+)"
     ],
 
     "spanish": [
