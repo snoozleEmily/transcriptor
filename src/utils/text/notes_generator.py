@@ -7,7 +7,6 @@ from src.utils.pdf_maker import PDFExporter
 from src.errors.exceptions import TranscriptionError
 
 
-
 class NotesGenerator:
     def __init__(self, language, config):
         self.language = language
@@ -40,8 +39,8 @@ class NotesGenerator:
         from src.utils.pdf_maker import CustomPDF  # avoid circular import
 
         pdf = self.pdf_exporter.pdf
-        font = self.pdf_exporter.font_family 
-        print(f"font: {font}") # DEBUG
+        font = self.pdf_exporter.font_family
+        print(f"font: {font}")  # DEBUG
         pdf.add_page()
 
         # Title
@@ -103,17 +102,19 @@ class NotesGenerator:
             for w in re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", "")):
                 if w.lower() not in QUESTION_WRD.get("english", []):
                     terms.add(w)
-                    
+
         return sorted(terms)[:10]
 
     def _extract_questions(self, segments: List[Dict]) -> List[Dict]:
         qs = []
         lang = self.language.get_language_code()
-        words = set(QUESTION_WRD.get(lang, QUESTION_WRD.get("english", [])))
+        question_words = set(QUESTION_WRD.get(lang, QUESTION_WRD["default"]))
 
         for seg in segments:
             t = seg.get("text", "").strip()
-            if t.endswith("?") or any(t.lower().startswith(qw) for qw in words):
+            if t.endswith("?") or any(
+                t.lower().startswith(qw) for qw in question_words
+            ):
                 qs.append(
                     {
                         "text": t,
