@@ -2,14 +2,17 @@ import re
 from typing import Dict, List, Any
 
 
-from src.utils.text.word_snippets import QUESTION_WRD
 from src.utils.pdf_maker import PDFExporter
 from src.errors.exceptions import TranscriptionError
+from src.utils.text.words.common import COMMON_WORDS
+from src.utils.text.words.question import QUESTION_WRD
+from src.utils.text.words.definition_pat import DEFINITION_PAT
+from src.utils.text.language import Language
 
 
 class NotesGenerator:
     def __init__(self, language, config):
-        self.language = language
+        self.language = Language()
         self.config = config
         self.pdf_exporter = PDFExporter()
 
@@ -98,9 +101,13 @@ class NotesGenerator:
 
     def _extract_key_terms(self, segments: List[Dict]) -> List[str]:
         terms = set()
+        lang = self.language.get_language()
+        excluded_words = set(QUESTION_WRD.get(lang, []) + COMMON_WORDS.get(lang, []))
+
         for seg in segments:
-            for w in re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", "")):
-                if w.lower() not in QUESTION_WRD.get("english", []):
+            words = re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", ""))
+            for w in words:
+                if w.lower() not in excluded_words: # TODO: add skip from custom_words
                     terms.add(w)
 
         return sorted(terms)[:8]
