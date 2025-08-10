@@ -4,7 +4,8 @@ from typing import Dict, List, Optional, Tuple
 
 from src.errors import LanguageError
 from src.utils.text.language import Language
-from src.utils.text.word_snippets import QUESTION_WRD, DEFINITION_PAT
+from src.utils.text.words.question import QUESTION_WRD 
+from src.utils.text.words.definition_pat import DEFINITION_PAT
 
 
 
@@ -60,6 +61,7 @@ class TextReviser:
         """Extract definitions using language-specific regex patterns."""
         patterns = self.language_processor.get_definition_patterns(DEFINITION_PAT)
         definitions: List[str] = []
+        
         for pattern in patterns:
             definitions.extend(re.findall(pattern, text))
 
