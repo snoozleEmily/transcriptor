@@ -103,7 +103,7 @@ class NotesGenerator:
                 if w.lower() not in QUESTION_WRD.get("english", []):
                     terms.add(w)
 
-        return sorted(terms)[:10]
+        return sorted(terms)[:8]
 
     def _extract_questions(self, segments: List[Dict]) -> List[Dict]:
         qs = []
