@@ -19,9 +19,9 @@ from src.utils.pdf_maker import PDFExporter
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Pipeline: audio → text → PDF"""
+
     model_size = str(MODELS[2])  # Default model
 
     def __init__(self) -> None:
@@ -87,6 +87,7 @@ class EndFlow:
 
         if isinstance(words, list):
             return {w.strip(): [] for w in words if w.strip()}
+            
         return words
 
     def _update_dependencies(self) -> None:
