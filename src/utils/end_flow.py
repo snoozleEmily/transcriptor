@@ -161,8 +161,8 @@ class EndFlow:
 
         return os.path.abspath(save_path)
 
-    def _normalize_notes_md(self, md: str) -> str:
-        """Standardize markdown for PDF rendering"""
+    def _normalize_notes(self, md: str) -> str:
+        """Standardize PDF rendering"""
         lines = []
         for line in md.splitlines():
             line = line.rstrip()
@@ -194,7 +194,7 @@ class EndFlow:
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
 
-        normalized = self._normalize_notes_md(notes)
+        normalized = self._normalize_notes(notes)
 
         if not self.pdf_exporter.export_to_pdf(
             normalized, save_path, f"Transcription: {os.path.basename(save_path)}", odd_words=odd_words
