@@ -22,7 +22,7 @@ from src.utils.models import MODELS
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
-    model_size = str(MODELS[2])  # Default model
+    model_size = str(MODELS[1])  # Default model
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -188,7 +188,8 @@ class EndFlow:
         print(f"Notes content: {notes_dict}")  # DEBUG
 
         # Convert dict notes to formatted string
-        notes = self._format_notes_dict(notes_dict)
+        odd_words = self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {}
+        notes = self._format_notes_dict(notes_dict, odd_words)
 
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
@@ -196,11 +197,11 @@ class EndFlow:
         normalized = self._normalize_notes_md(notes)
 
         if not self.pdf_exporter.export_to_pdf(
-            normalized, save_path, f"Transcription: {os.path.basename(save_path)}"
+            normalized, save_path, f"Transcription: {os.path.basename(save_path)}", odd_words=odd_words
         ):
             raise FileError.pdf_creation_failed()
 
-    def _format_notes_dict(self, notes_dict: Dict[str, Any]) -> str:
+    def _format_notes_dict(self, notes_dict: Dict[str, Any], odd_words: Optional[dict] = None) -> str:
         """Convert notes dictionary to formatted string for PDF."""
         lines = []
 
@@ -215,6 +216,16 @@ class EndFlow:
             lines.append("Key Terms")
             for term in key_terms:
                 lines.append(f"- {term}")
+            lines.append("")
+
+        # Add Odd Words after Key Terms
+        if odd_words:
+            lines.append("Specific Words")
+            for word, variants in odd_words.items():
+                if variants:
+                    lines.append(f"- {word}: {', '.join(variants)}")
+                else:
+                    lines.append(f"- {word}")
             lines.append("")
 
         # Add Questions with timestamps
