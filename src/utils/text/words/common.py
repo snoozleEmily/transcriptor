@@ -1,4 +1,7 @@
 COMMON_WORDS = {
+    # ----------------------
+    # ENGLISH (en)
+    # ----------------------
     "english": [
         # Determiners / articles / quantifiers
         "the", "a", "an", "this", "that", "these", "those", "each", "every", "any", "some", "no", "none",
@@ -70,6 +73,13 @@ COMMON_WORDS = {
         "pay", "pays", "paid", "paying",
         "meet", "meets", "met", "meeting",
         "include", "includes", "included", "including",
+        "need", "needs", "needed", "needing",
+        "want", "wants", "wanted", "wanting",
+        "put", "puts", "putting",
+        "stay", "stays", "stayed", "staying",
+        "let", "lets", "letting",
+        "seem", "seems", "seemed", "seeming",
+        "happen", "happens", "happened", "happening",
 
         # Common adjectives & adverbs (often not useful as key nouns)
         "good", "bad", "better", "best", "worse", "worst",
@@ -77,6 +87,7 @@ COMMON_WORDS = {
         "more", "most", "less", "least", "many", "much", "few", "several",
         "very", "really", "quite", "just", "only", "already", "still", "yet", "also", "else",
         "almost", "nearly", "about", "around", "exactly", "approximately",
+        "rather", "whether", "unless", "throughout",
 
         # Conjunctions & discourse markers / fillers
         "and", "or", "but", "so", "because", "as", "since", "if", "though", "although", "however",
@@ -96,14 +107,19 @@ COMMON_WORDS = {
 
         # Short answers / speech tokens
         "yes", "no", "maybe", "okay", "ok", "alright", "right", "sure", "uh-huh", "hmm",
+        "please", "thank", "thanks", "sorry",
 
         # Neutral informal tokens (not local slang)
         "yeah", "yep", "nah", "huh", "wow", "cool",
+        "gonna", "wanna", "gotta",
 
         # Abbreviations etc.
         "etc", "e.g.", "i.e.", "vs", "vs.", "approx", "per", "each", "via"
     ],
 
+    # ----------------------
+    # PORTUGUESE (pt-BR)
+    # ----------------------
     "portuguese": [
         # Artigos / determinantes
         "o", "a", "os", "as", "um", "uma", "uns", "umas", "este", "esta", "esses", "essas",
@@ -126,10 +142,22 @@ COMMON_WORDS = {
 
         # Verbos usuais
         "dizer", "diz", "disseram", "ver", "ve", "vir", "vem", "saber", "sabe", "achar", "achar", "pensar", "pensou",
+        "ficar", "fica", "ficou", "ficando",
+        "passar", "passa", "passou", "passando",
+        "precisar", "precisa", "precisou",
+        "querer", "quer", "quis", "querendo",
+        "dar", "dá", "deu", "dando",
+        "colocar", "coloca", "colocou",
+        "pegar", "pega", "pegou", "pegando",
+        "deixar", "deixa", "deixou", "deixando",
 
         # Adjetivos / advérbios / conectores
         "mais", "menos", "muito", "pouco", "bastante", "bem", "mal", "novo", "velho", "grande", "pequeno",
         "então", "logo", "pois", "assim", "também", "além", "assim mesmo", "portanto",
+        "mesmo", "mesma", "através", "junto",
+        "cada", "todo", "toda", "todos", "todas",
+        "sempre", "nunca", "jamais", "apenas",
+        "bom", "boa", "ruim", "legal", "bacana",
 
         # Conjunções / marcadores
         "e", "ou", "mas", "porém", "porque", "se", "enquanto", "quando", "entretanto", "portanto", "logo",
@@ -147,9 +175,12 @@ COMMON_WORDS = {
         "ok", "okay", "hmm", "ah", "oh", "não", "sim", "talvez", "certamente", "claro",
 
         # Abreviações / etc.
-        "etc", "ex.", "p.ex.", "aprox", "via"
+        "etc", "ex.", "p.ex.", "aprox", "via",
     ],
 
+    # ----------------------
+    # SPANISH (es)
+    # ----------------------
     "spanish": [
         # Artículos / determinantes
         "el", "la", "los", "las", "un", "una", "unos", "unas", "este", "esta", "estos", "estas", "ese", "esa",
@@ -188,9 +219,12 @@ COMMON_WORDS = {
         "ok", "okay", "hmm", "ah", "oh", "vale", "bueno", "quizás", "tal vez", "sí", "no",
 
         # Abreviaturas / etc
-        "etc", "ej.", "p.ej.", "aprox", "via"
+        "etc", "ej.", "p.ej.", "aprox", "via",
     ],
 
+    # ----------------------
+    # ITALIAN (it)
+    # ----------------------
     "italian": [
         # Articoli / determinanti
         "il", "lo", "la", "i", "gli", "le", "un", "uno", "una", "questo", "quello", "questi", "quelle",
@@ -225,9 +259,12 @@ COMMON_WORDS = {
         "ok", "okay", "ah", "oh", "hmm", "d'accordo", "forse", "sì", "no",
 
         # Abbreviazioni / etc
-        "ecc", "ecc.", "etc", "es.", "p.es."
+        "ecc", "ecc.", "etc", "es.", "p.es.",
     ],
 
+    # ----------------------
+    # FRENCH (fr)
+    # ----------------------
     "french": [
         # Articles / déterminants
         "le", "la", "les", "un", "une", "des", "ce", "cet", "cette", "ces", "cela", "ça", "celui", "celle",
@@ -245,6 +282,10 @@ COMMON_WORDS = {
         # Auxiliaires / verbes fréquents
         "être", "suis", "est", "sommes", "sont", "avoir", "ai", "a", "avons", "ont",
         "faire", "fait", "faire", "aller", "va", "vont", "pouvoir", "peut", "devoir", "doit",
+        "venir", "vient", "viennent",
+        "mettre", "met", "mettent",
+        "prendre", "prend", "prennent",
+        "trouver", "trouve", "trouvent",
 
         # Verbes fréquents
         "dire", "dit", "dire", "voir", "voit", "savoir", "sait", "penser", "penser",
@@ -252,6 +293,7 @@ COMMON_WORDS = {
         # Adjectifs / adverbes / connecteurs
         "plus", "moins", "très", "beaucoup", "peu", "bien", "mal", "autre", "même", "nouveau", "ancien",
         "alors", "donc", "parce que", "car", "mais", "ou", "et", "ainsi", "enfin", "puis",
+        "maintenant", "déjà", "toujours", "vraiment", "plutôt", "trop",
 
         # Marqueurs / fillers neutres
         "alors", "donc", "voilà", "ben", "euh", "bah", "quoi", "bon", "ok", "d'accord",
@@ -261,11 +303,11 @@ COMMON_WORDS = {
 
         # Numéraux / quantificateurs
         "un", "deux", "trois", "premier", "second", "plusieurs", "quelques", "beaucoup",
-
-        # Abbréviations
-        "etc", "p.ex.", "ex.", "i.e."
     ],
 
+    # ----------------------
+    # ROMANIAN (ro)
+    # ----------------------
     "romanian": [
         # Articole / determinanți
         "un", "o", "niște", "cei", "acei", "această", "acest", "aceea", "acela",
@@ -300,9 +342,12 @@ COMMON_WORDS = {
         "unu", "doi", "trei", "primul", "al doilea", "mai mulți", "câțiva",
 
         # Neutral fillers / tokens
-        "ok", "hmm", "ah", "oh", "da", "nu", "poate", "mulțumesc"
+        "ok", "hmm", "ah", "oh", "da", "nu", "poate", "mulțumesc",
     ],
 
+    # ----------------------
+    # DEFAULT
+    # ----------------------
     "default": [
         # Generic fallback - core function words
         "the", "a", "an", "and", "or", "but", "of", "in", "to", "for", "with", "on", "at", "from",
