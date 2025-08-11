@@ -1,10 +1,12 @@
 import os
-from fpdf import FPDF
+import re
 from typing import Optional, Dict, Any
+from fpdf import FPDF
 
 
 from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import THEMES
+
 
 
 FONT_NAME = "DejaVu"  # Unicode safe
@@ -19,7 +21,6 @@ FONT_PATHS = {
 
 class CustomPDF(FPDF):
     """Custom PDF generator with consistent styling and layout."""
-
     def __init__(self):
         super().__init__()
         self.set_auto_page_break(auto=True, margin=15)
@@ -65,9 +66,7 @@ class PDFExporter:
         self.pdf.register_unicode_fonts(FONT_NAME, FONT_PATHS)
         return FONT_NAME
 
-    def render_pdf(
-        self, text: str, filename: str, title: str, odd_words: Optional[dict] = None
-    ) -> bool:
+    def render_pdf(self, text: str, filename: str, title: str) -> bool:
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
@@ -81,11 +80,21 @@ class PDFExporter:
             self.pdf.cell(0, 10, title, ln=1, align="C")
             self.pdf.ln(10)
 
+            cleaned_text = self._normalize_notes(text)
+
             # Body rendering
-            self.pdf.set_font(self.font_family, size=12)
-            for line in text.splitlines():
-                self.pdf.multi_cell(0, 6, line or " ")
-                self.pdf.ln(3)
+            for line in cleaned_text.splitlines():
+                line = line.strip()
+
+                if line.startswith("# "): # Heading 1
+                    self.pdf.set_font(self.font_family, style="B", size=14)
+                    self.pdf.multi_cell(0, 8, line[2:].strip())
+                    self.pdf.ln(2)
+
+                else: # Regular text
+                    self.pdf.set_font(self.font_family, size=12)
+                    self.pdf.multi_cell(0, 6, line or " ")
+                    self.pdf.ln(2)
 
             # Ensure output path is valid
             os.makedirs(os.path.dirname(filename), exist_ok=True)
@@ -101,7 +110,7 @@ class PDFExporter:
             return True
 
         except FileError:
-            raise  # Re-raise already formatted error
+            raise  # Re-raise previous errors
 
         except Exception as e:
             raise FileError(
@@ -126,7 +135,6 @@ class PDFExporter:
         notes_dict = notes_generator.create_notes(
             {"text": text, "segments": result.get("segments", [])}
         )
-        # print(f"Notes content: {notes_dict}")  # DEBUG
 
         notes = self._format_notes_dict(notes_dict, odd_words)
 
@@ -136,29 +144,33 @@ class PDFExporter:
         normalized = self._normalize_notes(notes)
 
         if not self.render_pdf(
-            normalized,
-            save_path,
-            f"Transcription: {os.path.basename(save_path)}",
-            odd_words=odd_words,
+            normalized, save_path, 
+            f"Transcription: {os.path.splitext(os.path.basename(save_path))[0]}" # Title
         ):
             raise FileError.pdf_creation_failed()
 
-    def _normalize_notes(self, md: str) -> str:
-        """Standardize PDF rendering"""
+    def _normalize_notes(self, notes: str) -> str:
+        """Standardize PDF rendering."""
         lines = []
-        for line in md.splitlines():
+        for line in notes.splitlines():
             line = line.rstrip()
 
             # Convert bullets
             if line.lstrip().startswith("•"):
                 line = line.replace("•", "-", 1)
 
-            # Normalize headers
+            # Normalize headers (reduce multiple '#' to single '#')
             if line.startswith(("#", "##", "###")):
-                line = f"# {line.lstrip('# ')}"
+                line = f"# {line.lstrip('# ').strip()}"
+
             lines.append(line)
 
         return "\n".join(lines)
+
+    def _clean_text(self, text: str) -> str:
+        """Remove problematic or non-printable characters for PDF."""
+        # Keep printable ASCII + newline (adjust if you want unicode)
+        return re.sub(r"[^\x20-\x7E\n]", "", text)
 
     def _format_notes_dict(
         self, notes_dict: Dict[str, Any], odd_words: Optional[dict] = None
@@ -169,19 +181,19 @@ class PDFExporter:
         # Add summary
         summary = notes_dict.get("Summary", "")
         if summary:
-            lines.append("Summary\n" + summary + "\n")
+            lines.append("# Summary\n" + summary + "\n")
 
         # Add Key Terms as bullet points
         key_terms = notes_dict.get("Key Terms", [])
         if key_terms:
-            lines.append("Key Terms")
+            lines.append("# Key Terms")
             for term in key_terms:
                 lines.append(f"- {term}")
             lines.append("")
 
         # Add Odd Words after Key Terms
         if odd_words:
-            lines.append("Specific Words")
+            lines.append("# Specific Words")
             for word, variants in odd_words.items():
                 if variants:
                     lines.append(f"- {word}: {', '.join(variants)}")
@@ -192,7 +204,7 @@ class PDFExporter:
         # Add Questions with timestamps
         questions = notes_dict.get("Questions", [])
         if questions:
-            lines.append("Questions")
+            lines.append("# Questions")
             for q in questions:
                 lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
             lines.append("")
@@ -200,15 +212,7 @@ class PDFExporter:
         # Add Timestamps with text
         timestamps = notes_dict.get("Timestamps", [])
         if timestamps:
-            lines.append("Timestamps")
-            for t in timestamps:
-                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
-            lines.append("")
-
-        return "\n".join(lines)
-        timestamps = notes_dict.get("Timestamps", [])
-        if timestamps:
-            lines.append("Timestamps")
+            lines.append("# Timestamps")
             for t in timestamps:
                 lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
             lines.append("")
