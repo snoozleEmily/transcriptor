@@ -49,8 +49,7 @@ class Interface(tk.Tk):
         )
 
         # Message for Custom Words
-        self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n" \
-
+        self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n"
 
         # Initialization sequence
         self._configure_window()
@@ -330,7 +329,11 @@ class Interface(tk.Tk):
                     if word.strip()
                 ]
                 # Dynamically extract all lines from the placeholder text
-                placeholders = [line.strip() for line in self.C_WORDS_EX.splitlines() if line.strip()]
+                placeholders = [
+                    line.strip()
+                    for line in self.C_WORDS_EX.splitlines()
+                    if line.strip()
+                ]
                 filtered_words = [w for w in word_list if w not in placeholders]
                 custom_words = {word: [] for word in filtered_words}
                 has_odd = bool(custom_words)
