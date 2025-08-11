@@ -1,3 +1,6 @@
+# External Resources
+BUG_REPORTS_GT = "https://github.com/snoozleEmily/transcriptor/issues" 
+
 # Color Constants
 LOGO_COLOR = "#EBAC36"  # Primary brand color used for the app logo (golden yellow)
 PLACEHOLDER_TEXT = "#334345"  # Color for placeholder text in input fields (dark teal blue)
@@ -34,5 +37,12 @@ FONTS = {
     "emoji_small": ("Segoe UI Emoji", 12)   # Small emoji (inline text size)
 }
 
-# External Resources
-BUG_REPORTS_GT = "https://github.com/snoozleEmily/transcriptor/issues" 
+# For PDF Styling
+PDF_COLORS = {
+    "title": "#00468B",        # Dark blue for main titles
+    "heading": "#00468B",      # Dark blue for headings
+    "text": "#282828",         # Dark gray for regular text
+    "bullet": "#000000",       # Black for bullet points
+    "header_line": "#2E3B4E",  # Navy blue for header/footer lines
+    "footer_text": "#282828",  # Dark gray for footer text
+}
