@@ -31,7 +31,7 @@ class ContentType:
         self.types = types or []          # List of content types
         self.words = words or {}          # Specific terms
         self.has_code = has_code          # Code content flag
-        self.has_odd_names = has_odd_names or bool(words)  # Unusual names flag
+        self.has_odd_names = has_odd_names  # Unusual names flag
         self.is_multilingual = is_multilingual  # Multilingual content flag
         self.note_style = note_style  # 'technical', 'lecture', 'meeting'
         

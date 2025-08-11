@@ -49,8 +49,7 @@ class Interface(tk.Tk):
         )
 
         # Message for Custom Words
-        self.C_WORDS_NOTE = "Enter words here!\n"
-        self.C_WORDS_EX = f"{self.C_WORDS_NOTE}\nTell transcriptor which custom words to look out for in the video.\n" \
+        self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n" \
 
 
         # Initialization sequence
@@ -324,18 +323,24 @@ class Interface(tk.Tk):
 
             # Only process if user entered actual words (not the example text)
             if custom_words_raw and custom_words_raw != self.C_WORDS_EX:
-                word_list = [  # Split by commas or newlines,
-                    word.strip()  # strip whitespace, remove empty entries
+                # Split by commas or newlines, strip whitespace, remove empty entries
+                word_list = [
+                    word.strip()
                     for word in custom_words_raw.replace("\n", ",").split(",")
                     if word.strip()
                 ]
+                # Dynamically extract all lines from the placeholder text
+                placeholders = [line.strip() for line in self.C_WORDS_EX.splitlines() if line.strip()]
+                filtered_words = [w for w in word_list if w not in placeholders]
+                custom_words = {word: [] for word in filtered_words}
+                has_odd = bool(custom_words)
 
-                # Convert to expected dict format {word: []}
-                custom_words = {word: [] for word in word_list}
+            else:
+                custom_words = None
+                has_odd = False
 
-            has_odd = bool(custom_words)  # True if we have custom words
             config = ContentType(
-                words=custom_words,  # This is now either None or a proper dict
+                words=custom_words,
                 has_odd_names=has_odd,
                 has_code=False,
                 types=[],
@@ -379,6 +384,9 @@ class Interface(tk.Tk):
 
     # --------------------- Async Completion Handler ---------------------
     def _complete_processing(self):
+        """Handle completion of async processing"""
+        self.running = False
+        self.show_feedback("✓ Processing complete!")
         """Handle completion of async processing"""
         self.running = False
         self.show_feedback("✓ Processing complete!")
