@@ -93,7 +93,7 @@ class EndFlow:
     def _update_dependencies(self) -> None:
         """Update dependent components with new config."""
         if self.content_config.words and isinstance(self.content_config.words, dict):
-            self.reviser.specific_words = self.content_config.words
+            self.reviser.odd_words = self.content_config.words
 
         self.notes_generator.config = self.content_config
 
