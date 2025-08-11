@@ -1,5 +1,6 @@
 import os
 from fpdf import FPDF
+from typing import Optional, Dict, Any
 
 
 from src.errors.exceptions import FileError, ErrorCode
@@ -64,7 +65,7 @@ class PDFExporter:
         self.pdf.register_unicode_fonts(FONT_NAME, FONT_PATHS)
         return FONT_NAME
 
-    def export_to_pdf(self, text: str, filename: str, title: str) -> bool:
+    def export_to_pdf(self, text: str, filename: str, title: str, odd_words: Optional[dict] = None) -> bool:
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
