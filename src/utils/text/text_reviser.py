@@ -13,19 +13,19 @@ class TextReviser:
     def __init__(
         self,
         language: Language,
-        specific_words: Optional[Dict[str, List[str]]] = None,
+        odd_words: Optional[Dict[str, List[str]]] = None,
     ):
         self.language_processor = language
 
         # Normalize specific_words into a dict-of-lists
-        if isinstance(specific_words, str):
-            self.specific_words = {"default": [specific_words]}
+        if isinstance(odd_words, str):
+            self.specific_words = {"default": [odd_words]}
 
-        elif isinstance(specific_words, list):
-            self.specific_words = {"default": specific_words}
+        elif isinstance(odd_words, list):
+            self.specific_words = {"default": odd_words}
 
         else:
-            self.specific_words = specific_words or {}
+            self.specific_words = odd_words or {}
 
     def _split_with_timestamps(
         self, text: str
