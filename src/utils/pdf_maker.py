@@ -1,11 +1,11 @@
 import os
 import re
-from typing import Optional, Dict, Any
 from fpdf import FPDF
-
+from typing import Optional, Dict, Any
+import datetime
 
 from src.errors.exceptions import FileError, ErrorCode
-from src.frontend.constants import THEMES
+from src.frontend.constants import THEMES, PDF_COLORS
 
 
 
@@ -33,18 +33,23 @@ class CustomPDF(FPDF):
 
     def header(self):
         self.set_font(FONT_NAME, size=12)
-        self.set_draw_color(*self._hex_to_rgb(THEMES["dark"]["bg"]))
+        self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
         self.line(10, 10, 200, 10)
+        self.set_text_color(*self._hex_to_rgb(PDF_COLORS["text"]))
         self.cell(0, 10, "Made With Emily's Transcriptor", ln=1, align="C")
 
     def footer(self):
-        self.set_y(-15)
+        self.set_y(-30)  # Increase margin by moving footer content higher
         self.set_font(FONT_NAME, size=8)
-        self.set_draw_color(*self._hex_to_rgb(THEMES["dark"]["bg"]))
+        self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
         self.line(10, self.get_y() - 2, 200, self.get_y() - 2)
+        self.set_text_color(*self._hex_to_rgb(PDF_COLORS["footer_text"]))
         self.cell(0, 10, f"Page {self.page_no()}", align="C")
+        self.set_y(-25)  # Also shift date text up
+        date_str = datetime.datetime.now().strftime("%d/%m/%Y")
+        self.cell(0, 10, f"Generated on: {date_str}", align="C")
 
     def _hex_to_rgb(self, hex_color: str) -> tuple[int, int, int]:
         hex_color = hex_color.lstrip("#")
@@ -57,7 +62,6 @@ class CustomPDF(FPDF):
 
 class PDFExporter:
     """Main PDF export handler that processes content and generates files."""
-
     def __init__(self):
         self.pdf = CustomPDF()
         self.font_family = self._load_unicode_fonts()
@@ -76,6 +80,7 @@ class PDFExporter:
             self.pdf.add_page()
 
             # Title block
+            self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["title"]))
             self.pdf.set_font(self.font_family, style="B", size=18)
             self.pdf.cell(0, 10, title, ln=1, align="C")
             self.pdf.ln(10)
@@ -86,12 +91,14 @@ class PDFExporter:
             for line in cleaned_text.splitlines():
                 line = line.strip()
 
-                if line.startswith("# "): # Heading 1
+                if line.startswith("# "):  # Heading 
+                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["heading"]))
                     self.pdf.set_font(self.font_family, style="B", size=14)
                     self.pdf.multi_cell(0, 8, line[2:].strip())
                     self.pdf.ln(2)
 
-                else: # Regular text
+                else:  # Regular text
+                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["text"]))
                     self.pdf.set_font(self.font_family, size=12)
                     self.pdf.multi_cell(0, 6, line or " ")
                     self.pdf.ln(2)
@@ -144,8 +151,8 @@ class PDFExporter:
         normalized = self._normalize_notes(notes)
 
         if not self.render_pdf(
-            normalized, save_path, 
-            f"Transcription: {os.path.splitext(os.path.basename(save_path))[0]}" # Title
+            normalized, save_path,
+            f"Transcription: {os.path.splitext(os.path.basename(save_path))[0]}"  # Title
         ):
             raise FileError.pdf_creation_failed()
 
