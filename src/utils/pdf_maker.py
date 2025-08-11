@@ -7,20 +7,19 @@ from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import THEMES
 
 
-
-FONT_NAME = "DejaVu" # Unicode safe
+FONT_NAME = "DejaVu"  # Unicode safe
 FONT_DIR = os.path.join(os.path.dirname(__file__), "..", "fonts")
-
 FONT_PATHS = {
-    "": os.path.join(FONT_DIR, "DejaVuSans.ttf"),               # Regular
-    "B": os.path.join(FONT_DIR, "DejaVuSans-Bold.ttf"),         # Bold
-    "I": os.path.join(FONT_DIR, "DejaVuSans-Oblique.ttf"),      # Italic
-    "BI": os.path.join(FONT_DIR, "DejaVuSans-BoldOblique.ttf"), # Bold Italic
+    "": os.path.join(FONT_DIR, "DejaVuSans.ttf"),  # Regular
+    "B": os.path.join(FONT_DIR, "DejaVuSans-Bold.ttf"),  # Bold
+    "I": os.path.join(FONT_DIR, "DejaVuSans-Oblique.ttf"),  # Italic
+    "BI": os.path.join(FONT_DIR, "DejaVuSans-BoldOblique.ttf"),  # Bold Italic
 }
 
 
 class CustomPDF(FPDF):
     """Custom PDF generator with consistent styling and layout."""
+
     def __init__(self):
         super().__init__()
         self.set_auto_page_break(auto=True, margin=15)
@@ -57,6 +56,7 @@ class CustomPDF(FPDF):
 
 class PDFExporter:
     """Main PDF export handler that processes content and generates files."""
+
     def __init__(self):
         self.pdf = CustomPDF()
         self.font_family = self._load_unicode_fonts()
@@ -65,7 +65,9 @@ class PDFExporter:
         self.pdf.register_unicode_fonts(FONT_NAME, FONT_PATHS)
         return FONT_NAME
 
-    def export_to_pdf(self, text: str, filename: str, title: str, odd_words: Optional[dict] = None) -> bool:
+    def render_pdf(
+        self, text: str, filename: str, title: str, odd_words: Optional[dict] = None
+    ) -> bool:
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
@@ -99,11 +101,116 @@ class PDFExporter:
             return True
 
         except FileError:
-            raise # Re-raise already formatted error
-        
+            raise  # Re-raise already formatted error
+
         except Exception as e:
             raise FileError(
                 code=ErrorCode.PDF_GENERATION_ERROR,
                 message="Unexpected PDF generation error",
                 context={"error_type": type(e).__name__, "error_details": str(e)},
             ) from e
+
+    def save_notes(
+        self,
+        result: Dict[str, Any],
+        text: str,
+        save_path: str,
+        odd_words: Optional[dict] = None,
+        language=None,
+        config=None,
+    ) -> None:
+        """Handle PDF export with normalization and validation."""
+        from src.utils.text.notes_generator import NotesGenerator
+
+        notes_generator = NotesGenerator(language=language, config=config)
+        notes_dict = notes_generator.create_notes(
+            {"text": text, "segments": result.get("segments", [])}
+        )
+        # print(f"Notes content: {notes_dict}")  # DEBUG
+
+        notes = self._format_notes_dict(notes_dict, odd_words)
+
+        if not notes.strip():  # Check for empty content
+            raise FileError.pdf_invalid_content(len(notes))
+
+        normalized = self._normalize_notes(notes)
+
+        if not self.render_pdf(
+            normalized,
+            save_path,
+            f"Transcription: {os.path.basename(save_path)}",
+            odd_words=odd_words,
+        ):
+            raise FileError.pdf_creation_failed()
+
+    def _normalize_notes(self, md: str) -> str:
+        """Standardize PDF rendering"""
+        lines = []
+        for line in md.splitlines():
+            line = line.rstrip()
+
+            # Convert bullets
+            if line.lstrip().startswith("•"):
+                line = line.replace("•", "-", 1)
+
+            # Normalize headers
+            if line.startswith(("#", "##", "###")):
+                line = f"# {line.lstrip('# ')}"
+            lines.append(line)
+
+        return "\n".join(lines)
+
+    def _format_notes_dict(
+        self, notes_dict: Dict[str, Any], odd_words: Optional[dict] = None
+    ) -> str:
+        """Convert notes dictionary to formatted string for PDF."""
+        lines = []
+
+        # Add summary
+        summary = notes_dict.get("Summary", "")
+        if summary:
+            lines.append("Summary\n" + summary + "\n")
+
+        # Add Key Terms as bullet points
+        key_terms = notes_dict.get("Key Terms", [])
+        if key_terms:
+            lines.append("Key Terms")
+            for term in key_terms:
+                lines.append(f"- {term}")
+            lines.append("")
+
+        # Add Odd Words after Key Terms
+        if odd_words:
+            lines.append("Specific Words")
+            for word, variants in odd_words.items():
+                if variants:
+                    lines.append(f"- {word}: {', '.join(variants)}")
+                else:
+                    lines.append(f"- {word}")
+            lines.append("")
+
+        # Add Questions with timestamps
+        questions = notes_dict.get("Questions", [])
+        if questions:
+            lines.append("Questions")
+            for q in questions:
+                lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
+            lines.append("")
+
+        # Add Timestamps with text
+        timestamps = notes_dict.get("Timestamps", [])
+        if timestamps:
+            lines.append("Timestamps")
+            for t in timestamps:
+                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
+            lines.append("")
+
+        return "\n".join(lines)
+        timestamps = notes_dict.get("Timestamps", [])
+        if timestamps:
+            lines.append("Timestamps")
+            for t in timestamps:
+                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
+            lines.append("")
+
+        return "\n".join(lines)

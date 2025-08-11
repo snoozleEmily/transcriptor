@@ -87,7 +87,7 @@ class EndFlow:
 
         if isinstance(words, list):
             return {w.strip(): [] for w in words if w.strip()}
-            
+
         return words
 
     def _update_dependencies(self) -> None:
@@ -155,96 +155,18 @@ class EndFlow:
         )
 
         if pretty_notes:
-            self._export_pdf_notes(result, revised_text, save_path)
+            self.pdf_exporter.save_notes(
+                result,
+                revised_text,
+                save_path,
+                self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {},
+                language=self.language,
+                config=self.content_config,
+            )
         else:
             save_transcription(revised_text, save_path)
 
         return os.path.abspath(save_path)
-
-    def _normalize_notes(self, md: str) -> str:
-        """Standardize PDF rendering"""
-        lines = []
-        for line in md.splitlines():
-            line = line.rstrip()
-
-            # Convert bullets
-            if line.lstrip().startswith("•"):
-                line = line.replace("•", "-", 1)
-
-            # Normalize headers
-            if line.startswith(("#", "##", "###")):
-                line = f"# {line.lstrip('# ')}"
-            lines.append(line)
-
-        return "\n".join(lines)
-
-    def _export_pdf_notes(
-        self, result: Dict[str, Any], text: str, save_path: str
-    ) -> None:
-        """Handle PDF export with normalization and validation."""
-        notes_dict = self.notes_generator.create_notes(
-            {"text": text, "segments": result.get("segments", [])}
-        )
-        print(f"Notes content: {notes_dict}")  # DEBUG
-
-        # Convert dict notes to formatted string
-        odd_words = self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {}
-        notes = self._format_notes_dict(notes_dict, odd_words)
-
-        if not notes.strip():  # Check for empty content
-            raise FileError.pdf_invalid_content(len(notes))
-
-        normalized = self._normalize_notes(notes)
-
-        if not self.pdf_exporter.export_to_pdf(
-            normalized, save_path, f"Transcription: {os.path.basename(save_path)}", odd_words=odd_words
-        ):
-            raise FileError.pdf_creation_failed()
-
-    def _format_notes_dict(self, notes_dict: Dict[str, Any], odd_words: Optional[dict] = None) -> str:
-        """Convert notes dictionary to formatted string for PDF."""
-        lines = []
-
-        # Add summary
-        summary = notes_dict.get("Summary", "")
-        if summary:
-            lines.append("Summary\n" + summary + "\n")
-
-        # Add Key Terms as bullet points
-        key_terms = notes_dict.get("Key Terms", [])
-        if key_terms:
-            lines.append("Key Terms")
-            for term in key_terms:
-                lines.append(f"- {term}")
-            lines.append("")
-
-        # Add Odd Words after Key Terms
-        if odd_words:
-            lines.append("Specific Words")
-            for word, variants in odd_words.items():
-                if variants:
-                    lines.append(f"- {word}: {', '.join(variants)}")
-                else:
-                    lines.append(f"- {word}")
-            lines.append("")
-
-        # Add Questions with timestamps
-        questions = notes_dict.get("Questions", [])
-        if questions:
-            lines.append("Questions")
-            for q in questions:
-                lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
-            lines.append("")
-
-        # Add Timestamps with text
-        timestamps = notes_dict.get("Timestamps", [])
-        if timestamps:
-            lines.append("Timestamps")
-            for t in timestamps:
-                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
-            lines.append("")
-
-        return "\n".join(lines)
 
     # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
