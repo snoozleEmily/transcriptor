@@ -70,62 +70,6 @@ class PDFExporter:
         self.pdf.register_unicode_fonts(FONT_NAME, FONT_PATHS)
         return FONT_NAME
 
-    def render_pdf(self, text: str, filename: str, title: str) -> bool:
-        try:
-            if not text.strip():
-                raise FileError.pdf_invalid_content(len(text))
-
-            self.pdf = CustomPDF()
-            self.font_family = self._load_unicode_fonts()
-            self.pdf.add_page()
-
-            # Title block
-            self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["title"]))
-            self.pdf.set_font(self.font_family, style="B", size=18)
-            self.pdf.cell(0, 10, title, ln=1, align="C")
-            self.pdf.ln(10)
-
-            cleaned_text = self._normalize_notes(text)
-
-            # Body rendering
-            for line in cleaned_text.splitlines():
-                line = line.strip()
-
-                if line.startswith("# "):  # Heading 
-                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["heading"]))
-                    self.pdf.set_font(self.font_family, style="B", size=14)
-                    self.pdf.multi_cell(0, 8, line[2:].strip())
-                    self.pdf.ln(2)
-
-                else:  # Regular text
-                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["text"]))
-                    self.pdf.set_font(self.font_family, size=12)
-                    self.pdf.multi_cell(0, 6, line or " ")
-                    self.pdf.ln(2)
-
-            # Ensure output path is valid
-            os.makedirs(os.path.dirname(filename), exist_ok=True)
-
-            if os.path.exists(filename) and not os.access(filename, os.W_OK):
-                raise FileError.pdf_permission_denied(filename, PermissionError())
-
-            self.pdf.output(filename)
-
-            if not os.path.exists(filename):
-                raise FileError.pdf_creation_failed()
-
-            return True
-
-        except FileError:
-            raise  # Re-raise previous errors
-
-        except Exception as e:
-            raise FileError(
-                code=ErrorCode.PDF_GENERATION_ERROR,
-                message="Unexpected PDF generation error",
-                context={"error_type": type(e).__name__, "error_details": str(e)},
-            ) from e
-
     def save_notes(
         self,
         result: Dict[str, Any],
@@ -225,3 +169,59 @@ class PDFExporter:
             lines.append("")
 
         return "\n".join(lines)
+    
+    def render_pdf(self, text: str, filename: str, title: str) -> bool:
+        try:
+            if not text.strip():
+                raise FileError.pdf_invalid_content(len(text))
+
+            self.pdf = CustomPDF()
+            self.font_family = self._load_unicode_fonts()
+            self.pdf.add_page()
+
+            # Title block
+            self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["title"]))
+            self.pdf.set_font(self.font_family, style="B", size=18)
+            self.pdf.cell(0, 10, title, ln=1, align="C")
+            self.pdf.ln(10)
+
+            cleaned_text = self._normalize_notes(text)
+
+            # Body rendering
+            for line in cleaned_text.splitlines():
+                line = line.strip()
+
+                if line.startswith("# "):  # Heading 
+                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["heading"]))
+                    self.pdf.set_font(self.font_family, style="B", size=14)
+                    self.pdf.multi_cell(0, 8, line[2:].strip())
+                    self.pdf.ln(2)
+
+                else:  # Regular text
+                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["text"]))
+                    self.pdf.set_font(self.font_family, size=12)
+                    self.pdf.multi_cell(0, 6, line or " ")
+                    self.pdf.ln(2)
+
+            # Ensure output path is valid
+            os.makedirs(os.path.dirname(filename), exist_ok=True)
+
+            if os.path.exists(filename) and not os.access(filename, os.W_OK):
+                raise FileError.pdf_permission_denied(filename, PermissionError())
+
+            self.pdf.output(filename)
+
+            if not os.path.exists(filename):
+                raise FileError.pdf_creation_failed()
+
+            return True
+
+        except FileError:
+            raise  # Re-raise previous errors
+
+        except Exception as e:
+            raise FileError(
+                code=ErrorCode.PDF_GENERATION_ERROR,
+                message="Unexpected PDF generation error",
+                context={"error_type": type(e).__name__, "error_details": str(e)},
+            ) from e
