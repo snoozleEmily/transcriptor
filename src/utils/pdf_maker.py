@@ -5,7 +5,7 @@ from typing import Optional, Dict, Any
 import datetime
 
 from src.errors.exceptions import FileError, ErrorCode
-from src.frontend.constants import THEMES, PDF_COLORS
+from src.frontend.constants import PDF_COLORS
 
 
 
@@ -93,6 +93,9 @@ class PDFExporter:
             raise FileError.pdf_invalid_content(len(notes))
 
         normalized = self._normalize_notes(notes)
+
+        if text.strip(): # Get full transcription text
+            normalized += "\n\n# Transcription\n" + text.strip()
 
         if not self.render_pdf(
             normalized, save_path,
