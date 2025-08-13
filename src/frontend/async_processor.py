@@ -15,7 +15,7 @@ class AsyncTaskManager:
         Args:
             path: Path to the video file
             config_params: Content configuration parameters
-            pretty_notes: Boolean flag for PDF/TXT output
+            quick_script: Boolean flag for PDF/TXT output
             progress_handler: Callback for progress updates
         """
 
@@ -24,7 +24,7 @@ class AsyncTaskManager:
                 result = self.interface.controller.process_video(
                     path,
                     config_params=config_params,
-                    pretty_notes=quick_script,
+                    quick_script=quick_script,
                     progress_callback=progress_handler,
                 )
                 self.gui_queue.put(lambda: self.completion_callback(result))
