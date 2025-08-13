@@ -21,7 +21,7 @@ class AsyncTaskManager:
 
         def task():
             try:
-                result = self.interface.controller.process_video(
+                result = self.interface.flow.process_video( # end_flow reference
                     path,
                     config_params=config_params,
                     quick_script=quick_script,
