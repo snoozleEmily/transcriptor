@@ -10,11 +10,11 @@ from .widgets.header import Header
 from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
-from src.utils.text.content_type import ContentType
 from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
+from src.utils.text.content_type import ContentType
 
 
-# TODO: Refactor this class into smaller modules?
+# TODO?: Refactor this class into smaller modules?
 
 
 class Interface(tk.Tk):
