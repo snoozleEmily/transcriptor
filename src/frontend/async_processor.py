@@ -8,7 +8,7 @@ class AsyncTaskManager:
         self.completion_callback = completion_callback
 
     def get_busy(
-        self, path, config_params=None, pretty_notes=False, progress_handler=None
+        self, path, config_params=None, quick_script=False, progress_handler=None
     ):
         """Handle async transcription with progress updates
 
@@ -24,7 +24,7 @@ class AsyncTaskManager:
                 result = self.interface.controller.process_video(
                     path,
                     config_params=config_params,
-                    pretty_notes=pretty_notes,
+                    pretty_notes=quick_script,
                     progress_callback=progress_handler,
                 )
                 self.gui_queue.put(lambda: self.completion_callback(result))

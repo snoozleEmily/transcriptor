@@ -103,7 +103,7 @@ class EndFlow:
         self,
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
-        pretty_notes: bool = False,
+        quick_script: bool = False,
         **kwargs,
     ) -> str:
         """Enhanced transcription pipeline with better error context."""
@@ -124,7 +124,7 @@ class EndFlow:
                 raise FileError.empty_text()
 
             return self._save_output(
-                result, revised_text, os.path.basename(video_path), pretty_notes
+                result, revised_text, os.path.basename(video_path), quick_script
             )
         except Exception as e:
             self._log_error_context(video_path, config_params, kwargs)
@@ -147,14 +147,14 @@ class EndFlow:
         result: Dict[str, Any],
         revised_text: str,
         source_name: str,
-        pretty_notes: bool,
+        quick_script: bool,
     ) -> str:
         """Handle output saving with validation."""
         save_path = self._get_save_path(
-            os.path.splitext(source_name)[0], ".pdf" if pretty_notes else ".txt"
+            os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
-
-        if pretty_notes:
+        print(f"The flag quick_script is set to: {quick_script}")
+        if not quick_script:
             self.pdf_exporter.save_notes(
                 result,
                 revised_text,
@@ -186,6 +186,7 @@ class EndFlow:
                 filetypes=file_types,
             ):
                 return path
+            
         except Exception:
             pass
 

@@ -314,7 +314,7 @@ class Interface(tk.Tk):
         )
         if path:
             # Get format preference before processing
-            pretty_notes = self.buttons_panel.get_pretty_notes_flag()
+            quick_script = self.buttons_panel.get_quick_script_flag()
 
             # Get custom words from the text console and process them
             custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
@@ -352,7 +352,7 @@ class Interface(tk.Tk):
 
             self.running = True
             self.async_mgr.get_busy(
-                path, config_params=config, pretty_notes=pretty_notes
+                path, config_params=config, quick_script=quick_script
             )
 
     # --------------------- System Operations ---------------------
