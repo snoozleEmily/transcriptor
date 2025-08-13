@@ -153,7 +153,8 @@ class EndFlow:
         save_path = self._get_save_path(
             os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
-        print(f"The flag quick_script is set to: {quick_script}")
+        print(f"[DEBUG] quick_script received in EndFlow: {quick_script}")
+
         if not quick_script:
             self.pdf_exporter.save_notes(
                 result,

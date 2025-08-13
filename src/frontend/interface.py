@@ -315,6 +315,7 @@ class Interface(tk.Tk):
         if path:
             # Get format preference before processing
             quick_script = self.buttons_panel.get_quick_script_flag()
+            print(f"[DEBUG] quick_script received in Interface: {quick_script}")
 
             # Get custom words from the text console and process them
             custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
