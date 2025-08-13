@@ -37,9 +37,9 @@ class Interface(tk.Tk):
             pass
 
     # --------------------- Base Variables ---------------------
-    def __init__(self, controller):
+    def __init__(self, flow):
         super().__init__()
-        self.controller = controller
+        self.flow = flow # Gets called in AsyncTaskManager
         self.running = False
         self._alive = True
         self.current_theme = "default"
