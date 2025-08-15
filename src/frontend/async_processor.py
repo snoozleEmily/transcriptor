@@ -1,6 +1,7 @@
 import threading
 
 
+
 class AsyncTaskManager:
     """
     Manages asynchronous video processing tasks to prevent blocking the GUI.
@@ -43,7 +44,7 @@ class AsyncTaskManager:
             Executes video processing and ensures results are communicated back to the main GUI thread.
             """
             try:
-                result = self.interface.flow.process_video( # References EndFlow
+                result = self.interface.flow.process_video(  # References EndFlow
                     path,
                     config_params=config_params,
                     quick_script=quick_script,
