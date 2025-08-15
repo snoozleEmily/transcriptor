@@ -22,7 +22,6 @@ from src.utils.models import MODELS
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
-
     model_size = str(MODELS[1])  # Default model
 
     def __init__(self) -> None:
