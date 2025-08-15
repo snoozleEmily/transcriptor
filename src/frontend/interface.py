@@ -12,6 +12,7 @@ from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 from src.utils.text.content_type import ContentType
+from src.errors.debug import debug
 
 
 # TODO?: Refactor this class into smaller modules?
@@ -39,7 +40,7 @@ class Interface(tk.Tk):
     # --------------------- Base Variables ---------------------
     def __init__(self, flow):
         super().__init__()
-        self.flow = flow # Gets called in AsyncTaskManager
+        self.flow = flow  # Gets called in AsyncTaskManager
         self.running = False
         self._alive = True
         self.current_theme = "default"
@@ -314,8 +315,10 @@ class Interface(tk.Tk):
         )
         if path:
             # Get format preference before processing
-            quick_script = self.buttons_panel.get_quick_script_flag() # OnlyScript flag
-            print(f"[DEBUG] quick_script received in Interface: {quick_script}")
+            quick_script = self.buttons_panel.get_quick_script_flag()  # OnlyScript flag
+
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] quick_script received in Interface: {quick_script}")
 
             # Get custom words from the text console and process them
             custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
@@ -367,6 +370,7 @@ class Interface(tk.Tk):
         while not self.gui_queue.empty():
             try:
                 self.gui_queue.get_nowait()()
+
             except Empty:
                 break
 
@@ -388,9 +392,6 @@ class Interface(tk.Tk):
 
     # --------------------- Async Completion Handler ---------------------
     def _complete_processing(self):
-        """Handle completion of async processing"""
-        self.running = False
-        self.show_feedback("✓ Processing complete!")
         """Handle completion of async processing"""
         self.running = False
         self.show_feedback("✓ Processing complete!")
