@@ -1,189 +1,247 @@
 @echo off
 setlocal enabledelayedexpansion
 title Emily's Transcriptor - Setup
+
+:: Hide command outputs by default
+if not defined DEBUG (
+    >nul 2>&1 (
+        echo >nul
+    )
+)
+
+:: Set colors (green text on black background)
 color 0A 
 
-:: ------------------------------------------------------------
-:: Initial Credits
-:: ------------------------------------------------------------
+:: ==================================================
+:: Initial credits message
+:: ==================================================
 echo.
 echo ==================================================
 echo  Emily's Transcriptor
 echo ==================================================
-echo This is an independent project by Emily A. (@snoozleEmily)
-echo https://github.com/snoozleEmily/transcriptor
-echo Licensed under GPL-3.0
 echo.
-timeout /t 3 /nobreak >nul
+echo This is an independent project by Emily A. (@snoozleEmily)
+echo You can download it from https://github.com/snoozleEmily/transcriptor
+echo It is licensed under the GPL-3.0 license.
+echo See README.md for more details.
+echo.
+echo ------------------------------------------------
+echo.
+echo Este e um projeto independente criado por Emily A. (@snoozleEmily)
+echo Voce pode baixa-lo em https://github.com/snoozleEmily/transcriptor
+echo Ele esta licenciado sob a licenca GPL-3.0.
+echo Consulte o README.md para mais informacoes.
+echo.
+echo ==================================================
+echo Now, let's get started! / Agora, vamos comecar!
+echo ==================================================
+timeout /t 5 /nobreak >nul
 cls
 
-:: ------------------------------------------------------------
-:: Function: Display message
-:: ------------------------------------------------------------
+:: Jump to MAIN to avoid accidentally running functions
+goto :main
+
+:: ==================================================
+:: Function :display
+:: Displays a message in a box
+:: ==================================================
 :display
 echo.
 echo ===========================================
 echo  %~1
 echo ===========================================
 echo.
-timeout /t 1 /nobreak >nul
+timeout /t 2 /nobreak >nul
 goto :eof
 
+:: ==================================================
+:: Function :handle_error
+:: Displays an error message and pauses
+:: ==================================================
+:handle_error
+echo.
+echo ===========================================================
+echo ERROR encountered at step: %~1
+echo ===========================================================
+echo.
+pause
+exit /b 1
+
+:: ==================================================
+:: MAIN SCRIPT
+:: ==================================================
 :main
 call :display "Initializing Setup..."
 
-:: ------------------------------------------------------------
-:: Step 1 - Install Git if missing
-:: ------------------------------------------------------------
-call :display "Step 1/8: Checking Git..."
-where git >nul 2>nul || (
+:: ==================================================
+:: Step 1: Check for Python 3.10+
+:: ==================================================
+call :display "Step 1/8: Checking Python..."
+where python >nul 2>nul
+if errorlevel 1 (
+    call :display "Python not found. Installing..."
+    curl -L -o python.exe https://www.python.org/ftp/python/3.10.13/python-3.10.13-amd64.exe
+    if errorlevel 1 call :handle_error "Downloading Python"
+    start /wait python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
+    if errorlevel 1 call :handle_error "Installing Python"
+    del python.exe
+) else (
+    call :display "Python is already installed :)"
+)
+set "PYTHON_CMD=python"
+
+:: ==================================================
+:: Step 2: Check for Git
+:: ==================================================
+call :display "Step 2/8: Checking Git..."
+where git >nul 2>nul
+if errorlevel 1 (
     call :display "Git not found. Installing..."
     curl -L -o git.exe https://github.com/git-for-windows/git/releases/latest/download/Git-2.45.2-64-bit.exe
+    if errorlevel 1 call :handle_error "Downloading Git"
     start /wait git.exe /VERYSILENT /NORESTART
+    if errorlevel 1 call :handle_error "Installing Git"
     del git.exe
+) else (
+    call :display "Git is already installed :)"
 )
 
-:: ------------------------------------------------------------
-:: Step 2 - Install Python 3.10 if missing
-:: ------------------------------------------------------------
-call :display "Step 2/8: Checking Python 3.10..."
-set "PYTHON_CMD=python"
-for /f "tokens=2 delims= " %%v in ('python --version 2^>nul') do set PYTHON_VER=%%v
-echo %PYTHON_VER% | findstr /r "^3\.10\." >nul || (
-    call :display "Installing Python 3.10..."
-    curl -L -o python.exe https://www.python.org/ftp/python/3.10.13/python-3.10.13-amd64.exe
-    start /wait python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
-    del python.exe
-)
-
-:: ------------------------------------------------------------
-:: Step 3 - Install CMake if missing
-:: ------------------------------------------------------------
+:: ==================================================
+:: Step 3: Check for CMake
+:: ==================================================
 call :display "Step 3/8: Checking CMake..."
-where cmake >nul 2>nul || (
+where cmake >nul 2>nul
+if errorlevel 1 (
     call :display "CMake not found. Installing..."
     curl -L -o cmake.msi https://github.com/Kitware/CMake/releases/latest/download/cmake-3.29.0-windows-x86_64.msi
+    if errorlevel 1 call :handle_error "Downloading CMake"
     start /wait msiexec /i cmake.msi /quiet /norestart
+    if errorlevel 1 call :handle_error "Installing CMake"
     del cmake.msi
+) else (
+    call :display "CMake is already installed :)"
 )
 
-:: ------------------------------------------------------------
-:: Step 4 - C++ Compiler (install if missing)
-:: ------------------------------------------------------------
+:: ==================================================
+:: Step 4: Check for C++ Compiler
+:: ==================================================
 call :display "Step 4/8: Checking C++ Compiler..."
-where cl >nul 2>nul || (
-    call :display "No C++ compiler detected. Installing Visual Studio Build Tools (C++ workload)..."
+where cl >nul 2>nul
+if errorlevel 1 (
+    call :display "C++ compiler not found. Installing Visual Studio Build Tools..."
     set "VSBT_URL=https://aka.ms/vs/17/release/vs_BuildTools.exe"
     curl -L -o vs_buildtools.exe %VSBT_URL%
+    if errorlevel 1 call :handle_error "Downloading Visual Studio Build Tools"
     start /wait vs_buildtools.exe --quiet --wait --norestart --nocache ^
         --add Microsoft.VisualStudio.Workload.VCTools ^
         --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
         --add Microsoft.VisualStudio.Component.Windows10SDK.19041 ^
         --includeRecommended
+    if errorlevel 1 call :handle_error "Installing Visual Studio Build Tools"
     del vs_buildtools.exe
 )
+where cl >nul 2>nul
+if errorlevel 1 call :handle_error "C++ compiler still missing after installation"
 
-:: Re-check cl after install
-where cl >nul 2>nul || (
-    call :display "ERROR: C++ compiler still not available. Please reboot and re-run this script."
-    goto :end
-)
-
-:: ------------------------------------------------------------
-:: Step 5 - CUDA (optional, auto-install if NVIDIA GPU)
-:: ------------------------------------------------------------
+:: ==================================================
+:: Step 5: Check for CUDA (optional)
+:: ==================================================
 call :display "Step 5/8: Checking CUDA..."
 where nvcc >nul 2>nul
-if %errorlevel% neq 0 (
+if errorlevel 1 (
     for /f %%G in ('powershell -NoProfile -Command "(Get-CimInstance Win32_VideoController ^| Where-Object {$_.Name -match 'NVIDIA'} ^| Measure-Object).Count"') do set NVIDIA_COUNT=%%G
     if not defined NVIDIA_COUNT set NVIDIA_COUNT=0
     if %NVIDIA_COUNT% GTR 0 (
         call :display "NVIDIA GPU detected. Installing CUDA Toolkit..."
         set "CUDA_URL=https://developer.download.nvidia.com/compute/cuda/12.4.1/network_installers/cuda_12.4.1_windows_network.exe"
         curl -L -o cuda-installer.exe %CUDA_URL%
+        if errorlevel 1 call :handle_error "Downloading CUDA"
         start /wait cuda-installer.exe -s
+        if errorlevel 1 call :handle_error "Installing CUDA"
         del cuda-installer.exe
     ) else (
-        call :display "No NVIDIA GPU detected. Skipping CUDA install."
+        call :display "No NVIDIA GPU detected. Skipping CUDA installation."
     )
 ) else (
     call :display "CUDA already installed."
 )
 
-:: ------------------------------------------------------------
-:: Step 6 - Install FFmpeg if missing
-:: ------------------------------------------------------------
+:: ==================================================
+:: Step 6: Check for FFmpeg
+:: ==================================================
 call :display "Step 6/8: Checking FFmpeg..."
-where ffmpeg >nul 2>nul || (
-    call :display "Installing FFmpeg..."
+where ffmpeg >nul 2>nul
+if errorlevel 1 (
+    call :display "FFmpeg not found. Installing..."
     curl -L -o ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
     mkdir .ffmpeg
     tar -xf ffmpeg.zip -C .ffmpeg
     move .ffmpeg\ffmpeg-master-latest-win64-gpl\* .ffmpeg >nul
     rmdir /s /q .ffmpeg\ffmpeg-master-latest-win64-gpl
     del ffmpeg.zip
-
-    :: Add FFmpeg to PATH for current session
     set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-
-    :: Persist FFmpeg PATH safely
-    setx PATH "%PATH%;%~dp0.ffmpeg\bin"
+) else (
+    call :display "FFmpeg is already installed :)"
 )
 
-:: ------------------------------------------------------------
-:: Step 7 - Setup Python environment & dependencies
-:: ------------------------------------------------------------
+:: ==================================================
+:: Step 7: Python environment setup
+:: ==================================================
 call :display "Step 7/8: Setting up Python environment..."
 
-:: Step 7.1/8 - Create virtual environment if it doesn't exist
+:: Step 7.1 - Create virtual environment
 if not exist "venv" (
-    call :display "Step 7.1/8: Creating Python virtual environment..."
+    call :display "Step 7.1/8: Creating virtual environment..."
     %PYTHON_CMD% -m venv venv
+    if errorlevel 1 call :handle_error "Creating Python venv"
 )
 
-:: Activate virtual environment
+:: Step 7.2 - Activate virtual environment
 call venv\Scripts\activate.bat
 
-:: Upgrade pip inside venv
-python -m pip install --upgrade pip
-
-:: Step 7.2/8 - Install dependencies from requirements.txt
+:: Step 7.3 - Install requirements
 if exist requirements.txt (
-    call :display "Step 7.2/8: Installing dependencies from requirements.txt..."
+    call :display "Step 7.3/8: Installing dependencies from requirements.txt..."
     pip install -r requirements.txt
+    if errorlevel 1 call :handle_error "Installing Python dependencies"
 ) else (
-    call :display "Step 7.2/8: requirements.txt not found!"
-    echo Please place requirements.txt in this folder and re-run the script, OR install the packages manually.
+    call :display "requirements.txt not found. Skipping..."
 )
 
-:: Step 7.3/8 - Install PyTorch if missing
-call :display "Step 7.3/8: Checking for PyTorch..."
+:: Step 7.4 - Install PyTorch
+call :display "Step 7.4/8: Installing PyTorch..."
 python -c "import importlib.util,subprocess,sys; \
 if importlib.util.find_spec('torch') is None: \
     subprocess.check_call([sys.executable,'-m','pip','install','torch==2.0.0','--index-url','https://download.pytorch.org/whl/cpu'])"
+if errorlevel 1 call :handle_error "Installing PyTorch"
 
-:: Step 7.4/8 - Install llama_cpp if missing
+:: Step 7.5 - Install llama_cpp
+call :display "Step 7.5/8: Installing llama-cpp-python..."
 python -c "import importlib.util,subprocess,sys; \
 import pkg_resources; \
-try: \
-    pkg_resources.require('llama-cpp-python==0.3.9'); \
+try: pkg_resources.require('llama-cpp-python==0.3.9'); \
 except pkg_resources.DistributionNotFound: \
     subprocess.check_call([sys.executable,'-m','pip','install','llama-cpp-python==0.3.9'])"
+if errorlevel 1 call :handle_error "Installing llama-cpp-python"
 
-:: ----------------- Step 8: Run main.py -----------------
-call :display "Step 8/8: Starting Emily's Transcriptor..."
+:: ==================================================
+:: Step 8: Run main.py
+:: ==================================================
+call :display "Step 8/8: Running Emily's Transcriptor..."
 python -c "from main import main; main()"
+if errorlevel 1 call :handle_error "Running main.py"
 
+:: ==================================================
 :: Final message
+:: ==================================================
 echo.
 echo ===========================================
-echo  All Done! Happy Coding :D
+echo  All Done! Emily's Transcriptor is running
 echo ===========================================
 echo.
-
 echo ------------------------------------------------
 echo.
 echo  (Press any key to close this window)
 pause >nul
-:end
 endlocal
+exit /b 0
