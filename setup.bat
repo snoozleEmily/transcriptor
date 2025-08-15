@@ -137,6 +137,7 @@ if not exist "venv" (
 )
 
 :: Step 7.2 - Activate virtual environment
+call :display "Step 7.2/8: Activating virtual environment..."
 call venv\Scripts\activate.bat
 
 :: Step 7.3 - Install requirements
