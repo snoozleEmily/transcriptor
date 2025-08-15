@@ -1,20 +1,8 @@
-# Emily's Transcriptor [WIP]
+# Emily's Transcriptor
 
 Do you need to turn a video into text or want to get organized notes from a lengthy video? This app does that for you absolutely for free!
 
----
-> 🇧🇷 Oieee! Precisa dessas explicações em pt-BR? Me chama que te ajudo! 📚✨
-
-> 🇪🇸 ¡Holaa! ¿Necesitas esta explicación en español? ¡Llámame! 🔥📖
-
-> 🇮🇹 Ciao! Hai bisogno di questa spiegazione in ITA? Chiamami! 🍕📜
-
-> 🇫🇷 Coucou! Vous voulez cette explication en français? Appelez-moi! 🥖📚
-
-> 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
----
-
-`NOTE: I am yet to finish this, alright?! Patience is key.`
+`NOTE: This App is still in development.`
 
 ## Usage
 
@@ -85,3 +73,16 @@ If you're working on a different operating system `or want to manually arrange y
 ## License
 
 This project is licensed under the GNU General Public License. This means you are free to build upon the current code to develop the app further, but you **must credit the original author** and distribute any modifications under the **same license**. For more details, see the [license file](LICENSE).
+
+
+---
+> 🇧🇷 Oieee! Precisa dessas explicações em pt-BR? Me chama que te ajudo! 📚✨
+
+> 🇪🇸 ¡Holaa! ¿Necesitas esta explicación en español? ¡Llámame! 🔥📖
+
+> 🇮🇹 Ciao! Hai bisogno di questa spiegazione in ITA? Chiamami! 🍕📜
+
+> 🇫🇷 Coucou! Vous voulez cette explication en français? Appelez-moi! 🥖📚
+
+> 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖
+---
