@@ -107,66 +107,6 @@ if errorlevel 1 (
 )
 
 :: ==================================================
-:: Step 3: Check for CMake
-:: ==================================================
-call :display "Step 3/8: Checking CMake..."
-where cmake >nul 2>nul
-if errorlevel 1 (
-    call :display "CMake not found. Installing..."
-    curl -L -o cmake.msi https://github.com/Kitware/CMake/releases/latest/download/cmake-3.29.0-windows-x86_64.msi
-    if errorlevel 1 call :handle_error "Downloading CMake"
-    start /wait msiexec /i cmake.msi /quiet /norestart
-    if errorlevel 1 call :handle_error "Installing CMake"
-    del cmake.msi
-) else (
-    call :display "CMake is already installed :)"
-)
-
-:: ==================================================
-:: Step 4: Check for C++ Compiler
-:: ==================================================
-call :display "Step 4/8: Checking C++ Compiler..."
-where cl >nul 2>nul
-if errorlevel 1 (
-    call :display "C++ compiler not found. Installing Visual Studio Build Tools..."
-    set "VSBT_URL=https://aka.ms/vs/17/release/vs_BuildTools.exe"
-    curl -L -o vs_buildtools.exe %VSBT_URL%
-    if errorlevel 1 call :handle_error "Downloading Visual Studio Build Tools"
-    start /wait vs_buildtools.exe --quiet --wait --norestart --nocache ^
-        --add Microsoft.VisualStudio.Workload.VCTools ^
-        --add Microsoft.VisualStudio.Component.VC.Tools.x86.x64 ^
-        --add Microsoft.VisualStudio.Component.Windows10SDK.19041 ^
-        --includeRecommended
-    if errorlevel 1 call :handle_error "Installing Visual Studio Build Tools"
-    del vs_buildtools.exe
-)
-where cl >nul 2>nul
-if errorlevel 1 call :handle_error "C++ compiler still missing after installation"
-
-:: ==================================================
-:: Step 5: Check for CUDA (optional)
-:: ==================================================
-call :display "Step 5/8: Checking CUDA..."
-where nvcc >nul 2>nul
-if errorlevel 1 (
-    for /f %%G in ('powershell -NoProfile -Command "(Get-CimInstance Win32_VideoController ^| Where-Object {$_.Name -match 'NVIDIA'} ^| Measure-Object).Count"') do set NVIDIA_COUNT=%%G
-    if not defined NVIDIA_COUNT set NVIDIA_COUNT=0
-    if %NVIDIA_COUNT% GTR 0 (
-        call :display "NVIDIA GPU detected. Installing CUDA Toolkit..."
-        set "CUDA_URL=https://developer.download.nvidia.com/compute/cuda/12.4.1/network_installers/cuda_12.4.1_windows_network.exe"
-        curl -L -o cuda-installer.exe %CUDA_URL%
-        if errorlevel 1 call :handle_error "Downloading CUDA"
-        start /wait cuda-installer.exe -s
-        if errorlevel 1 call :handle_error "Installing CUDA"
-        del cuda-installer.exe
-    ) else (
-        call :display "No NVIDIA GPU detected. Skipping CUDA installation."
-    )
-) else (
-    call :display "CUDA already installed."
-)
-
-:: ==================================================
 :: Step 6: Check for FFmpeg
 :: ==================================================
 call :display "Step 6/8: Checking FFmpeg..."
@@ -210,25 +150,19 @@ if exist requirements.txt (
 
 :: Step 7.4 - Install PyTorch
 call :display "Step 7.4/8: Installing PyTorch..."
-python -c "import importlib.util,subprocess,sys; \
-if importlib.util.find_spec('torch') is None: \
-    subprocess.check_call([sys.executable,'-m','pip','install','torch==2.0.0','--index-url','https://download.pytorch.org/whl/cpu'])"
+%PYTHON_CMD% -m pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
 if errorlevel 1 call :handle_error "Installing PyTorch"
 
 :: Step 7.5 - Install llama_cpp
 call :display "Step 7.5/8: Installing llama-cpp-python..."
-python -c "import importlib.util,subprocess,sys; \
-import pkg_resources; \
-try: pkg_resources.require('llama-cpp-python==0.3.9'); \
-except pkg_resources.DistributionNotFound: \
-    subprocess.check_call([sys.executable,'-m','pip','install','llama-cpp-python==0.3.9'])"
+%PYTHON_CMD% -m pip install llama-cpp-python==0.3.9
 if errorlevel 1 call :handle_error "Installing llama-cpp-python"
 
 :: ==================================================
 :: Step 8: Run main.py
 :: ==================================================
 call :display "Step 8/8: Running Emily's Transcriptor..."
-python -c "from main import main; main()"
+%PYTHON_CMD% -c "from main import main; main()"
 if errorlevel 1 call :handle_error "Running main.py"
 
 :: ==================================================
