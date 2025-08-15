@@ -6,6 +6,7 @@ from typing import Dict, List, Optional, Union, Any
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
+from src.errors.debug import debug
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
@@ -22,6 +23,7 @@ from src.utils.models import MODELS
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
+
     model_size = str(MODELS[1])  # Default model
 
     def __init__(self) -> None:
@@ -109,10 +111,20 @@ class EndFlow:
         """Enhanced transcription pipeline with better error context."""
         self.configure_content(config_params)
 
+        if debug.is_dev_logs_enabled():
+            print(
+                f"[DEBUG] Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+            )
+
         try:
             # Audio processing
             audio = extract_audio(video_path)
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] Audio extracted: length={len(audio) if audio else 0}")
+
             cleaned_audio = clean_audio(audio)
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
 
             # Transcription
             context_prompt = self.debugger.generate_content_prompt(self.content_config)
@@ -187,7 +199,7 @@ class EndFlow:
                 filetypes=file_types,
             ):
                 return path
-            
+
         except Exception:
             pass
 
