@@ -2,15 +2,17 @@ import re
 from typing import Dict, List, Any
 
 
-from src.utils.text.word_snippets import QUESTION_WRD
-from src.utils.pdf_exporter import PDFExporter
+from src.utils.pdf_maker import PDFExporter
 from src.errors.exceptions import TranscriptionError
-from src.frontend.constants import THEMES
+from src.utils.text.words.common import COMMON_WORDS
+from src.utils.text.words.question import QUESTION_WRD
+from src.utils.text.words.definition_pat import DEFINITION_PAT
+from src.utils.text.language import Language
 
 
 class NotesGenerator:
     def __init__(self, language, config):
-        self.language = language
+        self.language = Language()
         self.config = config
         self.pdf_exporter = PDFExporter()
 
@@ -37,11 +39,12 @@ class NotesGenerator:
         output_path: str,
         title: str = "Transcription Notes",
     ):
-        from src.utils.pdf_exporter import CustomPDF  # avoid circular import
+        from src.utils.pdf_maker import CustomPDF  # avoid circular import
 
-        pdf = CustomPDF()
-        pdf.add_page()
+        pdf = self.pdf_exporter.pdf
         font = self.pdf_exporter.font_family
+        print(f"font: {font}")  # DEBUG
+        pdf.add_page()
 
         # Title
         pdf.set_font(font, style="B", size=18)
@@ -50,8 +53,8 @@ class NotesGenerator:
 
         for section_name, content in sections.items():
             # Section header
-            pdf.set_font(font, style="B", size=14)
-            pdf.cell(0, 10, section_name, ln=True)
+            pdf.set_font(font, style="B", size=16)
+            pdf.cell(0, 10, section_name.upper(), ln=True)
             pdf.ln(2)
 
             # Section content
@@ -60,6 +63,7 @@ class NotesGenerator:
             if isinstance(content, list):
                 if not content:
                     pdf.cell(0, 10, "None found", ln=True)
+
                 elif isinstance(content[0], dict):
                     for item in content:
                         ts = item.get("timestamp", "00:00:00")
@@ -72,42 +76,52 @@ class NotesGenerator:
                         # Text normal
                         pdf.set_font(font, style="", size=12)
                         pdf.cell(0, 10, f" {txt}", ln=True)
+
                 else:
                     for term in content:
                         pdf.cell(0, 10, f"- {term}", ln=True)
+
             else:
                 pdf.multi_cell(0, 8, content.strip() if content else "None found")
 
             pdf.ln(5)
 
-        self.pdf_exporter.pdf = pdf  # assign custom-formatted PDF to exporter
-        return self.pdf_exporter.export_to_pdf(
-            " ", output_path, title
-        )  # dummy text param for compatibility
+            self.pdf_exporter.pdf = pdf
+            return self.pdf_exporter.export_to_pdf(
+                " ", output_path, title
+            )  # dummy text param
 
     def _generate_summary(self, text: str) -> str:
         try:
             sentences = re.split(r"(?<=[.!?])\s+", text)
             return " ".join(sentences[:2]) if sentences else text[:200] + "..."
+
         except Exception as e:
             raise TranscriptionError.sentence_split_failed(e)
 
     def _extract_key_terms(self, segments: List[Dict]) -> List[str]:
         terms = set()
+        lang = self.language.get_language()
+        excluded_words = set(QUESTION_WRD.get(lang, []) + COMMON_WORDS.get(lang, []))
+
         for seg in segments:
-            for w in re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", "")):
-                if w.lower() not in QUESTION_WRD.get("english", []):
+            words = re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", ""))
+            for w in words:
+                if w.lower() not in excluded_words: # TODO: add skip from custom_words
                     terms.add(w)
-        return sorted(terms)[:10]
+
+        return sorted(terms)[:8]
 
     def _extract_questions(self, segments: List[Dict]) -> List[Dict]:
         qs = []
         lang = self.language.get_language_code()
-        words = set(QUESTION_WRD.get(lang, QUESTION_WRD.get("english", [])))
+        question_words = set(QUESTION_WRD.get(lang, QUESTION_WRD["default"]))
 
         for seg in segments:
             t = seg.get("text", "").strip()
-            if t.endswith("?") or any(t.lower().startswith(qw) for qw in words):
+            if t.endswith("?") or any(
+                t.lower().startswith(qw) for qw in question_words
+            ):
                 qs.append(
                     {
                         "text": t,
@@ -128,9 +142,11 @@ class NotesGenerator:
                         "timestamp": self._format_timestamp(seg.get("start", 0)),
                     }
                 )
+
         return out[:5]
 
     def _format_timestamp(self, seconds: float) -> str:
         m, s = divmod(seconds, 60)
         h, m = divmod(m, 60)
+
         return f"{int(h):02}:{int(m):02}:{int(s):02}"

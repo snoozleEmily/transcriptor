@@ -2,9 +2,11 @@ import os
 from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
+
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
+from src.errors.debug import debug
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
@@ -14,13 +16,15 @@ from src.utils.transcripting.textify import Textify
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
 from src.utils.file_handler import save_transcription
-from src.utils.pdf_exporter import PDFExporter
+from src.utils.pdf_maker import PDFExporter
 from src.utils.models import MODELS
+
 
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
-    model_size = str(MODELS[2])  # Default model
+
+    model_size = str(MODELS[1])  # Default model
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -85,12 +89,13 @@ class EndFlow:
 
         if isinstance(words, list):
             return {w.strip(): [] for w in words if w.strip()}
+
         return words
 
     def _update_dependencies(self) -> None:
         """Update dependent components with new config."""
         if self.content_config.words and isinstance(self.content_config.words, dict):
-            self.reviser.specific_words = self.content_config.words
+            self.reviser.odd_words = self.content_config.words
 
         self.notes_generator.config = self.content_config
 
@@ -100,16 +105,26 @@ class EndFlow:
         self,
         video_path: str,
         config_params: Optional[Dict[str, Any]] = None,
-        pretty_notes: bool = False,
+        quick_script: bool = False,
         **kwargs,
     ) -> str:
         """Enhanced transcription pipeline with better error context."""
         self.configure_content(config_params)
 
+        if debug.is_dev_logs_enabled():
+            print(
+                f"[DEBUG] Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+            )
+
         try:
             # Audio processing
             audio = extract_audio(video_path)
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] Audio extracted: length={len(audio) if audio else 0}")
+
             cleaned_audio = clean_audio(audio)
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
 
             # Transcription
             context_prompt = self.debugger.generate_content_prompt(self.content_config)
@@ -121,7 +136,7 @@ class EndFlow:
                 raise FileError.empty_text()
 
             return self._save_output(
-                result, revised_text, os.path.basename(video_path), pretty_notes
+                result, revised_text, os.path.basename(video_path), quick_script
             )
         except Exception as e:
             self._log_error_context(video_path, config_params, kwargs)
@@ -144,93 +159,27 @@ class EndFlow:
         result: Dict[str, Any],
         revised_text: str,
         source_name: str,
-        pretty_notes: bool,
+        quick_script: bool,
     ) -> str:
         """Handle output saving with validation."""
         save_path = self._get_save_path(
-            os.path.splitext(source_name)[0], ".pdf" if pretty_notes else ".txt"
+            os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
+        print(f"[DEBUG] quick_script received in EndFlow: {quick_script}")
 
-        if pretty_notes:
-            self._export_pdf_notes(result, revised_text, save_path)
+        if not quick_script:
+            self.pdf_exporter.save_notes(
+                result,
+                revised_text,
+                save_path,
+                self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {},
+                language=self.language,
+                config=self.content_config,
+            )
         else:
             save_transcription(revised_text, save_path)
 
         return os.path.abspath(save_path)
-
-    def _normalize_notes_md(self, md: str) -> str:
-        """Standardize markdown for PDF rendering"""
-        lines = []
-        for line in md.splitlines():
-            line = line.rstrip()
-
-            # Convert bullets
-            if line.lstrip().startswith("•"):
-                line = line.replace("•", "-", 1)
-
-            # Normalize headers
-            if line.startswith(("#", "##", "###")):
-                line = f"# {line.lstrip('# ')}"
-            lines.append(line)
-
-        return "\n".join(lines)
-
-    def _export_pdf_notes(
-        self, result: Dict[str, Any], text: str, save_path: str
-    ) -> None:
-        """Handle PDF export with normalization and validation."""
-        notes_dict = self.notes_generator.create_notes(
-            {"text": text, "segments": result.get("segments", [])}
-        )
-        print(f"Notes content: {notes_dict}")  # DEBUG
-
-        # Convert dict notes to formatted string
-        notes = self._format_notes_dict(notes_dict)
-
-        if not notes.strip():  # Check for empty content
-            raise FileError.pdf_invalid_content(len(notes))
-
-        normalized = self._normalize_notes_md(notes)
-
-        if not self.pdf_exporter.export_to_pdf(
-            normalized, save_path, f"Transcription: {os.path.basename(save_path)}"
-        ):
-            raise FileError.pdf_creation_failed()
-
-    def _format_notes_dict(self, notes_dict: Dict[str, Any]) -> str:
-        """Convert notes dictionary to formatted string for PDF."""
-        lines = []
-
-        # Add summary
-        summary = notes_dict.get("Summary", "")
-        if summary:
-            lines.append("Summary\n" + summary + "\n")
-
-        # Add Key Terms as bullet points
-        key_terms = notes_dict.get("Key Terms", [])
-        if key_terms:
-            lines.append("Key Terms")
-            for term in key_terms:
-                lines.append(f"- {term}")
-            lines.append("")
-
-        # Add Questions with timestamps
-        questions = notes_dict.get("Questions", [])
-        if questions:
-            lines.append("Questions")
-            for q in questions:
-                lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
-            lines.append("")
-
-        # Add Timestamps with text
-        timestamps = notes_dict.get("Timestamps", [])
-        if timestamps:
-            lines.append("Timestamps")
-            for t in timestamps:
-                lines.append(f"- [{t.get('timestamp', '')}] {t.get('text', '')}")
-            lines.append("")
-
-        return "\n".join(lines)
 
     # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
@@ -250,6 +199,7 @@ class EndFlow:
                 filetypes=file_types,
             ):
                 return path
+
         except Exception:
             pass
 

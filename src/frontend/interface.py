@@ -4,6 +4,7 @@ from tkinter import ttk, filedialog
 from queue import Empty, Queue
 
 
+from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 from .url_opener import open_browser
 from .theme import configure_theme
 from .widgets.header import Header
@@ -11,10 +12,10 @@ from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from src.utils.text.content_type import ContentType
-from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
+from src.errors.debug import debug
 
 
-# TODO: Refactor this class into smaller modules
+# TODO?: Refactor this class into smaller modules?
 
 
 class Interface(tk.Tk):
@@ -37,9 +38,9 @@ class Interface(tk.Tk):
             pass
 
     # --------------------- Base Variables ---------------------
-    def __init__(self, controller):
+    def __init__(self, flow):
         super().__init__()
-        self.controller = controller
+        self.flow = flow  # Gets called in AsyncTaskManager
         self.running = False
         self._alive = True
         self.current_theme = "default"
@@ -49,8 +50,7 @@ class Interface(tk.Tk):
         )
 
         # Message for Custom Words
-        self.C_WORDS_NOTE = f"Enter custom words here divided by commas:\n"
-        self.C_WORDS_EX = f"{self.C_WORDS_NOTE}\n(e.g.\nEiichiro Oda,\nAvril Lavigne,\nSAP, MLM, Okta,\nPR Flow, DeleteAllLogs)"
+        self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n"
 
         # Initialization sequence
         self._configure_window()
@@ -315,7 +315,10 @@ class Interface(tk.Tk):
         )
         if path:
             # Get format preference before processing
-            pretty_notes = self.buttons_panel.get_pretty_notes_flag()
+            quick_script = self.buttons_panel.get_quick_script_flag()  # OnlyScript flag
+
+            if debug.is_dev_logs_enabled():
+                print(f"[DEBUG] quick_script received in Interface: {quick_script}")
 
             # Get custom words from the text console and process them
             custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
@@ -323,18 +326,28 @@ class Interface(tk.Tk):
 
             # Only process if user entered actual words (not the example text)
             if custom_words_raw and custom_words_raw != self.C_WORDS_EX:
-                word_list = [  # Split by commas or newlines,
-                    word.strip()  # strip whitespace, remove empty entries
+                # Split by commas or newlines, strip whitespace, remove empty entries
+                word_list = [
+                    word.strip()
                     for word in custom_words_raw.replace("\n", ",").split(",")
                     if word.strip()
                 ]
+                # Dynamically extract all lines from the placeholder text
+                placeholders = [
+                    line.strip()
+                    for line in self.C_WORDS_EX.splitlines()
+                    if line.strip()
+                ]
+                filtered_words = [w for w in word_list if w not in placeholders]
+                custom_words = {word: [] for word in filtered_words}
+                has_odd = bool(custom_words)
 
-                # Convert to expected dict format {word: []}
-                custom_words = {word: [] for word in word_list}
+            else:
+                custom_words = None
+                has_odd = False
 
-            has_odd = bool(custom_words)  # True if we have custom words
             config = ContentType(
-                words=custom_words,  # This is now either None or a proper dict
+                words=custom_words,
                 has_odd_names=has_odd,
                 has_code=False,
                 types=[],
@@ -343,7 +356,7 @@ class Interface(tk.Tk):
 
             self.running = True
             self.async_mgr.get_busy(
-                path, config_params=config, pretty_notes=pretty_notes
+                path, config_params=config, quick_script=quick_script
             )
 
     # --------------------- System Operations ---------------------
@@ -357,6 +370,7 @@ class Interface(tk.Tk):
         while not self.gui_queue.empty():
             try:
                 self.gui_queue.get_nowait()()
+
             except Empty:
                 break
 

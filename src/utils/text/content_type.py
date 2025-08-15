@@ -29,11 +29,11 @@ class ContentType:
         """
         # Core content characteristics 
         self.types = types or []          # List of content types
-        self.words = words or []          # List of specific terms
+        self.words = words or {}          # Specific terms
         self.has_code = has_code          # Code content flag
-        self.has_odd_names = has_odd_names or bool(words)  # Unusual names flag
+        self.has_odd_names = has_odd_names  # Unusual names flag
         self.is_multilingual = is_multilingual  # Multilingual content flag
-        self.note_style = note_style,  # 'technical', 'lecture', 'meeting'
+        self.note_style = note_style  # 'technical', 'lecture', 'meeting'
         
         self.use_original_segments = use_original_segments
         

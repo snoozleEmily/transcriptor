@@ -18,13 +18,15 @@ from .logging import (
 
 from .func_printer import get_func_call
 
+from .warnings_config import custom_warning
+
 __all__ = [
     # Error Types
     "AppError",
     "FFmpegError",
     "TranscriptionError",
     "FileError",
-    "LanguageError"
+    "LanguageError",
     
     # Error Codes
     "ErrorCode",
@@ -37,5 +39,6 @@ __all__ = [
     "log_unexpected_error",
 
     # Function call log
-    get_func_call
+    "get_func_call",
+    "custom_warning"
 ]

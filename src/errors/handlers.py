@@ -3,6 +3,7 @@ import speech_recognition as sr
 from typing import Any, Callable
 
 
+from .debug import debug
 from .func_printer import get_func_call
 from .logging import log_unexpected_error
 from .exceptions import AppError, ErrorCode, FileError, TranscriptionError
@@ -15,8 +16,9 @@ def catch_errors(func: Callable) -> Callable:
     """
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> Any:
-        # Print function call details before execution
-        print(get_func_call(func, args, kwargs))
+        if debug.is_dev_logs_enabled: 
+            # Print function call details before execution
+            print(get_func_call(func, args, kwargs))
         
         try:
             return func(self, *args, **kwargs)
