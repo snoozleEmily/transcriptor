@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 
-
 from src.errors.debug import debug
 
 
@@ -26,20 +25,18 @@ class ButtonsPanel(ttk.Frame):
 
     def _create_widgets(self, select_handler, github_handler):
         style = ttk.Style()
-        style.configure("OnlyScript.TCheckbutton", font=("Courier New", 10), padding=5)
+        style.configure("OnlyScript.TCheckbutton", padding=5)
+        style.configure("DevLogs.TCheckbutton", padding=5)
 
         # Create buttons and checkboxes
         self.select_btn = ttk.Button(self, text=self.BUTTONS[0], command=select_handler)
-
         self.github_btn = ttk.Button(self, text=self.BUTTONS[1], command=github_handler)
-
         self.quick_script_cb = ttk.Checkbutton(
             self,
             text=self.BUTTONS[2],
             variable=self.quick_script_fl,
             style="OnlyScript.TCheckbutton",
         )
-
         self.dev_logs_cb = ttk.Checkbutton(
             self,
             text=self.BUTTONS[3],
