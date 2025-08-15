@@ -15,8 +15,6 @@ from src.utils.text.content_type import ContentType
 from src.errors.debug import debug
 
 
-# TODO?: Refactor this class into smaller modules?
-
 
 class Interface(tk.Tk):
     # --------------------- Console Log Set Up ---------------------
