@@ -4,13 +4,13 @@ from tkinter import ttk, filedialog
 from queue import Empty, Queue
 
 
+from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 from .url_opener import open_browser
 from .theme import configure_theme
 from .widgets.header import Header
 from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
-from .constants import THEMES, PLACEHOLDER_TEXT, FONTS, BUG_REPORTS_GT
 from src.utils.text.content_type import ContentType
 from src.errors.debug import debug
 
