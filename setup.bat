@@ -68,102 +68,145 @@ pause
 exit /b 1
 
 :: ==================================================
+:: Function :check_python_version
+:: Properly checks for Python 3.10.x
+:: ==================================================
+:check_python_version
+python --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
+exit /b %errorlevel%
+
+:: ==================================================
 :: MAIN SCRIPT
 :: ==================================================
 :main
 call :display "Initializing Setup..."
 
 :: ==================================================
-:: Step 1: Check for Python 3.10+
+:: Step 1: Check for Python 3.10.x
 :: ==================================================
-call :display "Step 1/8: Checking Python..."
-where python >nul 2>nul
-if errorlevel 1 (
-    call :display "Python not found. Installing..."
-    curl -L -o python.exe https://www.python.org/ftp/python/3.10.13/python-3.10.13-amd64.exe
-    if errorlevel 1 call :handle_error "Downloading Python"
-    start /wait python.exe /quiet InstallAllUsers=1 PrependPath=1 Include_pip=1
-    if errorlevel 1 call :handle_error "Installing Python"
-    del python.exe
-) else (
-    call :display "Python is already installed :)"
+call :display "Step 1/8: Checking Python 3.10.x..."
+call :check_python_version
+if %errorlevel% == 0 (
+    call :display "Python 3.10.x is already installed :)"
+    set "PYTHON_CMD=python"
+    goto :python_ok
 )
+
+:: ==================================================
+:: Step 1.5: Architecture check
+:: ==================================================
+set "ARCH=64"
+if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
+)
+
+:: Download and install
+call :display "Downloading Python 3.10 installer (%ARCH%-bit)..."
+set "PYTHON_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
+if "%ARCH%"=="64" (
+    set "PYTHON_URL=%PYTHON_URL%-amd64.exe"
+) else (
+    set "PYTHON_URL=%PYTHON_URL%.exe"
+)
+set "PYTHON_INSTALLER=python_installer.exe"
+
+:: Try downloading
+curl -L -o "%PYTHON_INSTALLER%" "%PYTHON_URL%"
+if errorlevel 1 (
+    call :handle_error "Failed to download Python installer"
+)
+call :display "Installing Python 3.10 (please wait)..."
+start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1
+if errorlevel 1 (
+    call :handle_error "Python installation failed"
+)
+del "%PYTHON_INSTALLER%" 2>nul
 set "PYTHON_CMD=python"
 
-:: ==================================================
-:: Step 2: Check for Git
-:: ==================================================
-call :display "Step 2/8: Checking Git..."
-where git >nul 2>nul
+:: Verify installation
+:python_ok
+call :check_python_version
 if errorlevel 1 (
-    call :display "Git not found. Installing..."
-    curl -L -o git.exe https://github.com/git-for-windows/git/releases/latest/download/Git-2.45.2-64-bit.exe
-    if errorlevel 1 call :handle_error "Downloading Git"
-    start /wait git.exe /VERYSILENT /NORESTART
-    if errorlevel 1 call :handle_error "Installing Git"
-    del git.exe
-) else (
-    call :display "Git is already installed :)"
+    call :handle_error "Python 3.10.x not found after installation"
 )
 
 :: ==================================================
-:: Step 6: Check for FFmpeg
+:: Step 2: Check for FFmpeg
 :: ==================================================
-call :display "Step 6/8: Checking FFmpeg..."
+call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
-if errorlevel 1 (
-    call :display "FFmpeg not found. Installing..."
-    curl -L -o ffmpeg.zip https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip
-    mkdir .ffmpeg
-    tar -xf ffmpeg.zip -C .ffmpeg
-    move .ffmpeg\ffmpeg-master-latest-win64-gpl\* .ffmpeg >nul
-    rmdir /s /q .ffmpeg\ffmpeg-master-latest-win64-gpl
-    del ffmpeg.zip
-    set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-) else (
+if %errorlevel% == 0 (
     call :display "FFmpeg is already installed :)"
+    goto :ffmpeg_ok
 )
 
-:: ==================================================
-:: Step 7: Python environment setup
-:: ==================================================
-call :display "Step 7/8: Setting up Python environment..."
+:: Architecture-specific download
+set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
 
-:: Step 7.1 - Create virtual environment
+call :display "Downloading FFmpeg..."
+curl -L -o ffmpeg.zip "%FFMPEG_URL%"
+if errorlevel 1 (
+    call :handle_error "Failed to download FFmpeg"
+)
+
+call :display "Extracting FFmpeg..."
+mkdir .ffmpeg 2>nul
+powershell -command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.ffmpeg'"
+if errorlevel 1 (
+    call :handle_error "Failed to extract FFmpeg"
+)
+
+:: Cleanup zip file
+del ffmpeg.zip 2>nul
+set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+:ffmpeg_ok
+
+:: ==================================================
+:: Step 3: Create virtual environment
+:: ==================================================
+call :display "Step 3/8: Creating virtual environment..."
 if not exist "venv" (
-    call :display "Step 7.1/8: Creating virtual environment..."
     %PYTHON_CMD% -m venv venv
     if errorlevel 1 call :handle_error "Creating Python venv"
 )
 
-:: Step 7.2 - Activate virtual environment
-call :display "Step 7.2/8: Activating virtual environment..."
+:: ==================================================
+:: Step 4: Activate virtual environment
+:: ==================================================
+call :display "Step 4/8: Activating virtual environment..."
 call venv\Scripts\activate.bat
+if errorlevel 1 call :handle_error "Activating virtual environment"
 
-:: Step 7.3 - Install requirements
+:: ==================================================
+:: Step 5: Install requirements
+:: ==================================================
 if exist requirements.txt (
-    call :display "Step 7.3/8: Installing dependencies from requirements.txt..."
+    call :display "Step 5/8: Installing dependencies from requirements.txt..."
     pip install -r requirements.txt
     if errorlevel 1 call :handle_error "Installing Python dependencies"
 ) else (
     call :display "requirements.txt not found. Skipping..."
 )
 
-:: Step 7.4 - Install PyTorch
-call :display "Step 7.4/8: Installing PyTorch..."
-%PYTHON_CMD% -m pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
+:: ==================================================
+:: Step 6: Install PyTorch
+:: ==================================================
+call :display "Step 6/8: Installing PyTorch..."
+pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
 if errorlevel 1 call :handle_error "Installing PyTorch"
 
-:: Step 7.5 - Install llama_cpp
-call :display "Step 7.5/8: Installing llama-cpp-python..."
-%PYTHON_CMD% -m pip install llama-cpp-python==0.3.9
+:: ==================================================
+:: Step 7: Install llama_cpp
+:: ==================================================
+call :display "Step 7/8: Installing llama-cpp-python..."
+pip install llama-cpp-python==0.3.9
 if errorlevel 1 call :handle_error "Installing llama-cpp-python"
 
 :: ==================================================
 :: Step 8: Run main.py
 :: ==================================================
 call :display "Step 8/8: Running Emily's Transcriptor..."
-%PYTHON_CMD% -c "from main import main; main()"
+python -c "from main import main; main()"
 if errorlevel 1 call :handle_error "Running main.py"
 
 :: ==================================================
