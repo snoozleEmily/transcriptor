@@ -107,10 +107,31 @@ if errorlevel 1 (
 :: Step 1.7: Install Python 3.10 via winget
 :: ==================================================
 call :display "Installing Python 3.10 via winget..."
-winget install --id Python.Python.3.10 -e --source winget
+winget install --id Python.Python.3.10 -e --source winget --silent
 if errorlevel 1 (
     call :handle_error "Python installation via winget failed"
 )
+
+:: ==================================================
+:: Step 1.8: Handle user-scope installation and PATH
+:: ==================================================
+:: Check default user-scope install location
+set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
+if exist "%PYTHON_DIR%\python.exe" (
+    set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+    set "PYTHON_CMD=python"
+    echo Python found at %PYTHON_DIR%, added to PATH.
+) else (
+    :: Fallback to py launcher
+    where python >nul 2>nul
+    if errorlevel 1 (
+        set "PYTHON_CMD=py -3.10"
+        echo Python not in PATH, using py launcher.
+    ) else (
+        set "PYTHON_CMD=python"
+    )
+)
+
 set "PYTHON_CMD=python"
 
 :python_ok
