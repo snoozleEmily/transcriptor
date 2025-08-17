@@ -89,17 +89,19 @@ if %errorlevel% == 0 (
 )
 
 :: ==================================================
-:: Step 1.5: Architecture check and Python download
+:: Step 1.5: Architecture check and Python download + install
 :: ==================================================
+
+:: Detect architecture
 set "ARCH=64"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 
-:: Base URL for Python 3.10.13
+:: Set base URL
 set "PYTHON_BASE_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
 
-:: Append architecture-specific suffix
+:: Append correct suffix
 if "%ARCH%"=="64" (
     set "PYTHON_URL=%PYTHON_BASE_URL%-amd64.exe"
 ) else (
@@ -108,25 +110,42 @@ if "%ARCH%"=="64" (
 
 set "PYTHON_INSTALLER=python_installer.exe"
 
-:: Show the URL we are downloading
+:: Show the URL
 echo Downloading Python from: %PYTHON_URL%
 
-:: Download using curl
+:: Download Python
 curl -L -o "%PYTHON_INSTALLER%" "%PYTHON_URL%"
 if errorlevel 1 (
     call :handle_error "Failed to download Python installer"
 )
 
-:: Install Python (logs progress)
-call :display "Installing Python 3.10..."
-:: Run installer directly, not via start
+:: Check if running as Administrator
+net session >nul 2>&1
+if errorlevel 1 (
+    echo ERROR: Please run this script as Administrator to install Python for all users.
+    pause
+    exit /b 1
+)
+
+:: Install Python silently with logging
+echo Installing Python 3.10 silently...
 "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0 /log python_install.log
 if errorlevel 1 (
-    echo See python_install.log for details
+    echo ERROR: Python installation failed. See python_install.log for details.
     call :handle_error "Python installation failed"
 )
+
+:: Clean up installer
 del "%PYTHON_INSTALLER%" 2>nul
 set "PYTHON_CMD=python"
+
+:: Verify installation
+python --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
+if errorlevel 1 (
+    call :handle_error "Python 3.10.x not found after installation"
+)
+
+echo Python 3.10 installed successfully!
 
 :: Step 2: FFmpeg
 call :display "Step 2/8: Checking FFmpeg..."
