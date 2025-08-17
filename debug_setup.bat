@@ -2,12 +2,7 @@
 setlocal enabledelayedexpansion
 title Emily's Transcriptor - Setup
 
-:: Hide command outputs by default unless DEBUG=1
-if not defined DEBUG (
-    >nul 2>&1 (
-        echo >nul
-    )
-)
+set DEBUG=1
 
 color 0A 
 
@@ -64,7 +59,7 @@ pause
 exit /b 1
 
 :: ==================================================
-:: Function :check_python_version
+:: Function: check_python_version
 :: ==================================================
 :check_python_version
 python --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
@@ -77,7 +72,7 @@ exit /b %errorlevel%
 call :display "Initializing Setup..."
 
 :: ==================================================
-:: Step 1: Check for Python 3.10.x
+:: Step 1: Check for Python 3.10
 :: ==================================================
 call :display "Step 1/8: Checking Python 3.10.x..."
 call :check_python_version
@@ -88,74 +83,46 @@ if %errorlevel% == 0 (
 )
 
 :: ==================================================
-:: Step 1.5: Architecture check and Python download + install
+:: Step 1.5: Check for any Python
 :: ==================================================
-call :display "Step 1.5: Determining architecture and downloading Python..."
-set "ARCH=64"
-if "%PROCESSOR_ARCHITECTURE%"=="x86" (
-    if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
+python --version >nul 2>nul
+if %errorlevel% == 0 (
+    call :display "Another Python version detected. Will use pip for dependencies."
+    set "PYTHON_CMD=python"
+    goto :python_ok
 )
 
-set "PYTHON_BASE_URL=https://www.python.org/ftp/python/3.10.10/python-3.10.10"
-set "PYTHON_URL=%PYTHON_BASE_URL%.exe"
-
-
-set "PYTHON_INSTALLER=python_installer.exe"
-echo Downloading Python from: %PYTHON_URL%
-
-:: Download Python using curl
-curl -L --fail -o "%PYTHON_INSTALLER%" "%PYTHON_URL%"
+:: ==================================================
+:: Step 1.6: Check for winget
+:: ==================================================
+where winget >nul 2>nul
 if errorlevel 1 (
-    call :handle_error "Failed to download Python installer"
+    echo ERROR: No Python detected and winget not found.
+    echo Please install Python 3.10 manually or install winget from Microsoft Store.
+    pause
+    exit /b 1
 )
 
-:: Quick verification
-for %%I in (%PYTHON_INSTALLER%) do set FILESIZE=%%~zI
-if %FILESIZE% LSS 10000000 (
-    call :handle_error "Downloaded file too small. Possibly corrupt HTML page."
-)
-
-:: Optional HTML check
-findstr /I "<html" "%PYTHON_INSTALLER%" >nul && call :handle_error "Downloaded file contains HTML, not installer."
-
 :: ==================================================
-:: Check if running as Admin
+:: Step 1.7: Install Python 3.10 via winget
 :: ==================================================
-net session >nul 2>&1
+call :display "Installing Python 3.10 via winget..."
+winget install --id Python.Python.3.10 -e --source winget --silent
 if errorlevel 1 (
-    echo WARNING: Not running as Administrator. Installing Python for current user only...
-    set "INSTALL_SCOPE=--user"
-    set "TARGET_DIR=%LOCALAPPDATA%\Programs\Python310"
-) else (
-    echo Running as Administrator. Installing Python for all users...
-    set "INSTALL_SCOPE="
-    set "TARGET_DIR=C:\Python310"
+    call :handle_error "Python installation via winget failed"
 )
+set "PYTHON_CMD=python"
 
-:: ==================================================
-:: Install Python silently with logging
-:: ==================================================
-echo Installing Python 3.10...
-"%PYTHON_INSTALLER%" /quiet TargetDir="%TARGET_DIR%" PrependPath=1 Include_test=0 /log python_install.log
-if errorlevel 1 (
-    echo Silent install failed. Trying interactive installer...
-    start "" "%PYTHON_INSTALLER%"
-    call :handle_error "Python installation failed"
-)
-
-del "%PYTHON_INSTALLER%" 2>nul
-set "PYTHON_CMD=%TARGET_DIR%\python.exe"
-
+:python_ok
 :: Verify installation
 call :check_python_version
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
-echo Python 3.10 installed successfully!
+call :display "Python 3.10 ready!"
 
-:python_ok
 :: ==================================================
-:: Step 2: Check for FFmpeg
+:: Step 2: Check FFmpeg
 :: ==================================================
 call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
@@ -164,13 +131,17 @@ if %errorlevel% == 0 (
     goto :ffmpeg_ok
 )
 
+:: Download and extract FFmpeg
+set "ARCH=64"
+if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
+)
 set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
 call :display "Downloading FFmpeg..."
 curl -L -o ffmpeg.zip "%FFMPEG_URL%"
 if errorlevel 1 (
     call :handle_error "Failed to download FFmpeg"
 )
-
 call :display "Extracting FFmpeg..."
 mkdir .ffmpeg 2>nul
 powershell -command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.ffmpeg'"
@@ -179,6 +150,7 @@ if errorlevel 1 (
 )
 del ffmpeg.zip 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+
 :ffmpeg_ok
 
 :: ==================================================
@@ -201,7 +173,7 @@ if errorlevel 1 call :handle_error "Activating virtual environment"
 :: Step 5: Install requirements
 :: ==================================================
 if exist requirements.txt (
-    call :display "Step 5/8: Installing dependencies from requirements.txt..."
+    call :display "Step 5/8: Installing dependencies..."
     pip install -r requirements.txt
     if errorlevel 1 call :handle_error "Installing Python dependencies"
 ) else (
