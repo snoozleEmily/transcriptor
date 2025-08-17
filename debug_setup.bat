@@ -107,7 +107,7 @@ if errorlevel 1 (
 :: Step 1.7: Install Python 3.10 via winget
 :: ==================================================
 call :display "Installing Python 3.10 via winget..."
-winget install --id Python.Python.3.10 -e --source winget --silent
+winget install --id Python.Python.3.10 -e --source winget
 if errorlevel 1 (
     call :handle_error "Python installation via winget failed"
 )
