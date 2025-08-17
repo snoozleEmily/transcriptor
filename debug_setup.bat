@@ -119,16 +119,8 @@ if errorlevel 1 (
     call :handle_error "Failed to download Python installer"
 )
 
-:: Check if running as Administrator
-net session >nul 2>&1
-if errorlevel 1 (
-    echo ERROR: Please run this script as Administrator to install Python for all users.
-    pause
-    exit /b 1
-)
-
-:: Install Python silently with logging
-echo Installing Python 3.10 silently...
+:: Install Python silently only for the current user
+echo Installing Python 3.10 (per-user)...
 "%PYTHON_INSTALLER%" /quiet TargetDir="%LOCALAPPDATA%\Programs\Python310" PrependPath=1 Include_test=0 /log python_install.log
 if errorlevel 1 (
     echo ERROR: Python installation failed. See python_install.log for details.
@@ -137,15 +129,16 @@ if errorlevel 1 (
 
 :: Clean up installer
 del "%PYTHON_INSTALLER%" 2>nul
-set "PYTHON_CMD=python"
+set "PYTHON_CMD=%LOCALAPPDATA%\Programs\Python310\python.exe"
 
 :: Verify installation
-python --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
+"%PYTHON_CMD%" --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
 
 echo Python 3.10 installed successfully!
+
 
 :: Step 2: FFmpeg
 call :display "Step 2/8: Checking FFmpeg..."
