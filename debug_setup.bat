@@ -129,7 +129,7 @@ if errorlevel 1 (
 
 :: Install Python silently with logging
 echo Installing Python 3.10 silently...
-"%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0 /log python_install.log
+"%PYTHON_INSTALLER%" /quiet PrependPath=1 Include_test=0 /log python_install.log
 if errorlevel 1 (
     echo ERROR: Python installation failed. See python_install.log for details.
     call :handle_error "Python installation failed"
