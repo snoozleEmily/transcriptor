@@ -88,24 +88,36 @@ if %errorlevel% == 0 (
     goto :python_ok
 )
 
-:: Architecture check
+:: ==================================================
+:: Step 1.5: Architecture check and Python download
+:: ==================================================
 set "ARCH=64"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 
-:: Download Python installer
-call :display "Downloading Python 3.10 installer (%ARCH%-bit)..."
-set "PYTHON_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
-if "%ARCH%"=="64" set "PYTHON_URL=%PYTHON_URL%-amd64.exe" else set "PYTHON_URL=%PYTHON_URL%.exe"
+:: Base URL for Python 3.10.13
+set "PYTHON_BASE_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
+
+:: Append architecture-specific suffix
+if "%ARCH%"=="64" (
+    set "PYTHON_URL=%PYTHON_BASE_URL%-amd64.exe"
+) else (
+    set "PYTHON_URL=%PYTHON_BASE_URL%.exe"
+)
+
 set "PYTHON_INSTALLER=python_installer.exe"
 
+:: Show the URL we are downloading
+echo Downloading Python from: %PYTHON_URL%
+
+:: Download using curl
 curl -L -o "%PYTHON_INSTALLER%" "%PYTHON_URL%"
 if errorlevel 1 (
     call :handle_error "Failed to download Python installer"
 )
 
-:: Install Python (log output)
+:: Install Python (logs progress)
 call :display "Installing Python 3.10..."
 start /wait "" "%PYTHON_INSTALLER%" InstallAllUsers=1 PrependPath=1 /log python_install.log
 if errorlevel 1 (
@@ -114,12 +126,6 @@ if errorlevel 1 (
 )
 del "%PYTHON_INSTALLER%" 2>nul
 set "PYTHON_CMD=python"
-
-:python_ok
-call :check_python_version
-if errorlevel 1 (
-    call :handle_error "Python 3.10.x not found after installation"
-)
 
 :: Step 2: FFmpeg
 call :display "Step 2/8: Checking FFmpeg..."
