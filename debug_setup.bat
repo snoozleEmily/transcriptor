@@ -173,32 +173,42 @@ if %errorlevel% == 0 (
 )
 
 :: ==================================================
-:: Step 2.2: Fallback download from hardcoded URL
+:: Step 2.2: Manual download fallback
 :: ==================================================
-call :display "Downloading FFmpeg manually..."
 set "ARCH=64"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
-curl -L -o ffmpeg.zip "%FFMPEG_URL%"
+
+call :display "Downloading FFmpeg manually..."
+curl -L -o "%~dp0ffmpeg.zip" "%FFMPEG_URL%"
 if errorlevel 1 (
-    echo ERROR: Failed to download FFmpeg.
-    echo Please install winget and rerun the setup, or manually install FFmpeg.
+    echo ERROR: Failed to download FFmpeg manually.
+    echo Please install winget and try again, or manually install FFmpeg from https://ffmpeg.org/download.html
     pause
     exit /b 1
 )
-call :display "Extracting FFmpeg..."
-mkdir .ffmpeg 2>nul
-powershell -command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.ffmpeg'"
-if errorlevel 1 (
-    call :handle_error "Failed to extract FFmpeg"
+
+if not exist "%~dp0ffmpeg.zip" (
+    echo ERROR: FFmpeg zip not found after download.
+    pause
+    exit /b 1
 )
-del ffmpeg.zip 2>nul
+
+call :display "Extracting FFmpeg..."
+powershell -Command "Expand-Archive -LiteralPath '%~dp0ffmpeg.zip' -DestinationPath '%~dp0.ffmpeg' -Force"
+if errorlevel 1 (
+    echo ERROR: Failed to extract FFmpeg.
+    pause
+    exit /b 1
+)
+
+del "%~dp0ffmpeg.zip" 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+call :display "FFmpeg ready!"
 
 :ffmpeg_ok
-call :display "FFmpeg ready!"
 
 :: ==================================================
 :: Step 3: Create virtual environment
