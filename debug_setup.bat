@@ -96,12 +96,9 @@ if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 
-set "PYTHON_BASE_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
-if "%ARCH%"=="64" (
-    set "PYTHON_URL=%PYTHON_BASE_URL%-amd64.exe"
-) else (
-    set "PYTHON_URL=%PYTHON_BASE_URL%.exe"
-)
+set "PYTHON_BASE_URL=https://www.python.org/ftp/python/3.10.10/python-3.10.10"
+set "PYTHON_URL=%PYTHON_BASE_URL%.exe"
+
 
 set "PYTHON_INSTALLER=python_installer.exe"
 echo Downloading Python from: %PYTHON_URL%
