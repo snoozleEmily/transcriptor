@@ -131,16 +131,41 @@ if %errorlevel% == 0 (
     goto :ffmpeg_ok
 )
 
-:: Download and extract FFmpeg
+:: ==================================================
+:: Step 2.1: Try installing FFmpeg via winget
+:: ==================================================
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    call :display "Attempting to install FFmpeg via winget..."
+    winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements > winget_ffmpeg.log 2>&1
+    set "WG_EXIT=%ERRORLEVEL%"
+    type winget_ffmpeg.log
+    if "%WG_EXIT%" == "0" (
+        call :display "FFmpeg installed via winget!"
+        goto :ffmpeg_ok
+    ) else (
+        echo Winget installation failed, exit code: %WG_EXIT%
+        echo Will attempt manual download...
+    )
+) else (
+    echo winget not found, will attempt manual download...
+)
+
+:: ==================================================
+:: Step 2.2: Fallback download from hardcoded URL
+:: ==================================================
+call :display "Downloading FFmpeg manually..."
 set "ARCH=64"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
-call :display "Downloading FFmpeg..."
 curl -L -o ffmpeg.zip "%FFMPEG_URL%"
 if errorlevel 1 (
-    call :handle_error "Failed to download FFmpeg"
+    echo ERROR: Failed to download FFmpeg.
+    echo Please install winget and rerun the setup, or manually install FFmpeg.
+    pause
+    exit /b 1
 )
 call :display "Extracting FFmpeg..."
 mkdir .ffmpeg 2>nul
@@ -152,6 +177,7 @@ del ffmpeg.zip 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
 
 :ffmpeg_ok
+call :display "FFmpeg ready!"
 
 :: ==================================================
 :: Step 3: Create virtual environment
