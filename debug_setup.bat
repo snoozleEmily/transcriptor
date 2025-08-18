@@ -43,7 +43,7 @@ echo ===========================================
 echo  %~1
 echo ===========================================
 echo.
-timeout /t 2 /nobreak >nul
+timeout /t 1 /nobreak >nul
 goto :eof
 
 :: ==================================================
@@ -79,7 +79,7 @@ call :check_python_version
 if %errorlevel% == 0 (
     echo Python 3.10.x detected in PATH.
     set "PYTHON_CMD=python"
-    set "PYTHON_DIR="
+    echo Skipping Python installation.
     goto :python_ok
 )
 
@@ -92,7 +92,6 @@ if %errorlevel% == 0 (
     echo Another Python version detected.
     echo Will continue using existing Python for dependencies.
     set "PYTHON_CMD=python"
-    set "PYTHON_DIR="
     goto :python_ok
 ) else (
     echo [WARN] No Python installation detected on this system.
@@ -121,8 +120,15 @@ if errorlevel 1 (
     call :handle_error "Python installation via winget failed"
 )
 
-:: Reset color after winget
+:: Reset color
 color 0A
+
+:: ==================================================
+:: Step 1.4b: Upgrade pip
+:: ==================================================
+call :display "Upgrading pip..."
+python -m pip install --upgrade pip
+if errorlevel 1 call :handle_error "Upgrading pip failed"
 
 :: ==================================================
 :: Step 1.5: Handle user-scope installation and PATH
@@ -132,8 +138,9 @@ set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
 if exist "%PYTHON_DIR%\python.exe" (
     echo Python found at %PYTHON_DIR%
     set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
-    setx PATH "%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
     set "PYTHON_CMD=python"
+    :: Add permanently
+    setx PATH "%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
 ) else (
     where python >nul 2>nul
     if errorlevel 1 (
@@ -150,12 +157,6 @@ call :check_python_version
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
-
-:: Upgrade pip
-echo Upgrading pip...
-%PYTHON_CMD% -m pip install --upgrade pip
-if errorlevel 1 call :handle_error "Upgrading pip failed"
-
 call :display "Python 3.10 is ready to use!"
 
 :: ==================================================
@@ -165,6 +166,7 @@ call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% == 0 (
     echo FFmpeg already available in PATH.
+    echo Skipping FFmpeg installation.
     goto :ffmpeg_ok
 ) else (
     echo [WARN] FFmpeg not detected on this system.
@@ -176,9 +178,8 @@ if %errorlevel% == 0 (
 call :display "Step 2.1: Trying to install FFmpeg via winget..."
 where winget >nul 2>nul
 if %errorlevel% == 0 (
-    winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements
+    winget install --id Gyan.FFmpeg -e --scope user --accept-package-agreements --accept-source-agreements
     set "WG_EXIT=%ERRORLEVEL%"
-    color 0A
     if "%WG_EXIT%"=="0" (
         echo Winget successfully installed FFmpeg.
         goto :ffmpeg_ok
@@ -215,16 +216,10 @@ if errorlevel 1 (
 )
 
 del "%~dp0ffmpeg.zip" 2>nul
-
-:: Add FFmpeg to PATH (temporary and permanent)
-if exist "%~dp0.ffmpeg\bin\ffmpeg.exe" (
-    echo Adding FFmpeg to PATH...
-    set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-    setx PATH "%~dp0.ffmpeg\bin;%PATH%"
-    echo FFmpeg added to PATH successfully.
-) else (
-    echo [WARN] FFmpeg binary not found in %~dp0.ffmpeg\bin
-)
+set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+:: Add FFmpeg permanently to PATH
+setx PATH "%~dp0.ffmpeg\bin;%PATH%"
+echo FFmpeg successfully installed locally.
 
 :ffmpeg_ok
 call :display "FFmpeg is ready to use!"
@@ -252,8 +247,8 @@ call :display "Step 6/8: Installing CMake via winget..."
 where winget >nul 2>nul
 if %errorlevel% == 0 (
     winget install Kitware.CMake -e --accept-package-agreements --accept-source-agreements
-    color 0A
     if errorlevel 1 call :handle_error "CMake installation failed"
+    color 0A
 ) else (
     echo winget not found. Please install CMake manually.
 )
@@ -265,8 +260,8 @@ call :display "Step 7/8: Installing Visual Studio Build Tools via winget..."
 where winget >nul 2>nul
 if %errorlevel% == 0 (
     winget install Microsoft.VisualStudio.2022.BuildTools -e --accept-package-agreements --accept-source-agreements
-    color 0A
     if errorlevel 1 call :handle_error "Visual Studio Build Tools installation failed"
+    color 0A
 ) else (
     echo winget not found. Please install Visual Studio Build Tools manually.
 )
