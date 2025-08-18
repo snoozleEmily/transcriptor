@@ -77,9 +77,9 @@ call :display "Initializing Setup..."
 call :display "Step 1/8: Checking Python 3.10.x..."
 call :check_python_version
 if %errorlevel% == 0 (
-    echo [INFO] Python 3.10.x detected in PATH.
+    echo Python 3.10.x detected in PATH.
     set "PYTHON_CMD=python"
-    echo [INFO] Skipping Python installation.
+    echo Skipping Python installation.
     goto :python_ok
 )
 
@@ -89,8 +89,8 @@ if %errorlevel% == 0 (
 call :display "Step 1.2: Checking for any installed Python..."
 python --version >nul 2>nul
 if %errorlevel% == 0 (
-    echo [INFO] Another Python version detected.
-    echo [INFO] Will continue using existing Python for dependencies.
+    echo Another Python version detected.
+    echo Will continue using existing Python for dependencies.
     set "PYTHON_CMD=python"
     goto :python_ok
 ) else (
@@ -115,11 +115,23 @@ if errorlevel 1 (
 :: Step 1.4: Install Python 3.10 via winget
 :: ==================================================
 call :display "Step 1.4: Installing Python 3.10 via winget..."
-winget install --id Python.Python.3.10 -e --source winget --silent
+winget install --id Python.Python.3.10 -e --source winget
 if errorlevel 1 (
     call :handle_error "Python installation via winget failed"
 )
-echo [INFO] Winget reported Python installed.
+
+:: Reset color after winget
+color 0A
+
+echo Winget reported Python installed.
+
+:: ==================================================
+:: Step 1.4b: Upgrade pip
+:: ==================================================
+call :display "Step 1.4b: Upgrading pip..."
+%PYTHON_CMD% -m ensurepip --upgrade
+%PYTHON_CMD% -m pip install --upgrade pip
+if errorlevel 1 call :handle_error "Upgrading pip failed"
 
 :: ==================================================
 :: Step 1.5: Handle user-scope installation and PATH
@@ -127,17 +139,17 @@ echo [INFO] Winget reported Python installed.
 call :display "Step 1.5: Adjusting PATH and verifying Python..."
 set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
 if exist "%PYTHON_DIR%\python.exe" (
-    echo [INFO] Python found at %PYTHON_DIR%
+    echo Python found at %PYTHON_DIR%
     set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
     set "PYTHON_CMD=python"
 ) else (
     where python >nul 2>nul
     if errorlevel 1 (
         set "PYTHON_CMD=py -3.10"
-        echo [INFO] Using Python launcher instead: py -3.10
+        echo Using Python launcher instead: py -3.10
     ) else (
         set "PYTHON_CMD=python"
-        echo [INFO] Python added to PATH automatically.
+        echo Python added to PATH automatically.
     )
 )
 
@@ -154,8 +166,8 @@ call :display "Python 3.10 is ready to use!"
 call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% == 0 (
-    echo [INFO] FFmpeg already available in PATH.
-    echo [INFO] Skipping FFmpeg installation.
+    echo FFmpeg already available in PATH.
+    echo Skipping FFmpeg installation.
     goto :ffmpeg_ok
 ) else (
     echo [WARN] FFmpeg not detected on this system.
@@ -169,12 +181,13 @@ where winget >nul 2>nul
 if %errorlevel% == 0 (
     winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements > winget_ffmpeg.log 2>&1
     set "WG_EXIT=%ERRORLEVEL%"
+    color 0A
     if "%WG_EXIT%"=="0" (
-        echo [INFO] Winget successfully installed FFmpeg.
+        echo Winget successfully installed FFmpeg.
         goto :ffmpeg_ok
     ) else (
         echo [ERROR] Winget FFmpeg install failed with exit code %WG_EXIT%.
-        echo [INFO] Falling back to manual download.
+        echo Falling back to manual download.
     )
 ) else (
     echo [WARN] winget not found. Will attempt manual FFmpeg installation...
@@ -206,11 +219,10 @@ if errorlevel 1 (
 
 del "%~dp0ffmpeg.zip" 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-echo [INFO] FFmpeg successfully installed locally.
+echo FFmpeg successfully installed locally.
 
 :ffmpeg_ok
 call :display "FFmpeg is ready to use!"
-
 
 :: ==================================================
 :: Step 3: Create virtual environment
@@ -229,7 +241,33 @@ call venv\Scripts\activate.bat
 if errorlevel 1 call :handle_error "Activating virtual environment"
 
 :: ==================================================
-:: Step 5: Install requirements
+:: Step 5: Install CMake
+:: ==================================================
+call :display "Step 6/8: Installing CMake via winget..."
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    winget install Kitware.CMake -e --accept-package-agreements --accept-source-agreements
+    color 0A
+    if errorlevel 1 call :handle_error "CMake installation failed"
+) else (
+    echo winget not found. Please install CMake manually.
+)
+
+:: ==================================================
+:: Step 6: Install Visual Studio Build Tools
+:: ==================================================
+call :display "Step 7/8: Installing Visual Studio Build Tools via winget..."
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    winget install Microsoft.VisualStudio.2022.BuildTools -e --accept-package-agreements --accept-source-agreements
+    color 0A
+    if errorlevel 1 call :handle_error "Visual Studio Build Tools installation failed"
+) else (
+    echo winget not found. Please install Visual Studio Build Tools manually.
+)
+
+:: ==================================================
+:: Step 7: Install requirements
 :: ==================================================
 if exist requirements.txt (
     call :display "Step 5/8: Installing dependencies..."
@@ -238,20 +276,6 @@ if exist requirements.txt (
 ) else (
     call :display "requirements.txt not found. Skipping..."
 )
-
-:: ==================================================
-:: Step 6: Install PyTorch
-:: ==================================================
-call :display "Step 6/8: Installing PyTorch..."
-pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
-if errorlevel 1 call :handle_error "Installing PyTorch"
-
-:: ==================================================
-:: Step 7: Install llama_cpp
-:: ==================================================
-call :display "Step 7/8: Installing llama-cpp-python..."
-pip install llama-cpp-python==0.3.9
-if errorlevel 1 call :handle_error "Installing llama-cpp-python"
 
 :: ==================================================
 :: Step 8: Run main.py
