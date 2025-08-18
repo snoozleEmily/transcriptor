@@ -71,6 +71,21 @@ exit /b %errorlevel%
 :main
 call :display "Initializing Setup..."
 
+
+:: ==================================================
+:: Step 0: Check for winget
+:: ==================================================
+call :display "Step 0: Checking for winget..."
+where winget >nul 2>nul
+if errorlevel 1 (
+    echo [ERROR] Winget not found.
+    echo [ACTION REQUIRED] Please install Python 3.10 manually:
+    echo   https://www.python.org/downloads/release/python-31013/
+    echo Or install winget from Microsoft Store and re-run this script.
+    pause
+    exit /b 1
+)
+
 :: ==================================================
 :: Step 1: Check for Python 3.10
 :: ==================================================
@@ -97,19 +112,6 @@ if %errorlevel% == 0 (
     echo [WARN] No Python installation detected on this system.
 )
 
-:: ==================================================
-:: Step 1.3: Check for winget
-:: ==================================================
-call :display "Step 1.3: Checking for winget..."
-where winget >nul 2>nul
-if errorlevel 1 (
-    echo [ERROR] No Python detected and winget not found.
-    echo [ACTION REQUIRED] Please install Python 3.10 manually:
-    echo   https://www.python.org/downloads/release/python-31013/
-    echo Or install winget from Microsoft Store and re-run this script.
-    pause
-    exit /b 1
-)
 
 :: ==================================================
 :: Step 1.4: Install Python 3.10 via winget
@@ -122,13 +124,6 @@ if errorlevel 1 (
 
 :: Reset color
 color 0A
-
-:: ==================================================
-:: Step 1.4b: Upgrade pip
-:: ==================================================
-call :display "Upgrading pip..."
-python -m pip install --upgrade pip
-if errorlevel 1 call :handle_error "Upgrading pip failed"
 
 :: ==================================================
 :: Step 1.5: Handle user-scope installation and PATH
@@ -158,6 +153,14 @@ if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
 call :display "Python 3.10 is ready to use!"
+
+:: ==================================================
+:: Step 1.4: Upgrade pip
+:: ==================================================
+call :display "Upgrading pip..."
+python -m pip install --upgrade pip
+if errorlevel 1 call :handle_error "Upgrading pip failed"
+
 
 :: ==================================================
 :: Step 2: Check FFmpeg
