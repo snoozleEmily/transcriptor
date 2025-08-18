@@ -79,7 +79,7 @@ call :check_python_version
 if %errorlevel% == 0 (
     echo Python 3.10.x detected in PATH.
     set "PYTHON_CMD=python"
-    echo Skipping Python installation.
+    set "PYTHON_DIR="
     goto :python_ok
 )
 
@@ -92,6 +92,7 @@ if %errorlevel% == 0 (
     echo Another Python version detected.
     echo Will continue using existing Python for dependencies.
     set "PYTHON_CMD=python"
+    set "PYTHON_DIR="
     goto :python_ok
 ) else (
     echo [WARN] No Python installation detected on this system.
@@ -123,16 +124,6 @@ if errorlevel 1 (
 :: Reset color after winget
 color 0A
 
-echo Winget reported Python installed.
-
-:: ==================================================
-:: Step 1.4b: Upgrade pip
-:: ==================================================
-call :display "Step 1.4b: Upgrading pip..."
-%PYTHON_CMD% -m ensurepip --upgrade
-%PYTHON_CMD% -m pip install --upgrade pip
-if errorlevel 1 call :handle_error "Upgrading pip failed"
-
 :: ==================================================
 :: Step 1.5: Handle user-scope installation and PATH
 :: ==================================================
@@ -141,6 +132,7 @@ set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
 if exist "%PYTHON_DIR%\python.exe" (
     echo Python found at %PYTHON_DIR%
     set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+    setx PATH "%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
     set "PYTHON_CMD=python"
 ) else (
     where python >nul 2>nul
@@ -158,6 +150,12 @@ call :check_python_version
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
+
+:: Upgrade pip
+echo Upgrading pip...
+%PYTHON_CMD% -m pip install --upgrade pip
+if errorlevel 1 call :handle_error "Upgrading pip failed"
+
 call :display "Python 3.10 is ready to use!"
 
 :: ==================================================
@@ -167,7 +165,6 @@ call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% == 0 (
     echo FFmpeg already available in PATH.
-    echo Skipping FFmpeg installation.
     goto :ffmpeg_ok
 ) else (
     echo [WARN] FFmpeg not detected on this system.
@@ -179,7 +176,7 @@ if %errorlevel% == 0 (
 call :display "Step 2.1: Trying to install FFmpeg via winget..."
 where winget >nul 2>nul
 if %errorlevel% == 0 (
-    winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements > winget_ffmpeg.log 2>&1
+    winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements
     set "WG_EXIT=%ERRORLEVEL%"
     color 0A
     if "%WG_EXIT%"=="0" (
@@ -218,8 +215,16 @@ if errorlevel 1 (
 )
 
 del "%~dp0ffmpeg.zip" 2>nul
-set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-echo FFmpeg successfully installed locally.
+
+:: Add FFmpeg to PATH (temporary and permanent)
+if exist "%~dp0.ffmpeg\bin\ffmpeg.exe" (
+    echo Adding FFmpeg to PATH...
+    set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+    setx PATH "%~dp0.ffmpeg\bin;%PATH%"
+    echo FFmpeg added to PATH successfully.
+) else (
+    echo [WARN] FFmpeg binary not found in %~dp0.ffmpeg\bin
+)
 
 :ffmpeg_ok
 call :display "FFmpeg is ready to use!"
