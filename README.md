@@ -26,8 +26,8 @@ If you're on Windows, simply run `setup.bat`. The script will handle all the too
 #### **Other Operating Systems**
 If you're working on a different operating system `or want to manually arrange your setup`, follow these steps:
 
-1. **Install Python and Git**:
-   - [Python](https://www.python.org/downloads/)
+1. **Install Python 3.10 and Git**:
+   - [Python 3.10](https://www.python.org/downloads/)
    - [Git](https://git-scm.com/downloads)
 
 2. **Install FFmpeg**:
@@ -53,7 +53,7 @@ If you're working on a different operating system `or want to manually arrange y
      venv\Scripts\activate  # Windows
      ```
 
-5. **Install Dependencies**:
+7. **Install Dependencies**:
    Install all required dependencies:
    ```bash
    pip install -r requirements.txt
@@ -61,9 +61,7 @@ If you're working on a different operating system `or want to manually arrange y
 
    python -m textblob.download_corpora  # Downloads NLTK data for TextBlob
   
-6.  [there is another step to add for the newer versions - how to setup `pydub`]
-
-7. **Run the Script**:
+8. **Run the Script**:
    You're ready to go! Run the script with:
    ```bash
    python main.py
