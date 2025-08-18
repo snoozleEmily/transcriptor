@@ -77,70 +77,76 @@ call :display "Initializing Setup..."
 call :display "Step 1/8: Checking Python 3.10.x..."
 call :check_python_version
 if %errorlevel% == 0 (
-    call :display "Python 3.10.x is already installed :)"
+    echo [INFO] Python 3.10.x detected in PATH.
     set "PYTHON_CMD=python"
+    echo [INFO] Skipping Python installation.
     goto :python_ok
 )
 
 :: ==================================================
-:: Step 1.5: Check for any Python
+:: Step 1.2: Check for any Python
 :: ==================================================
+call :display "Step 1.2: Checking for any installed Python..."
 python --version >nul 2>nul
 if %errorlevel% == 0 (
-    call :display "Another Python version detected. Will use pip for dependencies."
+    echo [INFO] Another Python version detected.
+    echo [INFO] Will continue using existing Python for dependencies.
     set "PYTHON_CMD=python"
     goto :python_ok
+) else (
+    echo [WARN] No Python installation detected on this system.
 )
 
 :: ==================================================
-:: Step 1.6: Check for winget
+:: Step 1.3: Check for winget
 :: ==================================================
+call :display "Step 1.3: Checking for winget..."
 where winget >nul 2>nul
 if errorlevel 1 (
-    echo ERROR: No Python detected and winget not found.
-    echo Please install Python 3.10 manually or install winget from Microsoft Store.
+    echo [ERROR] No Python detected and winget not found.
+    echo [ACTION REQUIRED] Please install Python 3.10 manually:
+    echo   https://www.python.org/downloads/release/python-31013/
+    echo Or install winget from Microsoft Store and re-run this script.
     pause
     exit /b 1
 )
 
 :: ==================================================
-:: Step 1.7: Install Python 3.10 via winget
+:: Step 1.4: Install Python 3.10 via winget
 :: ==================================================
-call :display "Installing Python 3.10 via winget..."
+call :display "Step 1.4: Installing Python 3.10 via winget..."
 winget install --id Python.Python.3.10 -e --source winget --silent
 if errorlevel 1 (
     call :handle_error "Python installation via winget failed"
 )
+echo [INFO] Winget reported Python installed.
 
 :: ==================================================
-:: Step 1.8: Handle user-scope installation and PATH
+:: Step 1.5: Handle user-scope installation and PATH
 :: ==================================================
-:: Check default user-scope install location
+call :display "Step 1.5: Adjusting PATH and verifying Python..."
 set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
 if exist "%PYTHON_DIR%\python.exe" (
+    echo [INFO] Python found at %PYTHON_DIR%
     set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
     set "PYTHON_CMD=python"
-    echo Python found at %PYTHON_DIR%, added to PATH.
 ) else (
-    :: Fallback to py launcher
     where python >nul 2>nul
     if errorlevel 1 (
         set "PYTHON_CMD=py -3.10"
-        echo Python not in PATH, using py launcher.
+        echo [INFO] Using Python launcher instead: py -3.10
     ) else (
         set "PYTHON_CMD=python"
+        echo [INFO] Python added to PATH automatically.
     )
 )
 
-set "PYTHON_CMD=python"
-
 :python_ok
-:: Verify installation
 call :check_python_version
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
-call :display "Python 3.10 ready!"
+call :display "Python 3.10 is ready to use!"
 
 :: ==================================================
 :: Step 2: Check FFmpeg
@@ -148,67 +154,63 @@ call :display "Python 3.10 ready!"
 call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% == 0 (
-    call :display "FFmpeg is already installed :)"
+    echo [INFO] FFmpeg already available in PATH.
+    echo [INFO] Skipping FFmpeg installation.
     goto :ffmpeg_ok
+) else (
+    echo [WARN] FFmpeg not detected on this system.
 )
 
 :: ==================================================
 :: Step 2.1: Try installing FFmpeg via winget
 :: ==================================================
+call :display "Step 2.1: Trying to install FFmpeg via winget..."
 where winget >nul 2>nul
 if %errorlevel% == 0 (
-    call :display "Attempting to install FFmpeg via winget..."
     winget install --id Gyan.FFmpeg -e --source winget --scope user --accept-package-agreements --accept-source-agreements > winget_ffmpeg.log 2>&1
     set "WG_EXIT=%ERRORLEVEL%"
-    type winget_ffmpeg.log
-    if "%WG_EXIT%" == "0" (
-        call :display "FFmpeg installed via winget!"
+    if "%WG_EXIT%"=="0" (
+        echo [INFO] Winget successfully installed FFmpeg.
         goto :ffmpeg_ok
     ) else (
-        echo Winget installation failed, exit code: %WG_EXIT%
-        echo Will attempt manual download...
+        echo [ERROR] Winget FFmpeg install failed with exit code %WG_EXIT%.
+        echo [INFO] Falling back to manual download.
     )
 ) else (
-    echo winget not found, will attempt manual download...
+    echo [WARN] winget not found. Will attempt manual FFmpeg installation...
 )
 
 :: ==================================================
 :: Step 2.2: Manual download fallback
 :: ==================================================
+call :display "Step 2.2: Downloading and extracting FFmpeg..."
 set "ARCH=64"
 if "%PROCESSOR_ARCHITECTURE%"=="x86" (
     if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
 )
 set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
 
-call :display "Downloading FFmpeg manually..."
 curl -L -o "%~dp0ffmpeg.zip" "%FFMPEG_URL%"
 if errorlevel 1 (
-    echo ERROR: Failed to download FFmpeg manually.
-    echo Please install winget and try again, or manually install FFmpeg from https://ffmpeg.org/download.html
+    echo [ERROR] Failed to download FFmpeg manually.
+    echo [ACTION REQUIRED] Please install winget or download FFmpeg manually:
+    echo   https://ffmpeg.org/download.html
     pause
     exit /b 1
 )
 
-if not exist "%~dp0ffmpeg.zip" (
-    echo ERROR: FFmpeg zip not found after download.
-    pause
-    exit /b 1
-)
-
-call :display "Extracting FFmpeg..."
 powershell -Command "Expand-Archive -LiteralPath '%~dp0ffmpeg.zip' -DestinationPath '%~dp0.ffmpeg' -Force"
 if errorlevel 1 (
-    echo ERROR: Failed to extract FFmpeg.
-    pause
-    exit /b 1
+    call :handle_error "Failed to extract FFmpeg"
 )
 
 del "%~dp0ffmpeg.zip" 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
-call :display "FFmpeg ready!"
+echo [INFO] FFmpeg successfully installed locally.
 
 :ffmpeg_ok
+call :display "FFmpeg is ready to use!"
+
 
 :: ==================================================
 :: Step 3: Create virtual environment
