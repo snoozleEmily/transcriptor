@@ -1,15 +1,10 @@
+:: NOT READY FOR USAGE - WORK IN PROGRESS
 @echo off
 setlocal enabledelayedexpansion
 title Emily's Transcriptor - Setup
 
-:: Hide command outputs by default
-if not defined DEBUG (
-    >nul 2>&1 (
-        echo >nul
-    )
-)
+set DEBUG=1
 
-:: Set colors (green text on black background)
 color 0A 
 
 :: ==================================================
@@ -38,12 +33,10 @@ echo ==================================================
 timeout /t 5 /nobreak >nul
 cls
 
-:: Jump to MAIN to avoid accidentally running functions
 goto :main
 
 :: ==================================================
 :: Function :display
-:: Displays a message in a box
 :: ==================================================
 :display
 echo.
@@ -51,12 +44,11 @@ echo ===========================================
 echo  %~1
 echo ===========================================
 echo.
-timeout /t 2 /nobreak >nul
+timeout /t 1 /nobreak >nul
 goto :eof
 
 :: ==================================================
 :: Function :handle_error
-:: Displays an error message and pauses
 :: ==================================================
 :handle_error
 echo.
@@ -68,8 +60,7 @@ pause
 exit /b 1
 
 :: ==================================================
-:: Function :check_python_version
-:: Properly checks for Python 3.10.x
+:: Function: check_python_version
 :: ==================================================
 :check_python_version
 python --version 2>nul | findstr /r /c:"Python 3\.10\." >nul
@@ -81,85 +72,161 @@ exit /b %errorlevel%
 :main
 call :display "Initializing Setup..."
 
+
 :: ==================================================
-:: Step 1: Check for Python 3.10.x
+:: Step 0: Check for winget
+:: ==================================================
+call :display "Step 0: Checking for winget..."
+where winget >nul 2>nul
+if errorlevel 1 (
+    echo [ERROR] Winget not found.
+    echo [ACTION REQUIRED] Please install Python 3.10 manually:
+    echo   https://www.python.org/downloads/release/python-31013/
+    echo Or install winget from Microsoft Store and re-run this script.
+    pause
+    exit /b 1
+)
+
+:: ==================================================
+:: Step 1: Check for Python 3.10
 :: ==================================================
 call :display "Step 1/8: Checking Python 3.10.x..."
 call :check_python_version
 if %errorlevel% == 0 (
-    call :display "Python 3.10.x is already installed :)"
+    echo Python 3.10.x detected in PATH.
     set "PYTHON_CMD=python"
+    echo Skipping Python installation.
     goto :python_ok
 )
 
 :: ==================================================
-:: Step 1.5: Architecture check
+:: Step 1.2: Check for any Python
 :: ==================================================
-set "ARCH=64"
-if "%PROCESSOR_ARCHITECTURE%"=="x86" (
-    if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
-)
-
-:: Download and install
-call :display "Downloading Python 3.10 installer (%ARCH%-bit)..."
-set "PYTHON_URL=https://www.python.org/ftp/python/3.10.13/python-3.10.13"
-if "%ARCH%"=="64" (
-    set "PYTHON_URL=%PYTHON_URL%-amd64.exe"
+call :display "Step 1.2: Checking for any installed Python..."
+python --version >nul 2>nul
+if %errorlevel% == 0 (
+    echo Another Python version detected.
+    echo Will continue using existing Python for dependencies.
+    set "PYTHON_CMD=python"
+    goto :python_ok
 ) else (
-    set "PYTHON_URL=%PYTHON_URL%.exe"
+    echo [WARN] No Python installation detected on this system.
 )
-set "PYTHON_INSTALLER=python_installer.exe"
 
-:: Try downloading
-curl -L -o "%PYTHON_INSTALLER%" "%PYTHON_URL%"
-if errorlevel 1 (
-    call :handle_error "Failed to download Python installer"
-)
-call :display "Installing Python 3.10 (please wait)..."
-start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1
-if errorlevel 1 (
-    call :handle_error "Python installation failed"
-)
-del "%PYTHON_INSTALLER%" 2>nul
-set "PYTHON_CMD=python"
 
-:: Verify installation
+:: ==================================================
+:: Step 1.4: Install Python 3.10 via winget
+:: ==================================================
+call :display "Step 1.4: Installing Python 3.10 via winget..."
+winget install --id Python.Python.3.10 -e --source winget
+if errorlevel 1 (
+    call :handle_error "Python installation via winget failed"
+)
+
+:: Reset color
+color 0A
+
+:: ==================================================
+:: Step 1.5: Handle user-scope installation and PATH
+:: ==================================================
+call :display "Step 1.5: Adjusting PATH and verifying Python..."
+set "PYTHON_DIR=%LOCALAPPDATA%\Programs\Python\Python310"
+if exist "%PYTHON_DIR%\python.exe" (
+    echo Python found at %PYTHON_DIR%
+    set "PATH=%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+    set "PYTHON_CMD=python"
+    :: Add permanently
+    setx PATH "%PYTHON_DIR%;%PYTHON_DIR%\Scripts;%PATH%"
+) else (
+    where python >nul 2>nul
+    if errorlevel 1 (
+        set "PYTHON_CMD=py -3.10"
+        echo Using Python launcher instead: py -3.10
+    ) else (
+        set "PYTHON_CMD=python"
+        echo Python added to PATH automatically.
+    )
+)
+
 :python_ok
 call :check_python_version
 if errorlevel 1 (
     call :handle_error "Python 3.10.x not found after installation"
 )
+call :display "Python 3.10 is ready to use!"
 
 :: ==================================================
-:: Step 2: Check for FFmpeg
+:: Step 1.4: Upgrade pip
+:: ==================================================
+call :display "Upgrading pip..."
+python -m pip install --upgrade pip
+if errorlevel 1 call :handle_error "Upgrading pip failed"
+
+
+:: ==================================================
+:: Step 2: Check FFmpeg
 :: ==================================================
 call :display "Step 2/8: Checking FFmpeg..."
 where ffmpeg >nul 2>nul
 if %errorlevel% == 0 (
-    call :display "FFmpeg is already installed :)"
+    echo FFmpeg already available in PATH.
+    echo Skipping FFmpeg installation.
     goto :ffmpeg_ok
+) else (
+    echo [WARN] FFmpeg not detected on this system.
 )
 
-:: Architecture-specific download
+:: ==================================================
+:: Step 2.1: Try installing FFmpeg via winget
+:: ==================================================
+call :display "Step 2.1: Trying to install FFmpeg via winget..."
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    winget install --id Gyan.FFmpeg -e --scope user --accept-package-agreements --accept-source-agreements
+    set "WG_EXIT=%ERRORLEVEL%"
+    if "%WG_EXIT%"=="0" (
+        echo Winget successfully installed FFmpeg.
+        goto :ffmpeg_ok
+    ) else (
+        echo [ERROR] Winget FFmpeg install failed with exit code %WG_EXIT%.
+        echo Falling back to manual download.
+    )
+) else (
+    echo [WARN] winget not found. Will attempt manual FFmpeg installation...
+)
+
+:: ==================================================
+:: Step 2.2: Manual download fallback
+:: ==================================================
+call :display "Step 2.2: Downloading and extracting FFmpeg..."
+set "ARCH=64"
+if "%PROCESSOR_ARCHITECTURE%"=="x86" (
+    if not defined PROCESSOR_ARCHITEW6432 set "ARCH=32"
+)
 set "FFMPEG_URL=https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win%ARCH%-gpl.zip"
 
-call :display "Downloading FFmpeg..."
-curl -L -o ffmpeg.zip "%FFMPEG_URL%"
+curl -L -o "%~dp0ffmpeg.zip" "%FFMPEG_URL%"
 if errorlevel 1 (
-    call :handle_error "Failed to download FFmpeg"
+    echo [ERROR] Failed to download FFmpeg manually.
+    echo [ACTION REQUIRED] Please install winget or download FFmpeg manually:
+    echo   https://ffmpeg.org/download.html
+    pause
+    exit /b 1
 )
 
-call :display "Extracting FFmpeg..."
-mkdir .ffmpeg 2>nul
-powershell -command "Expand-Archive -Path 'ffmpeg.zip' -DestinationPath '.ffmpeg'"
+powershell -Command "Expand-Archive -LiteralPath '%~dp0ffmpeg.zip' -DestinationPath '%~dp0.ffmpeg' -Force"
 if errorlevel 1 (
     call :handle_error "Failed to extract FFmpeg"
 )
 
-:: Cleanup zip file
-del ffmpeg.zip 2>nul
+del "%~dp0ffmpeg.zip" 2>nul
 set "PATH=%~dp0.ffmpeg\bin;%PATH%"
+:: Add FFmpeg permanently to PATH
+setx PATH "%~dp0.ffmpeg\bin;%PATH%"
+echo FFmpeg successfully installed locally.
+
 :ffmpeg_ok
+call :display "FFmpeg is ready to use!"
 
 :: ==================================================
 :: Step 3: Create virtual environment
@@ -178,29 +245,41 @@ call venv\Scripts\activate.bat
 if errorlevel 1 call :handle_error "Activating virtual environment"
 
 :: ==================================================
-:: Step 5: Install requirements
+:: Step 5: Install CMake
+:: ==================================================
+call :display "Step 6/8: Installing CMake via winget..."
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    winget install Kitware.CMake -e --accept-package-agreements --accept-source-agreements
+    if errorlevel 1 call :handle_error "CMake installation failed"
+    color 0A
+) else (
+    echo winget not found. Please install CMake manually.
+)
+
+:: ==================================================
+:: Step 6: Install Visual Studio Build Tools
+:: ==================================================
+call :display "Step 7/8: Installing Visual Studio Build Tools via winget..."
+where winget >nul 2>nul
+if %errorlevel% == 0 (
+    winget install Microsoft.VisualStudio.2022.BuildTools -e --accept-package-agreements --accept-source-agreements
+    if errorlevel 1 call :handle_error "Visual Studio Build Tools installation failed"
+    color 0A
+) else (
+    echo winget not found. Please install Visual Studio Build Tools manually.
+)
+
+:: ==================================================
+:: Step 7: Install requirements
 :: ==================================================
 if exist requirements.txt (
-    call :display "Step 5/8: Installing dependencies from requirements.txt..."
+    call :display "Step 5/8: Installing dependencies..."
     pip install -r requirements.txt
     if errorlevel 1 call :handle_error "Installing Python dependencies"
 ) else (
     call :display "requirements.txt not found. Skipping..."
 )
-
-:: ==================================================
-:: Step 6: Install PyTorch
-:: ==================================================
-call :display "Step 6/8: Installing PyTorch..."
-pip install torch==2.0.0 --index-url https://download.pytorch.org/whl/cpu
-if errorlevel 1 call :handle_error "Installing PyTorch"
-
-:: ==================================================
-:: Step 7: Install llama_cpp
-:: ==================================================
-call :display "Step 7/8: Installing llama-cpp-python..."
-pip install llama-cpp-python==0.3.9
-if errorlevel 1 call :handle_error "Installing llama-cpp-python"
 
 :: ==================================================
 :: Step 8: Run main.py
