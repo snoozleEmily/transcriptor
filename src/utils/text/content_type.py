@@ -53,13 +53,13 @@ class ContentType:
         if self.words:
             active.extend([f"word:{w}" for w in self.words])
 
-        if self.has_code:
+        if self.has_code: # Not Implemented yet
             active.append('has_code')
 
-        if self.has_odd_names:
+        if self.has_odd_names: # Not Implemented yet
             active.append('has_odd_names')
         
-        if self.is_multilingual:
+        if self.is_multilingual: # Not Implemented yet
             active.append('is_multilingual')
 
         return active
