@@ -2,12 +2,14 @@ import re
 from typing import Dict, List, Any
 
 
-from src.utils.pdf_maker import PDFExporter
+
+from src.errors.debug import debug
 from src.errors.exceptions import TranscriptionError
+from src.utils.pdf_maker import PDFExporter
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD
-from src.utils.text.words.definition_pat import DEFINITION_PAT
 from src.utils.text.language import Language
+
 
 
 class NotesGenerator:
@@ -43,7 +45,7 @@ class NotesGenerator:
 
         pdf = self.pdf_exporter.pdf
         font = self.pdf_exporter.font_family
-        print(f"font: {font}")  # DEBUG
+        debug.dprint(f"Font: {font}")
         pdf.add_page()
 
         # Title
@@ -87,7 +89,7 @@ class NotesGenerator:
             pdf.ln(5)
 
             self.pdf_exporter.pdf = pdf
-            return self.pdf_exporter.export_to_pdf(
+            return self.pdf_exporter.render_pdf(
                 " ", output_path, title
             )  # dummy text param
 
