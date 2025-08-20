@@ -111,17 +111,17 @@ class EndFlow:
         """Enhanced transcription pipeline with better error context."""
         self.configure_content(config_params)
 
-        debug.debug_print(
+        debug.dprint(
                 f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
             )
 
         try:
             # Audio processing
             audio = extract_audio(video_path)
-            debug.debug_print(f"Audio extracted: length={len(audio) if audio else 0}")
+            debug.dprint(f"Audio extracted: length={len(audio) if audio else 0}")
 
             cleaned_audio = clean_audio(audio)
-            debug.debug_print(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
+            debug.dprint(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
 
             # Transcription
             context_prompt = self.debugger.generate_content_prompt(self.content_config)
@@ -162,7 +162,7 @@ class EndFlow:
         save_path = self._get_save_path(
             os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
-        debug.debug_print(f"quick_script received in EndFlow: {quick_script}")
+        debug.dprint(f"quick_script received in EndFlow: {quick_script}")
 
         if not quick_script:
             self.pdf_exporter.save_notes(
