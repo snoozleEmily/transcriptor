@@ -47,11 +47,10 @@ class AsyncTaskManager:
             Executes video processing and ensures results are communicated back to the main GUI thread.
             """
             try:
-                if debug.is_dev_logs_enabled():
-                    print(f"[DEBUG] Starting processing for: {path}")
-                    print(
-                        f"[DEBUG] quick_script={quick_script}, config_params={config_params}"
-                    )
+                debug.dprint(f"Starting processing for: {path}")
+                debug.dprint(
+                    f"quick_script={quick_script}, config_params={config_params}"
+                )
 
                 result = self.interface.flow.process_video(  # References EndFlow
                     path,
@@ -60,8 +59,7 @@ class AsyncTaskManager:
                     progress_callback=progress_handler,
                 )
 
-                if debug.is_dev_logs_enabled():
-                    print(f"[DEBUG] Processing completed for: {path}")
+                debug.dprint(f"Processing completed for: {path}")
 
                 # Schedule completion callback on the main GUI thread
                 self.gui_queue.put(lambda: self.completion_callback(result))
