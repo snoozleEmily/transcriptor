@@ -10,7 +10,7 @@ class LanguageConfig:
     """Configuration for language processing"""
     default_language: str = "portuguese"
     supported_languages: List[str] = field(
-        default_factory=lambda: ["english", "portuguese", "spanish", "italian"]
+        default_factory=lambda: ["english", "portuguese", "spanish", "italian", "romanian"]
     )
     fallback_patterns: str = "default"
 
@@ -56,7 +56,7 @@ class Language:
     def is_supported_language(self, lang_code: str) -> bool:
         """Check if a language code is supported"""
         lang = lang_code.lower().split("-")[0]
-        
+
         is_supported = lang in self.config.supported_languages
         debug.dprint("Language is supported: {is_supported}")
 
