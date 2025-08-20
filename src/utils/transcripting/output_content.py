@@ -5,9 +5,9 @@ from src.utils.text.content_type import ContentType
 
 
 
-class OutputDebugger:
+class OutputContent:
     """Handles content-specific debugging and prompt generation"""
-    DEBUG_PREFIX = "[DEBUG]"
+    PREFIX = "[INFO]"
     PROMPT_DOMAIN_PREFIX = "Domains:"
 
     def generate_content_prompt(self, content_config: ContentType) -> str:
@@ -27,19 +27,19 @@ class OutputDebugger:
     def _debug_content_features(self, content_config: ContentType):
         """Log debug information about content features"""
         if content_config.words:
-            self._log_debug_message("Custom vocabulary detected", content_config.words)
+            self._log_info_message("Custom vocabulary detected", content_config.words)
 
         if content_config.has_code:
-            self._log_debug_message(
+            self._log_info_message(
                 "Code content detected", str(content_config.has_code)
             )
 
         if content_config.has_odd_names:
-            self._log_debug_message(
+            self._log_info_message(
                 "Unusual names detected", str(content_config.has_odd_names)
             )
 
-    def _log_debug_message(self, title: str, details: Optional[str] = None):
+    def _log_info_message(self, title: str, details: Optional[str] = None):
         """
         Standardized debug message formatting
 
@@ -47,6 +47,6 @@ class OutputDebugger:
             title: Main debug message
             details: Additional details to display
         """
-        print(f"\n{self.DEBUG_PREFIX} {title}")
+        print(f"\n{self.PREFIX} {title}")
         if details:
-            print(f"{' ' * (len(self.DEBUG_PREFIX) + 1)}{details}")
+            print(f"{' ' * (len(self.PREFIX) + 1)}{details}")

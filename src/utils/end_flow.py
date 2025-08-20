@@ -11,7 +11,7 @@ from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
 from src.utils.text.notes_generator import NotesGenerator
-from src.utils.transcripting.output_debugger import OutputDebugger
+from src.utils.transcripting.output_debugger import OutputContent
 from src.utils.transcripting.textify import Textify
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
@@ -33,7 +33,7 @@ class EndFlow:
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
         self.pdf_exporter = PDFExporter()
-        self.debugger = OutputDebugger()
+        self.debugger = OutputContent()
         self.notes_generator = NotesGenerator(
             language=self.language, config=self.content_config
         )
