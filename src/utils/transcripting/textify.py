@@ -2,7 +2,6 @@ import time
 import inspect
 from typing import Dict, Optional, Callable, Any
 
-
 from .loader import Loader
 from .set_model import SetModel
 from .info_dump import InfoDump
@@ -26,10 +25,11 @@ class Textify:
         # Detect Whisper version parameters
         self._detect_whisper_params()
 
-        if debug.is_dev_logs_enabled():
-            print(f"[DEBUG] Initialized Textify with model={self.model_size}, "
-                  f"use_on_progress={self.use_on_progress}, "
-                  f"use_progress_callback={self.use_progress_callback}")
+        debug.debug_print(
+            f"Initialized Textify with model={self.model_size}, "
+            f"use_on_progress={self.use_on_progress}, "
+            f"use_progress_callback={self.use_progress_callback}"
+        )
             
     def _detect_whisper_params(self) -> None:
         """Determine correct progress parameter name for Whisper version"""
@@ -51,14 +51,20 @@ class Textify:
         audio = self.audio_processor.validate_input(audio_input)
         audio_array, duration = self.audio_processor.convert(audio)
 
-        if debug.is_dev_logs_enabled():
-            print(f"[DEBUG] Audio validated. Duration={duration:.2f}s, "
-                  f"Shape={getattr(audio_array, 'shape', 'unknown')}")
+        debug.debug_print(
+            f"Audio validated. Duration={duration:.2f}s, "
+            f"Shape={getattr(audio_array, 'shape', 'unknown')}"
+        )
 
         # Time estimation
         content_config = kwargs.get("content_config", ContentType())
         custom_words = len(content_config.words) if content_config.words else 0
         setup_time = self.estimator.get_setup_time()
+
+        debug.debug_print(
+            f"Estimation setup. Duration={duration:.2f}s, custom_words={custom_words}, "
+            f"setup_time={setup_time:.2f}s"
+        )
 
         # Progress setup
         pipeline_start = self.progress.setup(setup_time)
@@ -101,6 +107,9 @@ class Textify:
                 "condition_on_previous_text",
             ]
             filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_args}
+            safe_args = {k: v for k, v in whisper_args.items() if k != "audio"}
+
+            debug.debug_print(f"Calling transcribe with args={safe_args}, extra_kwargs={filtered_kwargs}")
 
             result = self.model.transcribe(**whisper_args, **filtered_kwargs)
 
