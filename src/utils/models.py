@@ -57,10 +57,10 @@ for model in MODELS:  # Ensure all models have speed and setup entries
             "Missing entries detected. Using default."
         )  # No errors should be raised here
 
-        debug.debug_print(
+        debug.dprint(
             f"[DEBUG] Model '{model}' was missing setup time. Defaulted to 0.0s."
         )
-        debug.debug_print(
+        debug.dprint(
             f"[DEBUG] Current MODEL_SPEEDS: {MODEL_SPEEDS[model]} wps, "
             f"SETUP_TIMES: {SETUP_TIMES[model]}s"
         )
