@@ -21,7 +21,7 @@ class Debug:
 
     def dprint(self, msg: str) -> None:
         """
-        Print a message with [DEBUG] prefix if logs are enabled.
+        Prints a message with [DEBUG] prefix if DEV logs are enabled.
         """
         if self.dev_logs_fl:
             print(f"[DEBUG] {msg}")
