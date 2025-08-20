@@ -19,7 +19,7 @@ class Debug:
     def __repr__(self) -> str:
         return f"<Debug dev_logs_enabled={self.dev_logs_fl}>"
 
-    def debug_print(self, msg: str) -> None:
+    def dprint(self, msg: str) -> None:
         """
         Print a message with [DEBUG] prefix if logs are enabled.
         """
