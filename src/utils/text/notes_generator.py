@@ -18,6 +18,9 @@ class NotesGenerator:
         self.config = config
         self.pdf_exporter = PDFExporter()
 
+        debug.dprint(f"NotesGenerator initialized with config: {config}, language: {language}")
+
+
     def create_notes(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Prepares all sections as a dict, even if empty"""
         if not data.get("text"):
