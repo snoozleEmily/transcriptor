@@ -25,7 +25,7 @@ class Textify:
         # Detect Whisper version parameters
         self._detect_whisper_params()
 
-        debug.debug_print(
+        debug.dprint(
             f"Initialized Textify with model={self.model_size}, "
             f"use_on_progress={self.use_on_progress}, "
             f"use_progress_callback={self.use_progress_callback}"
@@ -51,7 +51,7 @@ class Textify:
         audio = self.audio_processor.validate_input(audio_input)
         audio_array, duration = self.audio_processor.convert(audio)
 
-        debug.debug_print(
+        debug.dprint(
             f"Audio validated. Duration={duration:.2f}s, "
             f"Shape={getattr(audio_array, 'shape', 'unknown')}"
         )
@@ -61,7 +61,7 @@ class Textify:
         custom_words = len(content_config.words) if content_config.words else 0
         setup_time = self.estimator.get_setup_time()
 
-        debug.debug_print(
+        debug.dprint(
             f"Estimation setup. Duration={duration:.2f}s, custom_words={custom_words}, "
             f"setup_time={setup_time:.2f}s"
         )
@@ -109,7 +109,7 @@ class Textify:
             filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_args}
             safe_args = {k: v for k, v in whisper_args.items() if k != "audio"}
 
-            debug.debug_print(f"Calling transcribe with args={safe_args}, extra_kwargs={filtered_kwargs}")
+            debug.dprint(f"Calling transcribe with args={safe_args}, extra_kwargs={filtered_kwargs}")
 
             result = self.model.transcribe(**whisper_args, **filtered_kwargs)
 
