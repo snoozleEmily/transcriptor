@@ -133,6 +133,7 @@ class NotesGenerator:
                         "timestamp": self._format_timestamp(seg.get("start", 0)),
                     }
                 )
+        debug.dprint(f"Detected questions: {len(qs[-1])}" if qs else "No questions detected")
         return qs[:5]
 
     def _get_important_timestamps(self, segments: List[Dict]) -> List[Dict]:
@@ -148,6 +149,7 @@ class NotesGenerator:
                     }
                 )
 
+        debug.dprint(f"Important parts found: {len(out[-1])}" if out else "No important snippets added")
         return out[:5]
 
     def _format_timestamp(self, seconds: float) -> str:
