@@ -3,20 +3,20 @@ from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
+from src.errors.debug import debug
 from src.errors.handlers import catch_errors
 from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
-from src.errors.debug import debug
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
 from src.utils.text.notes_generator import NotesGenerator
-from src.utils.transcripting.output_debugger import OutputContent
+from src.utils.transcripting.output_content import OutputContent
 from src.utils.transcripting.textify import Textify
+from src.utils.pdf_maker import PDFExporter
+from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
-from src.utils.file_handler import save_transcription
-from src.utils.pdf_maker import PDFExporter
 from src.utils.models import MODELS
 
 
@@ -24,7 +24,7 @@ from src.utils.models import MODELS
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
-    model_size = str(MODELS[1])  # Default model
+    model_size = str(MODELS[1])  # Default model [will be 3 | using a weaker for testing]
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -111,20 +111,17 @@ class EndFlow:
         """Enhanced transcription pipeline with better error context."""
         self.configure_content(config_params)
 
-        if debug.is_dev_logs_enabled():
-            print(
-                f"[DEBUG] Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+        debug.debug_print(
+                f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
             )
 
         try:
             # Audio processing
             audio = extract_audio(video_path)
-            if debug.is_dev_logs_enabled():
-                print(f"[DEBUG] Audio extracted: length={len(audio) if audio else 0}")
+            debug.debug_print(f"Audio extracted: length={len(audio) if audio else 0}")
 
             cleaned_audio = clean_audio(audio)
-            if debug.is_dev_logs_enabled():
-                print(f"[DEBUG] Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
+            debug.debug_print(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
 
             # Transcription
             context_prompt = self.debugger.generate_content_prompt(self.content_config)
@@ -165,7 +162,7 @@ class EndFlow:
         save_path = self._get_save_path(
             os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
-        print(f"[DEBUG] quick_script received in EndFlow: {quick_script}")
+        debug.debug_print(f"quick_script received in EndFlow: {quick_script}")
 
         if not quick_script:
             self.pdf_exporter.save_notes(
@@ -220,7 +217,7 @@ class EndFlow:
         return path
 
     # -------------------------- Debugging -------------------------
-    def _log_error_context(
+    def _log_error_context( # TODO: Change the location of this
         self,
         video_path: str,
         config_params: Optional[Dict[str, Any]],
