@@ -9,6 +9,8 @@ from .info_dump import InfoDump
 from .estimator import TimeEstimator
 from .convert_audio import ConvertAudio
 from src.utils.text.content_type import ContentType
+from src.errors.debug import debug
+
 
 
 class Textify:
@@ -24,6 +26,11 @@ class Textify:
         # Detect Whisper version parameters
         self._detect_whisper_params()
 
+        if debug.is_dev_logs_enabled():
+            print(f"[DEBUG] Initialized Textify with model={self.model_size}, "
+                  f"use_on_progress={self.use_on_progress}, "
+                  f"use_progress_callback={self.use_progress_callback}")
+            
     def _detect_whisper_params(self) -> None:
         """Determine correct progress parameter name for Whisper version"""
         transcribe_params = inspect.signature(self.model.transcribe).parameters
@@ -44,10 +51,13 @@ class Textify:
         audio = self.audio_processor.validate_input(audio_input)
         audio_array, duration = self.audio_processor.convert(audio)
 
+        if debug.is_dev_logs_enabled():
+            print(f"[DEBUG] Audio validated. Duration={duration:.2f}s, "
+                  f"Shape={getattr(audio_array, 'shape', 'unknown')}")
+
         # Time estimation
         content_config = kwargs.get("content_config", ContentType())
         custom_words = len(content_config.words) if content_config.words else 0
-        mean_t, lo_t, hi_t = self.estimator.estimate(duration, custom_words)
         setup_time = self.estimator.get_setup_time()
 
         # Progress setup
