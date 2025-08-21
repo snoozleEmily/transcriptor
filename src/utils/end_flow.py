@@ -4,9 +4,9 @@ from typing import Dict, List, Optional, Union, Any
 
 
 from src.errors.debug import debug
-from src.errors.handlers import catch_errors
-from src.errors.func_printer import get_func_call
 from src.errors.exceptions import ErrorCode, FileError
+from src.errors.handlers import catch_errors
+from src.errors.func_printer import _log_error_flow_context
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
@@ -136,7 +136,9 @@ class EndFlow:
                 result, revised_text, os.path.basename(video_path), quick_script
             )
         except Exception as e:
-            self._log_error_context(video_path, config_params, kwargs)
+            _log_error_flow_context(
+                self.process_video, video_path, config_params, e, kwargs
+            )
             raise
 
     def _transcribe_audio(
@@ -215,20 +217,3 @@ class EndFlow:
             counter += 1
 
         return path
-
-    # -------------------------- Debugging -------------------------
-    def _log_error_context( 
-        self,
-        video_path: str,
-        config_params: Optional[Dict[str, Any]],
-        kwargs: Dict[str, Any],
-    ) -> None:
-        """Log detailed error context for debugging."""
-        config_dict = {} if config_params is None else config_params
-        debug.dprint(
-            get_func_call(
-                self.process_video,
-                (video_path,),
-                {"config_params": config_dict, **kwargs},
-            )
-        )
