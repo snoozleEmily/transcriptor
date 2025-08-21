@@ -16,9 +16,7 @@ def catch_errors(func: Callable) -> Callable:
     """
     @functools.wraps(func)
     def wrapper(self, *args, **kwargs) -> Any:
-        if debug.is_dev_logs_enabled: 
-            # Print function call details before execution
-            print(get_func_call(func, args, kwargs))
+        debug.dprint(get_func_call(func, args, kwargs)) # Get details before execution
         
         try:
             return func(self, *args, **kwargs)
