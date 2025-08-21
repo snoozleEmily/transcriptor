@@ -1,5 +1,4 @@
 import os
-import warnings
 
 
 
@@ -9,5 +8,3 @@ def custom_warning(msg, *args, **kwargs):
         args = list(args)
         args[2] = os.path.basename(str(args[2]))
     return str(msg) + '\n'
-
-warnings.formatwarning = custom_warning
