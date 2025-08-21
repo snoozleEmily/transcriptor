@@ -2,12 +2,14 @@ import re
 from typing import Dict, List, Any
 
 
-from src.utils.pdf_maker import PDFExporter
+
+from src.errors.debug import debug
 from src.errors.exceptions import TranscriptionError
+from src.utils.pdf_maker import PDFExporter
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD
-from src.utils.text.words.definition_pat import DEFINITION_PAT
 from src.utils.text.language import Language
+
 
 
 class NotesGenerator:
@@ -15,6 +17,9 @@ class NotesGenerator:
         self.language = Language()
         self.config = config
         self.pdf_exporter = PDFExporter()
+
+        debug.dprint(f"NotesGenerator initialized with config: {config}, language: {language}")
+
 
     def create_notes(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Prepares all sections as a dict, even if empty"""
@@ -39,11 +44,9 @@ class NotesGenerator:
         output_path: str,
         title: str = "Transcription Notes",
     ):
-        from src.utils.pdf_maker import CustomPDF  # avoid circular import
-
         pdf = self.pdf_exporter.pdf
         font = self.pdf_exporter.font_family
-        print(f"font: {font}")  # DEBUG
+        debug.dprint(f"Font: {font}")
         pdf.add_page()
 
         # Title
@@ -87,7 +90,7 @@ class NotesGenerator:
             pdf.ln(5)
 
             self.pdf_exporter.pdf = pdf
-            return self.pdf_exporter.export_to_pdf(
+            return self.pdf_exporter.render_pdf(
                 " ", output_path, title
             )  # dummy text param
 
@@ -128,6 +131,7 @@ class NotesGenerator:
                         "timestamp": self._format_timestamp(seg.get("start", 0)),
                     }
                 )
+        debug.dprint(f"Detected questions: {len(qs[-1])}" if qs else "No questions detected")
         return qs[:5]
 
     def _get_important_timestamps(self, segments: List[Dict]) -> List[Dict]:
@@ -143,6 +147,7 @@ class NotesGenerator:
                     }
                 )
 
+        debug.dprint(f"Important parts found: {len(out[-1])}" if out else "No important snippets added")
         return out[:5]
 
     def _format_timestamp(self, seconds: float) -> str:

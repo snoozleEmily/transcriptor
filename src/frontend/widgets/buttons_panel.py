@@ -1,7 +1,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+
 from src.errors.debug import debug
+
 
 
 class ButtonsPanel(ttk.Frame):
@@ -52,7 +54,7 @@ class ButtonsPanel(ttk.Frame):
 
     def get_quick_script_flag(self):
         """Returns the current state of the Pretty Notes checkbox"""
-        print(
-            f"[DEBUG] self.quick_script_fl.get() returning in ButtonsPanel: {self.quick_script_fl.get()}"
+        debug.dprint(
+            f"quick_script_fl.get() returning in ButtonsPanel: {self.quick_script_fl.get()}"
         )
         return self.quick_script_fl.get()

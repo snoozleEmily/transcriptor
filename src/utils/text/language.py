@@ -2,12 +2,15 @@ from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 
 
+from src.errors.debug import debug
+
+
 @dataclass
 class LanguageConfig:
     """Configuration for language processing"""
     default_language: str = "portuguese"
     supported_languages: List[str] = field(
-        default_factory=lambda: ["english", "portuguese", "spanish", "italian"]
+        default_factory=lambda: ["english", "portuguese", "spanish", "italian", "romanian"]
     )
     fallback_patterns: str = "default"
 
@@ -43,6 +46,7 @@ class Language:
 
     def get_language(self) -> str:
         """Get the detected language or fallback to default"""
+        debug.dprint(f"Language detected: {self.detected_language}")
         return self.detected_language or self.config.default_language
 
     def get_language_code(self) -> str:
@@ -52,7 +56,11 @@ class Language:
     def is_supported_language(self, lang_code: str) -> bool:
         """Check if a language code is supported"""
         lang = lang_code.lower().split("-")[0]
-        return lang in self.config.supported_languages
+
+        is_supported = lang in self.config.supported_languages
+        debug.dprint("Language is supported: {is_supported}")
+
+        return is_supported
 
     def get_question_words(self, question_words_map: Dict[str, List[str]]) -> List[str]:
         """Get question words for the current language"""

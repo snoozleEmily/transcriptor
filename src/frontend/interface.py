@@ -43,9 +43,9 @@ class Interface(tk.Tk):
         self._alive = True
         self.current_theme = "default"
         self.gui_queue = Queue()
-        self.async_mgr = AsyncTaskManager(
-            self.gui_queue, self, self._complete_processing
-        )
+        self.async_mgr = AsyncTaskManager(self.gui_queue, self, self._complete_processing)
+        
+        debug.dprint(f"AsyncTaskManager initialized: {self.async_mgr}")
 
         # Message for Custom Words
         self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n"
@@ -100,6 +100,8 @@ class Interface(tk.Tk):
 
     def _toggle_theme(self):
         """Handle theme toggle"""
+        debug.dprint(f"Before toggling theme. Current theme: {self.current_theme}")
+
         self.current_theme = "dark" if self.current_theme == "default" else "default"
         self.theme_emoji.config(
             text="🌙" if self.current_theme == "dark" else "☀️",
@@ -110,6 +112,8 @@ class Interface(tk.Tk):
         )
         configure_theme(self, self.current_theme)
         self._update_root_theme()
+
+        debug.dprint(f"After toggling theme. Current theme: {self.current_theme}")
 
     # --------------------- Layout Management ---------------------
     def _create_layout(self):
@@ -315,12 +319,13 @@ class Interface(tk.Tk):
             # Get format preference before processing
             quick_script = self.buttons_panel.get_quick_script_flag()  # OnlyScript flag
 
-            if debug.is_dev_logs_enabled():
-                print(f"[DEBUG] quick_script received in Interface: {quick_script}")
+            debug.dprint(f"quick_script received in Interface: {quick_script}")
 
             # Get custom words from the text console and process them
             custom_words_raw = self.custom_words_raw.get("1.0", tk.END).strip()
             custom_words = None
+
+            debug.dprint(f"Custom words raw input: {custom_words_raw}")
 
             # Only process if user entered actual words (not the example text)
             if custom_words_raw and custom_words_raw != self.C_WORDS_EX:
@@ -339,6 +344,8 @@ class Interface(tk.Tk):
                 filtered_words = [w for w in word_list if w not in placeholders]
                 custom_words = {word: [] for word in filtered_words}
                 has_odd = bool(custom_words)
+
+                debug.dprint(f"has_odd: {has_odd}. Filtered custom words: {custom_words}.")
 
             else:
                 custom_words = None

@@ -36,9 +36,3 @@ class MainWindow:
 
         # Branding elements
         create_branding(self.main_frame).pack()
-
-        # Interactive controls
-        self.button_panel = ButtonsPanel(self.main_frame)
-        self.button_panel.add_button('select', "SELECT VIDEO")
-        self.button_panel.add_button('github', "GITHUB REPO")
-        self.button_panel.frame.pack(pady=(0, 15))

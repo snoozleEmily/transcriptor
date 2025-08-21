@@ -1,9 +1,9 @@
 import os
-from typing import Any, Callable
+from typing import Any, Dict, Callable, Optional
 
 
 from .exceptions import FileError, ErrorCode
-
+from .debug import debug
 
 
 def _sanitize_path(path: str) -> str:
@@ -12,9 +12,7 @@ def _sanitize_path(path: str) -> str:
         if isinstance(path, str) and (
             os.path.sep in path
             or any(
-                path.lower().endswith(ext) 
-                for ext 
-                in (".mp4", ".avi", ".mov", ".mkv")
+                path.lower().endswith(ext) for ext in (".mp4", ".avi", ".mov", ".mkv")
             )
         ):
             return f"[FILENAME]: {os.path.basename(path)}"
@@ -38,7 +36,7 @@ def _format_config(config: Any) -> list[str]:
             f"    - Categories: {config.get('categories', 'N/A')}",
             f"    - Words: {config.get('words', 'N/A')}",
         ]
-    
+
     return [f"  Config: {str(config)}"]
 
 
@@ -69,3 +67,26 @@ def get_func_call(func: Callable, args: tuple, kwargs: dict) -> str:
 
     output.append(f"{'='*50}\n")
     return "\n".join(output)
+
+def _log_error_flow_context(
+    func: Callable,
+    video_path: str,
+    config_params: Optional[Dict[str, Any]],
+    err: Exception,
+    kwargs: Dict[str, Any],
+) -> None:
+    """Log detailed error context for debugging, including the exception."""
+    config_dict = {} if config_params is None else config_params
+
+    # Build the function call log
+    call_log = get_func_call(
+        func,
+        (video_path,),
+        {"config_params": config_dict, **kwargs},
+    )
+
+    # Add error info
+    error_log = f"\nException: {type(err).__name__}: {err}\n"
+
+    debug.dprint(call_log + error_log)
+

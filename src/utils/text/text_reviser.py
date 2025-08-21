@@ -2,7 +2,8 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 
-from src.errors import LanguageError
+from src.errors.debug import debug
+from src.errors.exceptions import LanguageError
 from src.utils.text.language import Language
 from src.utils.text.words.question import QUESTION_WRD 
 from src.utils.text.words.definition_pat import DEFINITION_PAT
@@ -29,12 +30,15 @@ class TextReviser:
 
         self.placeholder_comment = self.odd_words
 
+        debug.dprint(f"TextReviser initialized with odd_words: {self.odd_words}")
+
     def _split_with_timestamps(
         self, text: str
     ) -> List[Tuple[str, Optional[float]]]:
         """Split text into sentences; return (sentence, None)."""
         try:
             sentences = re.split(r"(?<=[.!?])\s+", text)
+            debug.dprint(f"Split text into {len(sentences)} sentences.")
 
         except Exception as e:
             raise LanguageError.sentence_split_failed(e)
@@ -90,6 +94,7 @@ class TextReviser:
             return text
 
         revised_text = text
+        
         if self.odd_words:
             revised_text = self._process_technical_terms(revised_text)
 
