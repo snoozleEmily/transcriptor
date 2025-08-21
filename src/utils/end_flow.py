@@ -11,7 +11,7 @@ from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
 from src.utils.text.notes_generator import NotesGenerator
-from src.utils.transcripting.output_content import OutputContent
+from src.utils.transcripting.sanitize_prompt import SanitizePrompt
 from src.utils.transcripting.textify import Textify
 from src.utils.pdf_maker import PDFExporter
 from src.utils.file_handler import save_transcription
@@ -33,7 +33,7 @@ class EndFlow:
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
         self.pdf_exporter = PDFExporter()
-        self.debugger = OutputContent()
+        self.sanitized = SanitizePrompt()
         self.notes_generator = NotesGenerator(
             language=self.language, config=self.content_config
         )
@@ -124,7 +124,7 @@ class EndFlow:
             debug.dprint(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
 
             # Transcription
-            context_prompt = self.debugger.generate_content_prompt(self.content_config)
+            context_prompt = self.sanitized.generate_content_prompt(self.content_config)
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
 
             # Post-processing
@@ -217,7 +217,7 @@ class EndFlow:
         return path
 
     # -------------------------- Debugging -------------------------
-    def _log_error_context( # TODO: Change the location of this
+    def _log_error_context( 
         self,
         video_path: str,
         config_params: Optional[Dict[str, Any]],
@@ -225,7 +225,7 @@ class EndFlow:
     ) -> None:
         """Log detailed error context for debugging."""
         config_dict = {} if config_params is None else config_params
-        print(
+        debug.dprint(
             get_func_call(
                 self.process_video,
                 (video_path,),
