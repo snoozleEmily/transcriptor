@@ -44,8 +44,6 @@ class NotesGenerator:
         output_path: str,
         title: str = "Transcription Notes",
     ):
-        from src.utils.pdf_maker import CustomPDF  # avoid circular import
-
         pdf = self.pdf_exporter.pdf
         font = self.pdf_exporter.font_family
         debug.dprint(f"Font: {font}")
