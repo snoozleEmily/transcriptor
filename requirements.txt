@@ -1,57 +1,57 @@
 # Python 3.10.0
 
 # Core audio processing
-numpy==1.26.4
-pydub==0.25.1
-noisereduce==3.0.3
-librosa==0.10.1
-soundfile==0.13.1
-audioread==3.0.1
-joblib==1.5.1              # required by noisereduce
-matplotlib==3.7.1          # required by noisereduce
-decorator==5.1.1           # required by librosa
-lazy_loader==0.1            # required by librosa
-msgpack==1.0.5             # required by librosa
-pooch==1.7.0               # required by librosa
-scikit-learn==1.2.2        # required by librosa
-soxr==0.3.4                # required by librosa
-typing_extensions==4.7.1   # required by librosa
+numpy
+pydub
+noisereduce
+librosa
+soundfile
+audioread
+joblib            # required by noisereduce
+matplotlib==3.7.1 # required by noisereduce
+decorator         # required by librosa
+lazy_loader       # required by librosa
+msgpack           # required by librosa
+pooch             # required by librosa
+scikit-learn      # required by librosa
+soxr              # required by librosa
+typing_extensions # required by librosa
 
 # Whisper transcription (official implementation)
-openai-whisper==20231117
-torch==2.0.0  # CPU-only version for wider compatibility
-more-itertools==10.0.0     # required by openai-whisper
-tiktoken==0.4.0            # required by openai-whisper
-filelock==3.12.0           # required by torch
-jinja2==3.1.2              # required by torch
-sympy==1.12                # required by torch
+openai-whisper
+torch>=2.7.1-rc1
+more-itertools     # required by openai-whisper
+tiktoken           # required by openai-whisper
+filelock           # required by torch
+jinja2             # required by torch
+sympy              # required by torch
 
 # Windows audio subsystem
-pywin32==306
-SpeechRecognition==3.10.0
+pywin32
+SpeechRecognition
 
 # Utilities
 scipy==1.11.4  # Updated from 1.15.2 for Python 3.10 compatibility
-python-dotenv==1.0.1
-setuptools==69.2.0  # Required for proper package installation
+python-dotenv
+setuptools     # Required for proper package installation
 
 # FFmpeg wrapper (essential for audio conversion)
-ffmpeg-python==0.2.0
+ffmpeg-python
 
 # For Text Processing
-sumy==0.11.0
-breadability==0.1.20       # required by sumy
-pycountry==22.3.5          # required by sumy
-docopt==0.6.2
-nltk==3.9.1
-click==8.2.1               # required by nltk
-regex==2024.11.6           # required by nltk
-lxml==5.3.1
-networkx==3.4.2
-symspellpy==6.9.0          # Spelling correction
-textblob==0.19.0           # NLP processing
-fpdf2==2.8.3
-defusedxml==0.7.1          # required by fpdf2
+sumy
+breadability   # required by sumy
+pycountry      # required by sumy
+docopt
+nltk
+click          # required by nltk
+regex          # required by nltk
+lxml
+networkx
+symspellpy     # Spelling correction
+textblob       # NLP processing
+fpdf2
+defusedxml     # required by fpdf2
 
 # For Notes Generation
 llama-cpp-python==0.3.9
