@@ -110,6 +110,8 @@ class Interface(tk.Tk):
         self.copy_label.config(
             bg=THEMES[self.current_theme]["bg"], fg=THEMES[self.current_theme]["fg"]
         )
+        self.custom_words_raw.config(bg=THEMES[self.current_theme]["bg"], fg=THEMES[self.current_theme]["fg"])
+        self.log_text.config(bg=THEMES[self.current_theme]["bg"], fg=THEMES[self.current_theme]["fg"])
         configure_theme(self, self.current_theme)
         self._update_root_theme()
 
