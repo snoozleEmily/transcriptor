@@ -15,15 +15,24 @@ def check_ffmpeg() -> None:
     try:
         debug.dprint("Checking FFmpeg installation...")
 
-        subprocess.run(
+        # Get stderr depending on debug flag
+        stderr_target = subprocess.PIPE if debug.is_dev_logs_enabled() else subprocess.DEVNULL
+        stdout_target = subprocess.PIPE if debug.is_dev_logs_enabled() else subprocess.DEVNULL
+
+        result = subprocess.run(
             ["ffmpeg", "-version"],  # Basic command to check FFmpeg
-            check=True,  # Raise error if command fails
-            stdout=subprocess.DEVNULL,  # Hide version output
-            stderr=subprocess.DEVNULL,  # Hide error messages
-            timeout=5,  # Wait max 5 seconds
+            check=True,              # Raise error if command fails
+            stdout=stdout_target,    # Get version output if debugging
+            stderr=stderr_target,    # Get error messages if debugging
+            timeout=5,               # Wait max 5 seconds
         )
 
+        # Only print version info if debug logs are enabled
+        if result.stdout:
+            debug.dprint(f"FFmpeg version output:\n{result.stdout.decode()}")
+
         debug.dprint("FFmpeg found and working")
+
 
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         raise FFmpegError(
