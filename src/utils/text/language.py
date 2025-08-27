@@ -5,6 +5,7 @@ from dataclasses import dataclass, field
 from src.errors.debug import debug
 
 
+
 @dataclass
 class LanguageConfig:
     """Configuration for language processing"""
