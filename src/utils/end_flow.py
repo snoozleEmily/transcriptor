@@ -6,7 +6,7 @@ from typing import Dict, List, Optional, Union, Any
 from src.errors.debug import debug
 from src.errors.exceptions import ErrorCode, FileError
 from src.errors.func_printer import _log_error_flow_context
-from src.utils.text.language import Language
+from src.utils.text.language import language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
 from src.utils.text.notes_generator import NotesGenerator
@@ -29,7 +29,7 @@ class EndFlow:
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
         self.transcriber = Textify(EndFlow.model_size)
-        self.language = Language()
+        self.language = language
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
         self.pdf_exporter = PDFExporter()
@@ -131,6 +131,9 @@ class EndFlow:
             # Transcription
             context_prompt = self.sanitized.generate_content_prompt(self.content_config)
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
+
+            # Update language detection
+            self.language.process_whisper_output(result)
 
             # Post-processing
             revised_text = self.reviser.revise_text(result["text"])
