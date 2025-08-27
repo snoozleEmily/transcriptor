@@ -20,11 +20,12 @@ from src.utils.audio_processor import extract_audio
 from src.utils.models import MODELS
 
 
-
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
-    model_size = str(MODELS[1])  # Default model [will be 3 | using a weaker for testing]
+    model_size = str(
+        MODELS[1]
+    )  # Default model [will be 3 | using a weaker for testing]
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -36,6 +37,10 @@ class EndFlow:
         self.sanitized = SanitizePrompt()
         self.notes_generator = NotesGenerator(
             language=self.language, config=self.content_config
+        )
+
+        debug.dprint(
+            f"EndFlow initialized | Model size={EndFlow.model_size} | Language={self.language}"
         )
 
     # -------------------- Content Configuration ---------------------
@@ -112,8 +117,8 @@ class EndFlow:
         self.configure_content(config_params)
 
         debug.dprint(
-                f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
-            )
+            f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+        )
 
         try:
             # Audio processing
@@ -121,7 +126,9 @@ class EndFlow:
             debug.dprint(f"Audio extracted: length={len(audio) if audio else 0}")
 
             cleaned_audio = clean_audio(audio)
-            debug.dprint(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
+            debug.dprint(
+                f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}"
+            )
 
             # Transcription
             context_prompt = self.sanitized.generate_content_prompt(self.content_config)
