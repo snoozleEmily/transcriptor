@@ -295,9 +295,10 @@ class Interface(tk.Tk):
         self.clipboard_clear()
         self.clipboard_append(text)
         self.show_feedback("✓ Copied to clipboard!")
+        debug.dprint("Copy logs button was clicked")
 
     def show_feedback(self, message):
-        """Display temporary success message"""
+        """Display temporary success message for copying the logs"""
         feedback_label = ttk.Label(
             self, text=message, foreground=THEMES[self.current_theme]["message"]
         )
@@ -400,3 +401,4 @@ class Interface(tk.Tk):
         """Handle completion of async processing"""
         self.running = False
         self.show_feedback("✓ Processing complete!")
+        debug.dprint("The async processing is complete")
