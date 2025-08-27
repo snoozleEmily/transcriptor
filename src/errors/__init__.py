@@ -6,18 +6,11 @@ from .exceptions import (
     ErrorCode,
     LanguageError
 )
-
-from .handlers import (
-    catch_errors
-)
-
 from .logging import (
     configure_logging,
     log_unexpected_error
 )
-
 from .func_printer import get_func_call
-
 from .warnings_config import custom_warning
 
 __all__ = [
@@ -30,9 +23,6 @@ __all__ = [
     
     # Error Codes
     "ErrorCode",
-    
-    # Handlers
-    "catch_errors",
     
     # Logging
     "configure_logging",

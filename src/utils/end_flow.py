@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Union, Any
 
 from src.errors.debug import debug
 from src.errors.exceptions import ErrorCode, FileError
-from src.errors.handlers import catch_errors
 from src.errors.func_printer import _log_error_flow_context
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
@@ -105,7 +104,6 @@ class EndFlow:
         self.notes_generator.config = self.content_config
 
     # ----------------------- Core Processing -----------------------
-    @catch_errors
     def process_video(
         self,
         video_path: str,

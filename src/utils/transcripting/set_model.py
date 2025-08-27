@@ -2,7 +2,7 @@ import whisper
 
 
 from src.utils.models import MODELS
-from src.errors.handlers import TranscriptionError
+from src.errors.exceptions import TranscriptionError
 
 
 
