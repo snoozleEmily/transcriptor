@@ -4,9 +4,10 @@ import datetime
 from fpdf import FPDF
 from typing import Optional, Dict, Any
 
+
+from src.errors.debug import debug
 from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import PDF_COLORS
-
 
 
 FONT_NAME = "DejaVu"  # Unicode safe
@@ -30,6 +31,9 @@ class CustomPDF(FPDF):
         for style, path in font_paths.items():
             if os.path.isfile(path):
                 self.add_font(font_name, style, path, uni=True)
+                debug.dprint(f"Registered font '{font_name}' with style '{style}' from {path}")
+            else:
+                debug.dprint(f"Font path not found: {path}")
 
     def header(self):
         self.set_font(FONT_NAME, size=12)
