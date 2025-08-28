@@ -27,8 +27,8 @@ The script will handle all tools and setup configurations required.
 #### **Other Operating Systems**
 If you're working on a different operating system `or want to manually arrange your setup`, follow these steps:
 
-1. **Install Python 3.10 and Git**:
-   - Use Python 3.10 for compatibility: [Python 3.10](https://www.python.org/downloads/)
+1. **Install Python and Git**:
+   - For best compatibility, use Python 3.10: [Python 3.10](https://www.python.org/downloads/)
    - Install Git: [Git](https://git-scm.com/downloads)
 
 2. **Install FFmpeg** *(required by PyTorch and audio processing)*:
