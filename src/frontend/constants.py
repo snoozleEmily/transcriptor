@@ -7,7 +7,7 @@ PLACEHOLDER_TEXT = "#334345"  # Color for placeholder text in input fields (dark
 
 # UI Theme Configuration
 THEMES = {
-    # Light theme configuration - suitable for daytime/well-lit environments
+    # Light theme configuration
     "default": {
         "bg": "#F5F5F5",          # Main background color (light gray)
         "fg": "#333333",          # Primary text color (dark gray)
@@ -16,7 +16,7 @@ THEMES = {
         "active_fg": "#000000",   # Text color for active elements (black)
         "message": "#00707D",     # Notification/copy confirmation color (teal blue)
     },
-    # Dark theme configuration - reduces eye strain in low-light conditions
+    # Dark theme configuration
     "dark": {
         "bg": "#2E3B4E",          # Main background color (dark navy blue)
         "fg": "#FFFFFF",          # Primary text color (white)
