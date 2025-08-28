@@ -54,12 +54,12 @@ fpdf2
 defusedxml     # required by fpdf2
 
 # For Notes Generation
-llama-cpp-python==0.3.9
- # Requirements for llama:
- #   Python ≥ 3.8
- #   CMake ≥ 3.18
- #   A C++ compiler
- #   For GPU:
- #   CUDA (for NVIDIA GPU)
- #   Metal (for Apple M1/M2)
- #   OpenBLAS (optional, for faster CPU inference)
+llama-cpp-python==0.3.16
+# Requirements for llama:
+#   Python 3.8–3.10 (it may work with newer versions, but 3.10 is recommended)
+#   CMake ≥ 3.18
+#   A C++ compiler
+#   For GPU:
+#     CUDA (for NVIDIA GPU)
+#     Metal (for Apple M1/M2)
+#   OpenBLAS (optional, for faster CPU inference)
