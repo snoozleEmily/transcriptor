@@ -13,6 +13,8 @@ THEMES = {
         "fg": "#333333",          # Primary text color (dark gray)
         "button_bg": "#A5D9F1",   # Default button background (light blue)
         "active_bg": "#6CA0B8",   # Active/selected button background (medium blue)
+        "console_fg":"#333333",   # Text color in console (black)
+        "console_bg":"#F5F5F5",   # Main background color in console (light gray always)
         "active_fg": "#000000",   # Text color for active elements (black)
         "message": "#00707D",     # Notification/copy confirmation color (teal blue)
     },
@@ -22,6 +24,8 @@ THEMES = {
         "fg": "#FFFFFF",          # Primary text color (white)
         "button_bg": "#3C8DBC",   # Default button background (medium blue)
         "active_bg": "#367FA6",   # Active/selected button background (darker blue)
+        "console_fg":"#333333",   # Text color in console (black)
+        "console_bg":"#F5F5F5",   # Main background color in console (light gray always)
         "active_fg": "#FFFFFF",   # Text color for active elements (white)
         "message": "#FFFF00",     # Notification/copy confirmation color (yellow)
     }

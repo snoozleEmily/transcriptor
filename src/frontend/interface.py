@@ -108,7 +108,13 @@ class Interface(tk.Tk):
             background=THEMES[self.current_theme]["bg"],
         )
         self.copy_label.config(
-            bg=THEMES[self.current_theme]["bg"], fg=THEMES[self.current_theme]["fg"]
+            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
+        )
+        self.custom_words_raw.config(
+            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
+        )
+        self.log_text.config(
+            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
         )
         configure_theme(self, self.current_theme)
         self._update_root_theme()
@@ -259,7 +265,7 @@ class Interface(tk.Tk):
         """Handle focus in event"""
         if not self.custom_words_modified:
             self.custom_words_raw.delete("1.0", tk.END)
-            self.custom_words_raw.config(fg=THEMES[self.current_theme]["fg"])
+            self.custom_words_raw.config(fg=THEMES[self.current_theme]["console_fg"])
 
     def _on_focus_out(self):
         """Handle focus out event"""
