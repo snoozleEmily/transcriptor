@@ -2,7 +2,7 @@ import whisper
 
 
 from src.errors.debug import debug
-from src.utils.models import MODELS
+from src.utils.models import WHISPER_MODELS
 from src.errors.exceptions import TranscriptionError
 
 
@@ -12,7 +12,7 @@ class SetModel:
     def load(self, model_size: str):
         debug.dprint(f"Requested Whisper model: {model_size}")
 
-        if model_size not in MODELS:
+        if model_size not in WHISPER_MODELS:
             raise TranscriptionError.invalid_model()
             
         try:
