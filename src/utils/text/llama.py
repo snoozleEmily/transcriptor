@@ -3,6 +3,7 @@ from llama_cpp import Llama as Llm
 from llama_cpp import CreateChatCompletionResponse
 
 
+from src.errors.debug import debug
 from src.utils.models import LLAMA_MODELS
 from .llama_path import resolve_model_path
 
@@ -17,6 +18,7 @@ class Llama:
         with cls._lock:  # Acquire lock for thread safety
             if cls._instance is None:  # Create instance only if it doesn't exist
                 cls._instance = super().__new__(cls)
+                debug.dprint(f"Llama singleton instance created.")
 
         return cls._instance
 
@@ -24,6 +26,8 @@ class Llama:
         # avoid re-initializing singleton
         if getattr(self, "_initialized", False):
             return
+        
+        debug.dprint(f"Initializing Llama with model_size={model_size}")
 
         model_config = LLAMA_MODELS.get(model_size, LLAMA_MODELS["7b"])
         raw_path = model_config.get("model_path", "models/ggml-7b-model.bin")
@@ -31,10 +35,13 @@ class Llama:
 
         model_path = resolve_model_path(raw_path)  # raises FileNotFoundError if missing
 
-        # instantiate your Llm wrapper
+        # instantiates the Llm wrapper
         self.model = Llm(model_path=model_path, n_ctx=ctx_size, verbose=False)
         self.model_size = model_size
         self._initialized = True
+
+        debug.dprint(f"Llm instance created for model_size={model_size}, model_path={model_path}")
+
 
     def generate(self, prompt: str, max_tokens: int = 150) -> str:
         response: CreateChatCompletionResponse = self.model.create_chat_completion(
