@@ -16,15 +16,13 @@ from src.utils.pdf_maker import PDFExporter
 from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
-from src.utils.models import MODELS
+from src.utils.models import WHISPER_MODELS
 
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
-
-    model_size = str(
-        MODELS[1]
-    )  # Default model [will be 3 | using a weaker for testing]
+    # Default model [will be medium | using a weaker for testing]
+    model_size = "base"  
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
