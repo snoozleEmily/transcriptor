@@ -5,7 +5,7 @@ from src.utils.transcripting.textify import Textify
 from src.utils.end_flow import EndFlow
 from src.utils.text.language import Language
 from src.utils.text.content_type import ContentType
-from src.utils.models import MODELS, MODEL_SPEEDS, SETUP_TIMES
+from src.utils.models import WHISPER_MODELS, LLAMA_MODELS, MODEL_SPEEDS, SETUP_TIMES
 
 __all__ = [
     "check_ffmpeg",
@@ -16,8 +16,9 @@ __all__ = [
     "PDFExporter",
     "EndFlow",
     "ContentType",
-    "MODELS", 
-    "MODEL_SPEEDS", 
+    "WHISPER_MODELS", 
+    "MODEL_SPEEDS",
+    "LLAMA_MODELS", 
     "SETUP_TIMES", 
     "Language"
 ]
