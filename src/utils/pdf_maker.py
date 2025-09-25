@@ -31,7 +31,6 @@ class CustomPDF(FPDF):
         for style, path in font_paths.items():
             if os.path.isfile(path):
                 self.add_font(font_name, style, path, uni=True)
-                debug.dprint(f"Registered font '{font_name}' with style '{style}' from {path}")
             else:
                 debug.dprint(f"Font path not found: {path}")
 
@@ -92,6 +91,7 @@ class PDFExporter:
         )
 
         notes = self._format_notes_dict(notes_dict, odd_words)
+        debug.dprint(f"Formatted notes string length: {len(notes)}")
 
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
@@ -181,6 +181,8 @@ class PDFExporter:
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
+                
+            debug.dprint(f"Starting to render PDF")
 
             self.pdf = CustomPDF()
             self.font_family = self._load_unicode_fonts()
@@ -212,6 +214,7 @@ class PDFExporter:
 
             # Ensure output path is valid
             os.makedirs(os.path.dirname(filename), exist_ok=True)
+            debug.dprint(f"Ensured output directory exists: {os.path.dirname(filename)}")
 
             if os.path.exists(filename) and not os.access(filename, os.W_OK):
                 raise FileError.pdf_permission_denied(filename, PermissionError())
@@ -220,7 +223,8 @@ class PDFExporter:
 
             if not os.path.exists(filename):
                 raise FileError.pdf_creation_failed()
-
+            
+            debug.dprint(f"PDF output called. Exists in Path={os.path.exists(filename)}")
             return True
 
         except FileError:
