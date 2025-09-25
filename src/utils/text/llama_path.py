@@ -38,6 +38,7 @@ def resolve_model_path(config_path: str | Path) -> str:
 
     for p in candidates:
         if p.exists():
+            debug.dprint(f"Candidate model found at: {p}")
             return str(p)
 
     # not found -> helpful error
