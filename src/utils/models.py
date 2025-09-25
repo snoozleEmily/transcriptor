@@ -51,7 +51,7 @@ SETUP_TIMES: Dict[str, float] = {name: model["setup_time"] for name, model in WH
 # --------------------- Llama Model Info ---------------------
 LLAMA_MODELS: dict = {
     "7b": {
-        "model_path": "D:\\Projects\\Python-studies\\transcriptor\\llm_models\\llama-2-7b.Q4_K_M.gguf",  
+        "model_path": "D:\\Projects\\Python-studies\\transcriptor\\llm_models\\llama-2-7b-chat.Q4_K_M.gguf",  
         "speed": 25.0,           # tokens per second
         "setup_time": 5.0,       # loading time in seconds
         "tokens": 4096,          # context_size
