@@ -9,10 +9,12 @@ from .llama_path import resolve_model_path
 
 # Call it in notes generator for summarization
 
+
 class Llama:
     """Singleton wrapper for the LLaMA model."""
+
     _instance = None  # Holds the single instance of this class
-    _lock = Lock()    # Ensures thread-safe instantiation
+    _lock = Lock()  # Ensures thread-safe instantiation
 
     def __new__(cls):
         with cls._lock:  # Acquire lock for thread safety
@@ -26,7 +28,7 @@ class Llama:
         # avoid re-initializing singleton
         if getattr(self, "_initialized", False):
             return
-        
+
         debug.dprint(f"Initializing Llama with model_size={model_size}")
 
         model_config = LLAMA_MODELS.get(model_size, LLAMA_MODELS["7b"])
@@ -40,16 +42,24 @@ class Llama:
         self.model_size = model_size
         self._initialized = True
 
-        debug.dprint(f"Llm instance created for model_size={model_size}, model_path={model_path}")
+        debug.dprint(
+            f"Llm instance created for model_size={model_size}, model_path={model_path}"
+        )
 
-
-    def generate(self, prompt: str, max_tokens: int = 150) -> str:
+    def generate(self, prompt: str, max_tokens) -> str:
         response: CreateChatCompletionResponse = self.model.create_chat_completion(
-            messages=[{"role": "user", "content": prompt}],
+            messages=[
+                {
+                    "role": "system",
+                    "content": "You are a helpful assistant that summarizes transcription text concisely.",
+                },
+                {"role": "user", "content": prompt},
+            ],
             max_tokens=max_tokens,
-            stream=False
+            stream=False,
         )
         content = response["choices"][0]["message"]["content"]
         return content.strip() if content else ""
 
-llama: Llama = Llama()  
+
+llama: Llama = Llama()
