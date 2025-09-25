@@ -2,12 +2,13 @@ import re
 from typing import Dict, List, Any
 from threading import Thread
 
+
 from src.errors.debug import debug
 from src.errors.exceptions import TranscriptionError
 from src.utils.pdf_maker import PDFExporter
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD
-from src.utils.text.language import language
+from src.utils.text.llama import llama, Llama
 
 
 class NotesGenerator:
@@ -15,8 +16,11 @@ class NotesGenerator:
         self.language = language
         self.config = config
         self.pdf_exporter = PDFExporter()
+        self.llama: Llama = llama
 
-        debug.dprint(f"NotesGenerator initialized with config: {config}, language: {language}")
+        debug.dprint(
+            f"NotesGenerator initialized with config: {config}, language: {language}"
+        )
 
     # ----------------- Notes Generation -----------------
     def create_notes(self, data: Dict[str, Any]) -> Dict[str, Any]:
@@ -37,12 +41,21 @@ class NotesGenerator:
         return sections
 
     # ----------------- PDF Export -----------------
-    def export_notes_to_pdf(self, sections: Dict[str, Any], output_path: str, title: str = "Transcription Notes", async_export: bool = False):
+    def export_notes_to_pdf(
+        self,
+        sections: Dict[str, Any],
+        output_path: str,
+        title: str = "Transcription Notes",
+        async_export: bool = False,
+    ):
         """Export notes to PDF. Can run asynchronously to avoid GUI freeze."""
+        debug.dprint(f"Exporting notes to PDF: {output_path} (async={async_export})")
         if async_export:
-            thread = Thread(target=self._export_pdf, args=(sections, output_path, title))
+            thread = Thread(
+                target=self._export_pdf, args=(sections, output_path, title)
+            )
             thread.start()
-            return thread  # Caller can join() if needed
+            return thread
         else:
             return self._export_pdf(sections, output_path, title)
 
@@ -57,6 +70,10 @@ class NotesGenerator:
         pdf.ln(8)
 
         for section_name, content in sections.items():
+            debug.dprint(
+                f"Rendering section: {section_name} ({len(content) if isinstance(content, list) else 'str'})"
+            )
+
             # Section header
             pdf.set_font(font, style="B", size=16)
             pdf.cell(0, 10, section_name.upper(), ln=True)
@@ -85,15 +102,30 @@ class NotesGenerator:
             pdf.ln(5)
 
         self.pdf_exporter.pdf = pdf
+        debug.dprint(f"PDF page content prepared, calling render_pdf for: {output_path}")
         return self.pdf_exporter.render_pdf(" ", output_path, title)
 
     # ----------------- Helpers -----------------
     def _generate_summary(self, text: str) -> str:
+        """Generate a summary using LLaMA."""
         try:
+            max_tokens = 300
+            max_characters = max_tokens - (max_tokens / 10) # reserve 10% of tokens as a buffer
+            prompt = (
+                f"Summarize the text below into a clear, concise overview. "
+                f"Limit your response to no more than {int(max_characters)} characters. "
+                f"Do not exceed this limit. Avoid filler words.\n\n"
+                f"Text:\n{text}\n\n"
+            )
+            debug.dprint(f"Generating summary with prompt length: {len(prompt)}")
+            summary = llama.generate(prompt, max_tokens) 
+            debug.dprint(f"Summary generated length={len(summary)}")
+            return summary.strip()
+
+        except Exception as e:
+            debug.dprint(f"Using fallback since LLaMA summarization failed: {e}")
             sentences = re.split(r"(?<=[.!?])\s+", text)
             return " ".join(sentences[:2]) + ("..." if len(sentences) > 2 else "")
-        except Exception as e:
-            raise TranscriptionError.sentence_split_failed(e)
 
     def _extract_key_terms(self, segments: List[Dict]) -> List[str]:
         terms = set()
@@ -115,13 +147,19 @@ class NotesGenerator:
 
         for seg in segments:
             t = seg.get("text", "").strip()
-            if t.endswith("?") or any(t.lower().startswith(qw) for qw in question_words):
-                qs.append({
-                    "text": t,
-                    "timestamp": self._format_timestamp(seg.get("start", 0))
-                })
+            if t.endswith("?") or any(
+                t.lower().startswith(qw) for qw in question_words
+            ):
+                qs.append(
+                    {
+                        "text": t,
+                        "timestamp": self._format_timestamp(seg.get("start", 0)),
+                    }
+                )
 
-        debug.dprint(f"Detected questions: {len(qs)}" if qs else "No questions detected")
+        debug.dprint(
+            f"Detected questions: {len(qs)}" if qs else "No questions detected"
+        )
         return qs[:5]
 
     def _get_important_timestamps(self, segments: List[Dict]) -> List[Dict]:
@@ -130,12 +168,18 @@ class NotesGenerator:
             txt = seg.get("text", "")
             if len(txt.split()) > 10:
                 snippet = txt[:100] + ("..." if len(txt) > 100 else "")
-                out.append({
-                    "text": snippet,
-                    "timestamp": self._format_timestamp(seg.get("start", 0))
-                })
+                out.append(
+                    {
+                        "text": snippet,
+                        "timestamp": self._format_timestamp(seg.get("start", 0)),
+                    }
+                )
 
-        debug.dprint(f"Important parts found: {len(out)}" if out else "No important snippets added")
+        debug.dprint(
+            f"Important parts found: {len(out)}"
+            if out
+            else "No important snippets added"
+        )
         return out[:5]
 
     def _format_timestamp(self, seconds: float) -> str:
