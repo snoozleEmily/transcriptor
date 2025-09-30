@@ -21,8 +21,9 @@ from src.utils.models import WHISPER_MODELS
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
-    # Default model [will be medium | using a weaker for testing]
-    model_size = "base"  
+
+    # Default model [will be medium as default | using a weaker for testing]
+    model_size = "base"
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -171,8 +172,13 @@ class EndFlow:
             os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
         debug.dprint(f"quick_script received in EndFlow: {quick_script}")
+        debug.dprint(f"Final save path determined: {save_path}")
+
+        if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
+            debug.dprint(f"No write permissions for the directory of the save path.")
 
         if not quick_script:
+            debug.dprint("Attempting to save as PDF...")
             self.pdf_exporter.save_notes(
                 result,
                 revised_text,
@@ -182,8 +188,12 @@ class EndFlow:
                 config=self.content_config,
             )
         else:
+            debug.dprint("Attempting to save as TXT...")
             save_transcription(revised_text, save_path)
 
+        debug.dprint(
+            f"Save operation complete. Verifying file exists: {os.path.exists(save_path)}"
+        )
         return os.path.abspath(save_path)
 
     # ----------------------- File Management ----------------------
@@ -205,7 +215,10 @@ class EndFlow:
             ):
                 return path
 
-        except Exception:
+        except Exception as e:
+            debug.dprint(
+                f"Failed to open save dialog: {e}. Falling back to desktop path."
+            )
             pass
 
         return self._generate_desktop_path(base_name, extension)
