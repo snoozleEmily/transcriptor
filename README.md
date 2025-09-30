@@ -77,6 +77,9 @@ If you're working on a different operating system `or want to manually arrange y
    pip install -r requirements.txt
    ```
 
+9. **Download Llama Model** 
+   [llama-2-7b-chat.Q4_K_M.gguf](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main)
+
 9. **Run the Script**:
    You're ready to go! Run the app with:
    ```bash
