@@ -109,8 +109,18 @@ class NotesGenerator:
     def _generate_summary(self, text: str) -> str:
         """Generate a summary using LLaMA."""
         try:
-            max_tokens = 300
-            max_characters = max_tokens - (max_tokens / 10) # reserve 10% of tokens as a buffer
+            max_tokens = 80
+            prompt = (
+                "STRICTLY follow these instructions:\n"
+                "1. Summarize the text below concisely\n"
+                "2. Focus on main entities, events, and relationships\n"
+                "3. DO NOT start with 'Here is a summary' or similar phrases\n"
+                "4. DO NOT use quotes around your response\n"
+                "5. DO NOT mention character limits\n"
+                "6. Respond with ONLY the summary text, nothing else\n\n"
+                f"Text:\n{text}\n\n"
+                "Summary:"
+            )
             prompt = (
                 f"Summarize the text below into a clear, concise overview. "
                 f"Limit your response to no more than {int(max_characters)} characters. "
