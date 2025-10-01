@@ -44,14 +44,14 @@ class CustomPDF(FPDF):
         self.cell(0, 10, "Made With Emily's Transcriptor", ln=1, align="C")
 
     def footer(self):
-        self.set_y(-50)  # Increase margin by moving footer content higher
+        self.set_y(-40)  # Increase margin by moving footer content higher
         self.set_font(FONT_NAME, size=8)
         self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
         self.line(10, self.get_y() - 2, 200, self.get_y() - 2)
         self.set_text_color(*self._hex_to_rgb(PDF_COLORS["footer_text"]))
         self.cell(0, 10, f"Page {self.page_no()}", align="C")
-        self.set_y(-25)  # Shift date text up
+        self.set_y(-10)  # Shift date text up
         date_str = datetime.datetime.now().strftime("%d/%m/%Y")
         self.cell(0, 10, f"Generated on: {date_str}", align="C")
 
