@@ -128,7 +128,7 @@ class NotesGenerator:
                 f"Text:\n{text}\n\n"
             )
             debug.dprint(f"Generating summary with prompt length: {len(prompt)}")
-            summary = llama.generate(prompt, max_tokens) 
+            summary = llama.generate_summary(prompt, max_tokens) 
             debug.dprint(f"Summary generated length={len(summary)}")
             return summary.strip()
 
