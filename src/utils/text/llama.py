@@ -46,12 +46,17 @@ class Llama:
             f"Llm instance created for model_size={model_size}, model_path={model_path}"
         )
 
-    def generate(self, prompt: str, max_tokens) -> str:
+    def generate_summary(self, prompt: str, max_tokens) -> str:
         response: CreateChatCompletionResponse = self.model.create_chat_completion(
             messages=[
                 {
                     "role": "system",
-                    "content": "You are a helpful assistant that summarizes transcription text concisely.",
+                    "content": (
+                        "You are a helpful assistant that creates "
+                        "'to the point/captures the core meaning' summaries and only with facts present in the input. "
+                        "Do NOT invent facts, dates, or figures. "
+                        "Always respond with only the summary text, no introductions or explanations."
+                    ),
                 },
                 {"role": "user", "content": prompt},
             ],
