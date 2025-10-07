@@ -109,26 +109,21 @@ class NotesGenerator:
     def _generate_summary(self, text: str) -> str:
         """Generate a summary using LLaMA."""
         try:
+            debug.dprint(f"Inside _generate_summary. Language is: {self.language}")
             max_tokens = 80
             prompt = (
                 "STRICTLY follow these instructions:\n"
-                "1. Summarize the text below concisely\n"
-                "2. Focus on main entities, events, and relationships\n"
-                "3. DO NOT start with 'Here is a summary' or similar phrases\n"
-                "4. DO NOT use quotes around your response\n"
-                "5. DO NOT mention character limits\n"
-                "6. Respond with ONLY the summary text, nothing else\n\n"
+                "1. Summarize the text below concisely in the original transcription language presented.\n"
+                "2. Respond with ONLY the summary text, nothing else.\n"
+                "3. DO NOT start with 'Here is a summary' or similar phrases.\n"
+                "4. DO NOT use quotes around your response.\n"
+                "5. DO NOT mention character limits.\n"
                 f"Text:\n{text}\n\n"
                 "Summary:"
             )
-            prompt = (
-                f"Summarize the text below into a clear, concise overview. "
-                f"Limit your response to no more than {int(max_characters)} characters. "
-                f"Do not exceed this limit. Avoid filler words.\n\n"
-                f"Text:\n{text}\n\n"
-            )
             debug.dprint(f"Generating summary with prompt length: {len(prompt)}")
-            summary = llama.generate_summary(prompt, max_tokens) 
+            debug.dprint(f"Generating summary with prompt head: {prompt[:100]}")
+            summary = llama.generate_summary(prompt, max_tokens)
             debug.dprint(f"Summary generated length={len(summary)}")
             return summary.strip()
 
