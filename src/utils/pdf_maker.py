@@ -44,7 +44,7 @@ class CustomPDF(FPDF):
         self.cell(0, 10, "Made With Emily's Transcriptor", ln=1, align="C")
 
     def footer(self):
-        self.set_y(-40)  # Increase margin by moving footer content higher
+        self.set_y(-20)  # Increase margin by moving footer content higher
         self.set_font(FONT_NAME, size=8)
         self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
