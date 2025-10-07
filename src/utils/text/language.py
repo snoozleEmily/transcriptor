@@ -37,23 +37,20 @@ class Language:
             return
 
         # Clean and extract base language code
-        lang = lang_code.lower().split("-")[0]
-        debug.dprint(f"Extracted base language code: {lang}")
+        base_lang_code = lang_code.lower().split("-")[0]
+        debug.dprint(f"Extracted base language code: {base_lang_code}")
 
-        # Validate against supported languages
-        if lang in self.config.supported_languages:
-            self.detected_language = lang
-            debug.dprint(f"Detected language set: {self.detected_language}")
-        else:
-            # Try matching first 2 letters (en, pt, es, etc.)
-            base_code = lang[:2]
-            for supported_lang in self.config.supported_languages:
-                if supported_lang.startswith(base_code):
-                    self.detected_language = supported_lang
-                    debug.dprint(f"Detected language matched fallback: {self.detected_language}")
-                    break
-            if not self.detected_language:
-                debug.dprint("No matching supported language found; will fallback later")
+        # Reset detected language for each run
+        self.detected_language = None 
+        
+        # Find a match in supported languages
+        for supported_lang in self.config.supported_languages:
+            if supported_lang.startswith(base_lang_code):
+                self.detected_language = supported_lang
+                debug.dprint(f"Detected language set: {self.detected_language}")
+                return 
+
+        debug.dprint(f"No matching supported language found for code '{base_lang_code}'; will fallback later")
 
     def get_language(self) -> str:
         """Get the detected language or fallback to default"""
