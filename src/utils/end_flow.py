@@ -19,6 +19,7 @@ from src.utils.audio_processor import extract_audio
 from src.utils.models import WHISPER_MODELS
 
 
+
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
@@ -33,9 +34,6 @@ class EndFlow:
         self.content_config = ContentType(words=None, has_odd_names=True)
         self.pdf_exporter = PDFExporter()
         self.sanitized = SanitizePrompt()
-        self.notes_generator = NotesGenerator(
-            language=self.language, config=self.content_config
-        )
 
         debug.dprint(
             f"EndFlow initialized | Model size={EndFlow.model_size} | Language={self.language}"
@@ -99,8 +97,6 @@ class EndFlow:
         """Update dependent components with new config."""
         if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.odd_words = self.content_config.words
-
-        self.notes_generator.config = self.content_config
 
     # ----------------------- Core Processing -----------------------
     def process_video(
