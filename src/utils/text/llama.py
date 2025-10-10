@@ -51,11 +51,11 @@ class Llama:
             "role": "system",
             "content": (
                 "You are a precise summarizer. FOLLOW THESE RULES EXACTLY:\n"
-                "1) Output EXACTLY one line containing only the summary text and nothing else.\n"
-                "2) Do NOT prepend or append any phrase such as 'Here is the summary', 'Summary:', 'TL;DR', or similar.\n"
-                "3) Do NOT use quotes, headings, code blocks, or extra whitespace.\n"
-                "4) Keep the summary in the original language of the input.\n"
-                "5) If you must shorten to meet token limits, truncate the summary only — do NOT comment about truncation."
+                "1. Output EXACTLY one line containing only the summary text and nothing else.\n"
+                "2. Do NOT prepend or append any phrase such as 'Here is the summary', 'Summary:', 'TL;DR', or similar.\n"
+                "3. Do NOT use quotes, headings, code blocks, or extra whitespace.\n"
+                "4. Keep the summary in the original language of the input.\n"
+                "5. If you must shorten to meet token limits, truncate the summary only — do NOT comment about truncation."
             ),
         }
 
