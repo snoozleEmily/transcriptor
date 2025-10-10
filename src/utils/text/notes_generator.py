@@ -107,34 +107,23 @@ class NotesGenerator:
 
     # ----------------- Helpers -----------------
     def _generate_summary(self, text: str) -> str:
-        """Generate a summary using LLaMA."""
         try:
             debug.dprint(f"Inside _generate_summary. Language is: {self.language}")
-            max_tokens = 80
-            prompt = (
-                "STRICTLY follow these instructions:\n"
-                "1. Summarize the text below concisely in the original transcription language presented.\n"
-                "2. Respond with ONLY the summary text, nothing else.\n"
-                "3. DO NOT start with 'Here is a summary' or similar phrases.\n"
-                "4. DO NOT use quotes around your response.\n"
-                "5. DO NOT mention character limits.\n"
-                f"Text:\n{text}\n\n"
-                "Summary:"
-            )
-            debug.dprint(f"Generating summary with prompt length: {len(prompt)}")
-            summary = llama.generate_summary(prompt, max_tokens)
-            debug.dprint(f"Summary generated length={len(summary)}")
-            return summary.strip()
-
+            debug.dprint(f"Generating summary with LLaMA for text length={len(text)}")
+            return self.llama.summarize_text(text, max_tokens=80)
+        
         except Exception as e:
             debug.dprint(f"Using fallback since LLaMA summarization failed: {e}")
             sentences = re.split(r"(?<=[.!?])\s+", text)
             return " ".join(sentences[:2]) + ("..." if len(sentences) > 2 else "")
 
+
     def _extract_key_terms(self, segments: List[Dict]) -> List[str]:
         terms = set()
         lang = self.language.get_language()
         excluded_words = set(QUESTION_WRD.get(lang, []) + COMMON_WORDS.get(lang, []))
+
+        debug.dprint(f"Inside _extract_key_terms. Language is: {lang}")
 
         for seg in segments:
             words = re.findall(r"\b[A-Z][a-z]{3,}\b", seg.get("text", ""))
@@ -148,6 +137,8 @@ class NotesGenerator:
         qs = []
         lang = self.language.get_language_code()
         question_words = set(QUESTION_WRD.get(lang, QUESTION_WRD.get("default", [])))
+
+        debug.dprint(f"Inside _extract_questions. Language is: {lang}")
 
         for seg in segments:
             t = seg.get("text", "").strip()
