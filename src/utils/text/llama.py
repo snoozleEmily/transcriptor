@@ -7,7 +7,6 @@ from src.errors.debug import debug
 from src.utils.models import LLAMA_MODELS
 from .llama_path import resolve_model_path
 
-# Call it in notes generator for summarization
 
 
 class Llama:
@@ -46,25 +45,44 @@ class Llama:
             f"Llm instance created for model_size={model_size}, model_path={model_path}"
         )
 
-    def generate_summary(self, prompt: str, max_tokens) -> str:
+    def summarize_text(self, text: str, max_tokens: int = 80) -> str:
+        """Generate a concise summary following strict formatting rules."""
+        system_message = {
+            "role": "system",
+            "content": (
+                "You are a precise summarizer. FOLLOW THESE RULES EXACTLY:\n"
+                "1) Output EXACTLY one line containing only the summary text and nothing else.\n"
+                "2) Do NOT prepend or append any phrase such as 'Here is the summary', 'Summary:', 'TL;DR', or similar.\n"
+                "3) Do NOT use quotes, headings, code blocks, or extra whitespace.\n"
+                "4) Keep the summary in the original language of the input.\n"
+                "5) If you must shorten to meet token limits, truncate the summary only — do NOT comment about truncation."
+            ),
+        }
+
+        user_message = {"role": "user", "content": text}
+
         response: CreateChatCompletionResponse = self.model.create_chat_completion(
-            messages=[
-                {
-                    "role": "system",
-                    "content": (
-                        "You are a helpful assistant that creates "
-                        "'to the point/captures the core meaning' summaries and only with facts present in the input. "
-                        "Do NOT invent facts, dates, or figures. "
-                        "Always respond with only the summary text, no introductions or explanations."
-                    ),
-                },
-                {"role": "user", "content": prompt},
-            ],
+            messages=[system_message, user_message],
             max_tokens=max_tokens,
+            temperature=0,
             stream=False,
         )
-        content = response["choices"][0]["message"]["content"]
-        return content.strip() if content else ""
+
+        raw: str | None = response["choices"][0]["message"].get("content")
+        return self._clean_summary(raw) # type: ignore
+
+
+    def _clean_summary(self, text: str) -> str:
+        """Remove unwanted prefixes and enforce single-line output."""
+        import re
+
+        if not text:
+            return "" # handles None or empty string safely
+        
+        text = text.strip()
+        text = re.sub(r"^(here is (the )?summary[:\-\s]*)", "", text, flags=re.I)
+        text = re.sub(r"^(summary[:\-\s]*)", "", text, flags=re.I)
+        return text.splitlines()[0].strip()
 
 
 llama: Llama = Llama()
