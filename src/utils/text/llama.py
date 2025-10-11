@@ -8,7 +8,6 @@ from src.utils.models import LLAMA_MODELS
 from .llama_path import resolve_model_path
 
 
-
 class Llama:
     """Singleton wrapper for the LLaMA model."""
 
@@ -59,7 +58,14 @@ class Llama:
             ),
         }
 
-        user_message = {"role": "user", "content": text}
+        user_message = {
+            "role": "user",
+            "content": (
+                "Summarize this text in one concise sentence."
+                "Output only the summary itself:\n\n"
+            )
+            + text,
+        }
 
         response: CreateChatCompletionResponse = self.model.create_chat_completion(
             messages=[system_message, user_message],
@@ -71,14 +77,13 @@ class Llama:
         raw: str | None = response["choices"][0]["message"].get("content")
         return self._clean_summary(raw) # type: ignore
 
-
     def _clean_summary(self, text: str) -> str:
         """Remove unwanted prefixes and enforce single-line output."""
         import re
 
         if not text:
-            return "" # handles None or empty string safely
-        
+            return ""  # handles None or empty string safely
+
         text = text.strip()
         text = re.sub(r"^(here is (the )?summary[:\-\s]*)", "", text, flags=re.I)
         text = re.sub(r"^(summary[:\-\s]*)", "", text, flags=re.I)
