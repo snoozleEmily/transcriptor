@@ -25,7 +25,7 @@ class CustomPDF(FPDF):
 
     def __init__(self):
         super().__init__()
-        self.set_auto_page_break(auto=True, margin=15)
+        self.set_auto_page_break(auto=True, margin=30)
 
     def register_unicode_fonts(self, font_name: str, font_paths: dict):
         """Register all styles of a TTF font dynamically."""
@@ -44,11 +44,11 @@ class CustomPDF(FPDF):
         self.cell(0, 10, "Made With Emily's Transcriptor", ln=1, align="C")
 
     def footer(self):
-        self.set_y(-20)  # Increase margin by moving footer content higher
+        self.set_y(-15)
         self.set_font(FONT_NAME, size=8)
         self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
-        self.line(10, self.get_y() - 2, 200, self.get_y() - 2)
+        self.line(10, self.get_y() - 5, 200, self.get_y() - 5)
         self.set_text_color(*self._hex_to_rgb(PDF_COLORS["footer_text"]))
         self.cell(0, 10, f"Page {self.page_no()}", align="C")
         self.set_y(-10)  # Shift date text up
