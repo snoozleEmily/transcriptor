@@ -78,9 +78,9 @@ If you're working on a different operating system `or want to manually arrange y
    ```
 
 9. **Download Llama Model** 
-   [llama-2-7b-chat.Q4_K_M.gguf](https://huggingface.co/TheBloke/Llama-2-7B-Chat-GGUF/tree/main)
+   [Llama-3.2-3B-Instruct-Q4_K_M](https://huggingface.co/hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF/tree/main)
 
-9. **Run the Script**:
+10. **Run the Script**:
    You're ready to go! Run the app with:
    ```bash
    python main.py
