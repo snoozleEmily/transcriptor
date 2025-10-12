@@ -103,6 +103,9 @@ class Llama:
 
             try:
                 enc = tiktoken.get_encoding("cl100k_base")
+                token_count = len(enc.encode(text))
+                debug.dprint(f"tiktoken successfully used: {token_count} tokens")
+                
             except Exception as e:
                 debug.dprint(
                     f"tiktoken encoding lookup failed; falling back to gpt-3.5-turbo encoding. Error: {e}"
