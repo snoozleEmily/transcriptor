@@ -3,7 +3,7 @@ from typing import Tuple
 
 
 from src.utils.models import MODEL_SPEEDS, SETUP_TIMES
-from src.errors.exceptions import TranscriptionError
+from src.logs.exceptions import TranscriptionError
 
 
 

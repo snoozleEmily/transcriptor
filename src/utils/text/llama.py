@@ -3,7 +3,7 @@ from llama_cpp import Llama as Llm
 from llama_cpp import CreateChatCompletionResponse
 
 
-from src.errors.debug import debug
+from src.logs.debug import debug
 from src.utils.models import LLAMA_MODELS
 from .llama_path import resolve_model_path
 

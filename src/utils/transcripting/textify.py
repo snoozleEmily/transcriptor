@@ -9,7 +9,7 @@ from .info_dump import InfoDump
 from .estimator import TimeEstimator
 from .convert_audio import ConvertAudio
 from src.utils.text.content_type import ContentType
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 

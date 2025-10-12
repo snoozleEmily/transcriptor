@@ -6,8 +6,8 @@ from pydub import AudioSegment
 from pydub.exceptions import CouldntDecodeError
 
 
-from src.errors.debug import debug
-from src.errors.exceptions import FFmpegError, TranscriptionError, ErrorCode
+from src.logs.debug import debug
+from src.logs.exceptions import FFmpegError, TranscriptionError, ErrorCode
 
 
 def check_ffmpeg() -> None:

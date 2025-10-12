@@ -4,7 +4,7 @@ from typing import Optional, Callable
 
 
 from .info_dump import InfoDump
-from src.errors.exceptions import TranscriptionError
+from src.logs.exceptions import TranscriptionError
 
 
 

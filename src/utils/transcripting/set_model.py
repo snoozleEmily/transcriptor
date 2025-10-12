@@ -1,9 +1,9 @@
 import whisper
 
 
-from src.errors.debug import debug
+from src.logs.debug import debug
+from src.logs.exceptions import TranscriptionError
 from src.utils.models import WHISPER_MODELS
-from src.errors.exceptions import TranscriptionError
 
 
 

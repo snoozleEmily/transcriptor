@@ -1,8 +1,8 @@
 from typing import List, Dict
 
 
-from src.errors.exceptions import TranscriptionError
-from src.errors.debug import debug
+from src.logs.exceptions import TranscriptionError
+from src.logs.debug import debug
 
 
 

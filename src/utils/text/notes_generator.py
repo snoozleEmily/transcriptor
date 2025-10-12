@@ -3,8 +3,8 @@ from typing import Dict, List, Any
 from threading import Thread
 
 
-from src.errors.debug import debug
-from src.errors.exceptions import TranscriptionError
+from src.logs.debug import debug
+from src.logs.exceptions import TranscriptionError
 from src.utils.pdf_maker import PDFExporter
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD

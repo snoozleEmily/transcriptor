@@ -5,8 +5,8 @@ from fpdf import FPDF
 from typing import Optional, Dict, Any
 
 
-from src.errors.debug import debug
-from src.errors.exceptions import FileError, ErrorCode
+from src.logs.debug import debug
+from src.logs.exceptions import FileError, ErrorCode
 from src.frontend.constants import PDF_COLORS
 
 

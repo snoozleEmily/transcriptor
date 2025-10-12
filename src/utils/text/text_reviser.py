@@ -2,8 +2,8 @@ import re
 from typing import Dict, List, Optional, Tuple
 
 
-from src.errors.debug import debug
-from src.errors.exceptions import LanguageError
+from src.logs.debug import debug
+from src.logs.exceptions import LanguageError
 from src.utils.text.language import Language
 from src.utils.text.words.question import QUESTION_WRD 
 from src.utils.text.words.definition_pat import DEFINITION_PAT

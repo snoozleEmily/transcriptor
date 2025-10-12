@@ -2,7 +2,7 @@ from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 
 
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 

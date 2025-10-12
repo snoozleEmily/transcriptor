@@ -3,9 +3,9 @@ from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
-from src.errors.debug import debug
-from src.errors.exceptions import ErrorCode, FileError
-from src.errors.func_printer import _log_error_flow_context
+from src.logs.debug import debug
+from src.logs.exceptions import ErrorCode, FileError
+from src.logs.func_printer import _log_error_flow_context
 from src.utils.text.language import language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser

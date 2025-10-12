@@ -12,7 +12,7 @@ from .warning_popup import WarningPopup
 from .widgets.buttons_panel import ButtonsPanel
 from .async_processor import AsyncTaskManager
 from src.utils.text.content_type import ContentType
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 
