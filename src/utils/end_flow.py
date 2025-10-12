@@ -9,7 +9,6 @@ from src.logs.func_printer import _log_error_flow_context
 from src.utils.text.language import language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
-from src.utils.text.notes_generator import NotesGenerator
 from src.utils.transcripting.sanitize_prompt import SanitizePrompt
 from src.utils.transcripting.textify import Textify
 from src.utils.pdf_maker import PDFExporter
