@@ -4,9 +4,10 @@ import datetime
 from fpdf import FPDF
 from typing import Optional, Dict, Any
 
+
+from src.errors.debug import debug
 from src.errors.exceptions import FileError, ErrorCode
 from src.frontend.constants import PDF_COLORS
-
 
 
 FONT_NAME = "DejaVu"  # Unicode safe
@@ -21,15 +22,18 @@ FONT_PATHS = {
 
 class CustomPDF(FPDF):
     """Custom PDF generator with consistent styling and layout."""
+
     def __init__(self):
         super().__init__()
-        self.set_auto_page_break(auto=True, margin=15)
+        self.set_auto_page_break(auto=True, margin=30)
 
     def register_unicode_fonts(self, font_name: str, font_paths: dict):
         """Register all styles of a TTF font dynamically."""
         for style, path in font_paths.items():
             if os.path.isfile(path):
                 self.add_font(font_name, style, path, uni=True)
+            else:
+                debug.dprint(f"Font path not found: {path}")
 
     def header(self):
         self.set_font(FONT_NAME, size=12)
@@ -40,14 +44,14 @@ class CustomPDF(FPDF):
         self.cell(0, 10, "Made With Emily's Transcriptor", ln=1, align="C")
 
     def footer(self):
-        self.set_y(-30)  # Increase margin by moving footer content higher
+        self.set_y(-15)
         self.set_font(FONT_NAME, size=8)
         self.set_draw_color(*self._hex_to_rgb(PDF_COLORS["header_line"]))
         self.set_line_width(0.5)
-        self.line(10, self.get_y() - 2, 200, self.get_y() - 2)
+        self.line(10, self.get_y() - 5, 200, self.get_y() - 5)
         self.set_text_color(*self._hex_to_rgb(PDF_COLORS["footer_text"]))
         self.cell(0, 10, f"Page {self.page_no()}", align="C")
-        self.set_y(-25)  # Also shift date text up
+        self.set_y(-10)  # Shift date text up
         date_str = datetime.datetime.now().strftime("%d/%m/%Y")
         self.cell(0, 10, f"Generated on: {date_str}", align="C")
 
@@ -62,6 +66,7 @@ class CustomPDF(FPDF):
 
 class PDFExporter:
     """Main PDF export handler that processes content and generates files."""
+
     def __init__(self):
         self.pdf = CustomPDF()
         self.font_family = self._load_unicode_fonts()
@@ -88,18 +93,20 @@ class PDFExporter:
         )
 
         notes = self._format_notes_dict(notes_dict, odd_words)
+        debug.dprint(f"Formatted notes string length: {len(notes)}")
 
         if not notes.strip():  # Check for empty content
             raise FileError.pdf_invalid_content(len(notes))
 
         normalized = self._normalize_notes(notes)
 
-        if text.strip(): # Get full transcription text
+        if text.strip():  # Get full transcription text
             normalized += "\n\n# Transcription\n" + text.strip()
 
         if not self.render_pdf(
-            normalized, save_path,
-            f"Transcription: {os.path.splitext(os.path.basename(save_path))[0]}"  # Title
+            normalized,
+            save_path,
+            f"Transcription: {os.path.splitext(os.path.basename(save_path))[0]}",  # Title
         ):
             raise FileError.pdf_creation_failed()
 
@@ -123,7 +130,7 @@ class PDFExporter:
 
     def _clean_text(self, text: str) -> str:
         """Remove problematic or non-printable characters for PDF."""
-        # Keep printable ASCII + newline (adjust if you want unicode)
+        # Keep printable ASCII + newline
         return re.sub(r"[^\x20-\x7E\n]", "", text)
 
     def _format_notes_dict(
@@ -132,12 +139,10 @@ class PDFExporter:
         """Convert notes dictionary to formatted string for PDF."""
         lines = []
 
-        # Add summary
         summary = notes_dict.get("Summary", "")
         if summary:
             lines.append("# Summary\n" + summary + "\n")
 
-        # Add Key Terms as bullet points
         key_terms = notes_dict.get("Key Terms", [])
         if key_terms:
             lines.append("# Key Terms")
@@ -145,7 +150,6 @@ class PDFExporter:
                 lines.append(f"- {term}")
             lines.append("")
 
-        # Add Odd Words after Key Terms
         if odd_words:
             lines.append("# Specific Words")
             for word, variants in odd_words.items():
@@ -155,7 +159,6 @@ class PDFExporter:
                     lines.append(f"- {word}")
             lines.append("")
 
-        # Add Questions with timestamps
         questions = notes_dict.get("Questions", [])
         if questions:
             lines.append("# Questions")
@@ -163,7 +166,6 @@ class PDFExporter:
                 lines.append(f"- [{q.get('timestamp', '')}] {q.get('text', '')}")
             lines.append("")
 
-        # Add Timestamps with text
         timestamps = notes_dict.get("Timestamps", [])
         if timestamps:
             lines.append("# Timestamps")
@@ -172,11 +174,13 @@ class PDFExporter:
             lines.append("")
 
         return "\n".join(lines)
-    
+
     def render_pdf(self, text: str, filename: str, title: str) -> bool:
         try:
             if not text.strip():
                 raise FileError.pdf_invalid_content(len(text))
+
+            debug.dprint(f"Starting to render PDF")
 
             self.pdf = CustomPDF()
             self.font_family = self._load_unicode_fonts()
@@ -194,8 +198,10 @@ class PDFExporter:
             for line in cleaned_text.splitlines():
                 line = line.strip()
 
-                if line.startswith("# "):  # Heading 
-                    self.pdf.set_text_color(*self.pdf._hex_to_rgb(PDF_COLORS["heading"]))
+                if line.startswith("# "):  # Heading
+                    self.pdf.set_text_color(
+                        *self.pdf._hex_to_rgb(PDF_COLORS["heading"])
+                    )
                     self.pdf.set_font(self.font_family, style="B", size=14)
                     self.pdf.multi_cell(0, 8, line[2:].strip())
                     self.pdf.ln(2)
@@ -208,6 +214,9 @@ class PDFExporter:
 
             # Ensure output path is valid
             os.makedirs(os.path.dirname(filename), exist_ok=True)
+            debug.dprint(
+                f"Ensured output directory exists: {os.path.dirname(filename)}"
+            )
 
             if os.path.exists(filename) and not os.access(filename, os.W_OK):
                 raise FileError.pdf_permission_denied(filename, PermissionError())
@@ -217,6 +226,9 @@ class PDFExporter:
             if not os.path.exists(filename):
                 raise FileError.pdf_creation_failed()
 
+            debug.dprint(
+                f"PDF output called. Exists in Path={os.path.exists(filename)}"
+            )
             return True
 
         except FileError:

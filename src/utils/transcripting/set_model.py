@@ -1,19 +1,24 @@
 import whisper
 
 
-from src.utils.models import MODELS
-from src.errors.handlers import TranscriptionError
+from src.errors.debug import debug
+from src.utils.models import WHISPER_MODELS
+from src.errors.exceptions import TranscriptionError
 
 
 
 class SetModel:
     """Manages Whisper model loading"""
     def load(self, model_size: str):
-        if model_size not in MODELS:
+        debug.dprint(f"Requested Whisper model: {model_size}")
+
+        if model_size not in WHISPER_MODELS:
             raise TranscriptionError.invalid_model()
             
         try:
-            return whisper.load_model(model_size)
+            model = whisper.load_model(model_size)
+            debug.dprint(f"Successfully loaded model: {model_size} of type: {type(model)}")
+            return model
         
         except Exception as e:
             raise TranscriptionError.load_failed() from e

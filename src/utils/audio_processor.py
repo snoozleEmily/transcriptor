@@ -6,21 +6,33 @@ from pydub import AudioSegment
 from pydub.exceptions import CouldntDecodeError
 
 
+from src.errors.debug import debug
 from src.errors.exceptions import FFmpegError, TranscriptionError, ErrorCode
-
 
 
 def check_ffmpeg() -> None:
     """Verify system has ffmpeg installed"""
     try:
-        # Check if FFmpeg is installed and working
-        subprocess.run(
+        debug.dprint("Checking FFmpeg installation...")
+
+        # Get stderr depending on debug flag
+        stderr_target = subprocess.PIPE if debug.is_dev_logs_enabled() else subprocess.DEVNULL
+        stdout_target = subprocess.PIPE if debug.is_dev_logs_enabled() else subprocess.DEVNULL
+
+        result = subprocess.run(
             ["ffmpeg", "-version"],  # Basic command to check FFmpeg
-            check=True,  # Raise error if command fails
-            stdout=subprocess.DEVNULL,  # Hide version output
-            stderr=subprocess.DEVNULL,  # Hide error messages
-            timeout=5,  # Wait max 5 seconds
+            check=True,              # Raise error if command fails
+            stdout=stdout_target,    # Get version output if debugging
+            stderr=stderr_target,    # Get error messages if debugging
+            timeout=5,               # Wait max 5 seconds
         )
+
+        # Only print version info if debug logs are enabled
+        if result.stdout:
+            debug.dprint(f"FFmpeg version output:\n{result.stdout.decode()}")
+
+        debug.dprint("FFmpeg found and working")
+
 
     except (subprocess.CalledProcessError, FileNotFoundError) as e:
         raise FFmpegError(
@@ -56,7 +68,6 @@ def extract_audio(video_path: str) -> AudioSegment:
             "-y",  # Auto-overwrite output files without asking
             "-i",
             video_path,  # Input file path
-
             # Audio extraction options:
             "-vn",  # Disable video processing (video no)
             "-acodec",
@@ -65,7 +76,6 @@ def extract_audio(video_path: str) -> AudioSegment:
             "16000",  # Audio sample rate: 16kHz (optimal for speech)
             "-ac",
             "1",  # Audio channels: 1 (mono)
-            
             # Output format:
             "-f",
             "wav",  # Output format: WAV container
@@ -80,8 +90,15 @@ def extract_audio(video_path: str) -> AudioSegment:
             timeout=30,  # Maximum execution time (seconds)
         )
 
+        # Log FFmpeg output
+        debug.dprint(f"FFmpeg logs:\n{result.stderr.decode()}\n")
+
         # Convert binary stdout to AudioSegment
-        return AudioSegment.from_wav(BytesIO(result.stdout))
+        audio = AudioSegment.from_wav(BytesIO(result.stdout))
+        debug.dprint(
+            f"Audio extraction successful: duration={len(audio)/1000:.2f}s, channels={audio.channels}, frame_rate={audio.frame_rate}"
+        )
+        return audio
 
     except subprocess.TimeoutExpired as e:
         raise FFmpegError(
@@ -99,6 +116,8 @@ def extract_audio(video_path: str) -> AudioSegment:
 
 def clean_audio(audio: AudioSegment) -> AudioSegment:
     """Audio preprocessing pipeline"""
+    debug.dprint(f"Cleaning audio: duration={len(audio)/1000:.2f}s, channels={audio.channels}, frame_rate={audio.frame_rate}")
+
     try:
         # Convert to numpy array for processing
         samples = np.array(audio.get_array_of_samples())
@@ -109,6 +128,8 @@ def clean_audio(audio: AudioSegment) -> AudioSegment:
             sr=audio.frame_rate,  # Keep original sample rate (e.g. 16000)
             stationary=True,  # Best for steady noise like fans/AC
         )
+
+        debug.dprint("Audio cleaning completed")
 
         # Convert back to audio format
         return AudioSegment(

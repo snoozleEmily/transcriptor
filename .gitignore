@@ -1,4 +1,5 @@
 *.pyc
+*.gguf
 /venv
 /venv
 test*

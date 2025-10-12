@@ -77,7 +77,10 @@ If you're working on a different operating system `or want to manually arrange y
    pip install -r requirements.txt
    ```
 
-9. **Run the Script**:
+9. **Download Llama Model** 
+   [Llama-3.2-3B-Instruct-Q4_K_M](https://huggingface.co/hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF/tree/main)
+
+10. **Run the Script**:
    You're ready to go! Run the app with:
    ```bash
    python main.py

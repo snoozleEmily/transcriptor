@@ -5,9 +5,8 @@ from typing import Dict, List, Optional, Union, Any
 
 from src.errors.debug import debug
 from src.errors.exceptions import ErrorCode, FileError
-from src.errors.handlers import catch_errors
 from src.errors.func_printer import _log_error_flow_context
-from src.utils.text.language import Language
+from src.utils.text.language import language
 from src.utils.text.content_type import ContentType
 from src.utils.text.text_reviser import TextReviser
 from src.utils.text.notes_generator import NotesGenerator
@@ -17,25 +16,27 @@ from src.utils.pdf_maker import PDFExporter
 from src.utils.file_handler import save_transcription
 from src.utils.audio_cleaner import clean_audio
 from src.utils.audio_processor import extract_audio
-from src.utils.models import MODELS
+from src.utils.models import WHISPER_MODELS
 
 
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
-    model_size = str(MODELS[1])  # Default model [will be 3 | using a weaker for testing]
+    # Default model [will be medium as default | using a weaker for testing]
+    model_size = "base"
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
         self.transcriber = Textify(EndFlow.model_size)
-        self.language = Language()
+        self.language = language
         self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
         self.pdf_exporter = PDFExporter()
         self.sanitized = SanitizePrompt()
-        self.notes_generator = NotesGenerator(
-            language=self.language, config=self.content_config
+
+        debug.dprint(
+            f"EndFlow initialized | Model size={EndFlow.model_size} | Language={self.language}"
         )
 
     # -------------------- Content Configuration ---------------------
@@ -97,10 +98,7 @@ class EndFlow:
         if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.odd_words = self.content_config.words
 
-        self.notes_generator.config = self.content_config
-
     # ----------------------- Core Processing -----------------------
-    @catch_errors
     def process_video(
         self,
         video_path: str,
@@ -112,8 +110,8 @@ class EndFlow:
         self.configure_content(config_params)
 
         debug.dprint(
-                f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
-            )
+            f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+        )
 
         try:
             # Audio processing
@@ -121,11 +119,16 @@ class EndFlow:
             debug.dprint(f"Audio extracted: length={len(audio) if audio else 0}")
 
             cleaned_audio = clean_audio(audio)
-            debug.dprint(f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}")
+            debug.dprint(
+                f"Audio cleaned: length={len(cleaned_audio) if cleaned_audio else 0}"
+            )
 
             # Transcription
             context_prompt = self.sanitized.generate_content_prompt(self.content_config)
             result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
+
+            # Update language detection
+            self.language.process_whisper_output(result)
 
             # Post-processing
             revised_text = self.reviser.revise_text(result["text"])
@@ -165,8 +168,13 @@ class EndFlow:
             os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
         )
         debug.dprint(f"quick_script received in EndFlow: {quick_script}")
+        debug.dprint(f"Final save path determined: {save_path}")
+
+        if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
+            debug.dprint(f"No write permissions for the directory of the save path.")
 
         if not quick_script:
+            debug.dprint("Attempting to save as PDF...")
             self.pdf_exporter.save_notes(
                 result,
                 revised_text,
@@ -176,8 +184,12 @@ class EndFlow:
                 config=self.content_config,
             )
         else:
+            debug.dprint("Attempting to save as TXT...")
             save_transcription(revised_text, save_path)
 
+        debug.dprint(
+            f"Save operation complete. Verifying file exists: {os.path.exists(save_path)}"
+        )
         return os.path.abspath(save_path)
 
     # ----------------------- File Management ----------------------
@@ -199,7 +211,10 @@ class EndFlow:
             ):
                 return path
 
-        except Exception:
+        except Exception as e:
+            debug.dprint(
+                f"Failed to open save dialog: {e}. Falling back to desktop path."
+            )
             pass
 
         return self._generate_desktop_path(base_name, extension)
