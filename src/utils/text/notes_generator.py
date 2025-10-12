@@ -1,5 +1,5 @@
 import re
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
 from threading import Thread
 
 
@@ -23,7 +23,9 @@ class NotesGenerator:
         )
 
     # ----------------- Notes Generation -----------------
-    def create_notes(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    def create_notes(
+        self, data: Dict[str, Any], max_tokens: Optional[int] = None
+    ) -> Dict[str, Any]:
         """Prepares all sections as a dict, even if empty"""
         if not data.get("text"):
             raise TranscriptionError.no_result()
@@ -32,7 +34,7 @@ class NotesGenerator:
         segments = data.get("segments", [])
 
         sections = {
-            "Summary": self._generate_summary(text),
+            "Summary": self._generate_summary(text, max_tokens),
             "Key Terms": self._extract_key_terms(segments),
             "Questions": self._extract_questions(segments),
             "Timestamps": self._get_important_timestamps(segments),
@@ -102,21 +104,22 @@ class NotesGenerator:
             pdf.ln(5)
 
         self.pdf_exporter.pdf = pdf
-        debug.dprint(f"PDF page content prepared, calling render_pdf for: {output_path}")
+        debug.dprint(
+            f"PDF page content prepared, calling render_pdf for: {output_path}"
+        )
         return self.pdf_exporter.render_pdf(" ", output_path, title)
 
     # ----------------- Helpers -----------------
-    def _generate_summary(self, text: str) -> str:
+    def _generate_summary(self, text: str, max_tokens: int) -> str:
         try:
             debug.dprint(f"Inside _generate_summary. Language is: {self.language}")
             debug.dprint(f"Generating summary with LLaMA for text length={len(text)}")
-            return self.llama.summarize_text(text, max_tokens=80)
-        
+            return self.llama.summarize_text(text, max_tokens)
+
         except Exception as e:
             debug.dprint(f"Using fallback since LLaMA summarization failed: {e}")
             sentences = re.split(r"(?<=[.!?])\s+", text)
             return " ".join(sentences[:2]) + ("..." if len(sentences) > 2 else "")
-
 
     def _extract_key_terms(self, segments: List[Dict]) -> List[str]:
         terms = set()
