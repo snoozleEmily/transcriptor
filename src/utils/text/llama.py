@@ -27,27 +27,32 @@ class Llama:
         if getattr(self, "_initialized", False):
             return
 
-        debug.dprint(f"Initializing Llama with model_size={model_size}")
-
-        model_config = LLAMA_MODELS.get(model_size, LLAMA_MODELS["3b"])
-        raw_path = model_config.get("model_path", "models/ggml-7b-model.bin")
-        ctx_size = int(model_config.get("tokens", 4096))
-
-        model_path = resolve_model_path(raw_path)  # raises FileNotFoundError if missing
-
-        # instantiates the Llm wrapper
-        self.model = Llm(
-            model_path=model_path, n_ctx=ctx_size, verbose=debug.is_dev_logs_enabled()
-        )
         self.model_size = model_size
+        self._model = None  # Will hold the actual LLaMA model
         self._initialized = True
+        debug.dprint(f"Llama initialized for lazy loading, model_size={model_size}")
 
-        debug.dprint(
-            f"Llm instance created for model_size={model_size}, model_path={model_path}"
-        )
+    @property
+    def model(self):
+        """Lazy-load the LLaMA model on first access."""
+        if self._model is None:
+            debug.dprint(f"Loading LLaMA model '{self.model_size}' now...")
+            model_config = LLAMA_MODELS.get(self.model_size, LLAMA_MODELS["3b"])
+            raw_path = model_config.get("model_path", "models/ggml-7b-model.bin")
+            ctx_size = int(model_config.get("tokens", 4096))
+            model_path = resolve_model_path(raw_path) # raises FileNotFoundError if missing
+
+            self._model = Llm(
+                model_path=model_path,
+                n_ctx=ctx_size,
+                verbose=debug.is_dev_logs_enabled(),
+            )
+            debug.dprint(f"LLaMA model '{self.model_size}' loaded.")
+
+        return self._model
 
     def summarize_text(self, text: str, max_tokens: int = 80) -> str:
-        """Generate a concise summary following strict formatting rules."""
+        """Use the lazy-loaded model to summarize text."""
         system_message = {
             "role": "system",
             "content": (
@@ -62,10 +67,7 @@ class Llama:
 
         user_message = {
             "role": "user",
-            "content": (
-                "Summarize this text in one concise sentence."
-                "Output only the summary itself:\n\n"
-            )
+            "content": "Summarize this text in one concise sentence. Output only the summary itself:\n\n"
             + text,
         }
 
@@ -80,11 +82,10 @@ class Llama:
         return self._clean_summary(raw)  # type: ignore
 
     def _clean_summary(self, text: str) -> str:
-        """Remove unwanted prefixes and enforce single-line output."""
         import re
 
         if not text:
-            return ""  # handles None or empty string safely
+            return ""
 
         text = text.strip()
         text = re.sub(r"^(here is (the )?summary[:\-\s]*)", "", text, flags=re.I)
