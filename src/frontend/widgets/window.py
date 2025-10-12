@@ -3,8 +3,6 @@ import tkinter as tk
 
 from ..styles_manager import StyleManager
 from ..constants import THEMES
-from .branding import create_branding
-from .buttons_panel import ButtonsPanel
 
 
 
@@ -33,6 +31,3 @@ class MainWindow:
         """Build primary interface components"""
         self.main_frame = tk.Frame(self.root, bg=THEMES["bg"])
         self.main_frame.pack(expand=True, fill='both', padx=40, pady=50)
-
-        # Branding elements
-        create_branding(self.main_frame).pack()
