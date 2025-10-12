@@ -50,14 +50,14 @@ SETUP_TIMES: Dict[str, float] = {name: model["setup_time"] for name, model in WH
 
 # --------------------- Llama Model Info ---------------------
 LLAMA_MODELS: dict = {
-    "7b": {
-        "model_path": "D:\\Projects\\Python-studies\\transcriptor\\llm_models\\llama-2-7b-chat.Q4_K_M.gguf",  
-        "speed": 25.0,           # tokens per second
-        "setup_time": 5.0,       # loading time in seconds
-        "tokens": 4096,          # context_size
-        "memory": "8-12GB RAM",  # RAM requirements
-        "params": "7B",          # parameter count
-        "description": "Fast inference, good for most tasks",
+    "3b": {
+        "model_path": "D:\\Projects\\Python-studies\\transcriptor\\llm_models\\llama-3.2-3b-instruct-q4_k_m.gguf",
+        "speed": 40.0,           # tokens per second (smaller model, faster inference)
+        "setup_time": 3.0,       # loading time in seconds
+        "tokens": 4096,           # context_size
+        "memory": "4-6GB RAM",    # RAM requirements
+        "params": "3B",           # parameter count
+        "description": "Compact and efficient, good for lightweight tasks or testing",
     }
 }
 # --------------------- Error Check ---------------------
@@ -75,25 +75,3 @@ for model in WHISPER_MODEL_NAMES:
         
         debug.dprint(f"Model '{model}' was missing setup time. Defaulted to 0.0s.")
         debug.dprint(f"Current MODEL_SPEEDS: {MODEL_SPEEDS[model]} wps, SETUP_TIMES: {SETUP_TIMES[model]}s")
-
-
-# --------------------- Constants For User ---------------------
-# TODO: Implement this info to be achievable through the interface
-MODELS_INFO = {
-    "whisper": {
-        "tiny": [0, "Fastest", "Lowest accuracy", "~3M parameters"],
-        "base": [1, "Very fast", "Low accuracy", "~40M parameters"],
-        "small": [2, "Moderate speed", "Medium accuracy", "~74M parameters"],
-        "medium": [3, "Slower", "High accuracy", "~155M parameters"],
-        "large": [4, "Slowest", "Highest accuracy", "~300M parameters"],
-    },
-    "llama": {
-        "7b": [
-            0,
-            "Fast inference",
-            "7B parameters",
-            "8-12GB RAM",
-            LLAMA_MODELS["7b"]["description"],
-        ]
-    },
-}
