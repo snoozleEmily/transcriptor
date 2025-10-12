@@ -11,7 +11,6 @@ from .logging import (
     log_unexpected_error
 )
 from .func_printer import get_func_call
-from .warnings_config import custom_warning
 
 __all__ = [
     # Error Types
@@ -30,5 +29,4 @@ __all__ = [
 
     # Function call log
     "get_func_call",
-    "custom_warning"
 ]
