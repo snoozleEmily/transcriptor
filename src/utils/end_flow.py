@@ -162,34 +162,58 @@ class EndFlow:
         source_name: str,
         quick_script: bool,
     ) -> str:
-        """Handle output saving with validation."""
-        save_path = self._get_save_path(
-            os.path.splitext(source_name)[0], ".txt" if quick_script else ".pdf"
-        )
+        """Handle output saving with validation and debug logs."""
+
         debug.dprint(f"quick_script received in EndFlow: {quick_script}")
-        debug.dprint(f"Final save path determined: {save_path}")
 
-        if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
-            debug.dprint(f"No write permissions for the directory of the save path.")
-
-        if not quick_script:
-            debug.dprint("Attempting to save as PDF...")
-            self.pdf_exporter.save_notes(
-                result,
-                revised_text,
-                save_path,
-                self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {},
-                language=self.language,
-                config=self.content_config,
+        if quick_script:
+            # For TXT, ask save path immediately
+            save_path = self._get_save_path(
+                os.path.splitext(source_name)[0], ".txt"
             )
-        else:
+            debug.dprint(f"Final save path determined for TXT: {save_path}")
+
+            if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
+                debug.dprint("No write permissions for the directory of the save path.")
+
             debug.dprint("Attempting to save as TXT...")
             save_transcription(revised_text, save_path)
 
-        debug.dprint(
-            f"Save operation complete. Verifying file exists: {os.path.exists(save_path)}"
+            debug.dprint(
+                f"TXT save operation complete. Verifying file exists: {os.path.exists(save_path)}"
+            )
+            return os.path.abspath(save_path)
+
+        # For PDF, first generate to a temporary path
+        temp_path = os.path.join(os.path.expanduser("~"), "Desktop", "temp_output.pdf")
+        debug.dprint(f"Generating PDF temporarily at: {temp_path}")
+
+        self.pdf_exporter.save_notes(
+            result,
+            revised_text,
+            temp_path,
+            self.reviser.odd_words if hasattr(self.reviser, "odd_words") else {},
+            language=self.language,
+            config=self.content_config,
         )
+
+        debug.dprint("PDF generation complete. Prompting user for save location...")
+        save_path = self._get_save_path(
+            os.path.splitext(source_name)[0], ".pdf"
+        )
+        debug.dprint(f"Final save path chosen by user: {save_path}")
+
+        if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
+            debug.dprint("No write permissions for the directory of the save path.")
+
+        # Move temp PDF to user-selected path
+        os.replace(temp_path, save_path)
+        debug.dprint(
+            f"PDF save operation complete. Verifying file exists: {os.path.exists(save_path)}"
+        )
+
         return os.path.abspath(save_path)
+
 
     # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
