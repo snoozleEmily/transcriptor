@@ -22,21 +22,23 @@ class Llama:
 
         return cls._instance
 
-    def __init__(self, model_size: str = "7b"):
+    def __init__(self, model_size: str = "3b"):
         # avoid re-initializing singleton
         if getattr(self, "_initialized", False):
             return
 
         debug.dprint(f"Initializing Llama with model_size={model_size}")
 
-        model_config = LLAMA_MODELS.get(model_size, LLAMA_MODELS["7b"])
+        model_config = LLAMA_MODELS.get(model_size, LLAMA_MODELS["3b"])
         raw_path = model_config.get("model_path", "models/ggml-7b-model.bin")
         ctx_size = int(model_config.get("tokens", 4096))
 
         model_path = resolve_model_path(raw_path)  # raises FileNotFoundError if missing
 
         # instantiates the Llm wrapper
-        self.model = Llm(model_path=model_path, n_ctx=ctx_size, verbose=False)
+        self.model = Llm(
+            model_path=model_path, n_ctx=ctx_size, verbose=debug.is_dev_logs_enabled()
+        )
         self.model_size = model_size
         self._initialized = True
 
@@ -75,7 +77,7 @@ class Llama:
         )
 
         raw: str | None = response["choices"][0]["message"].get("content")
-        return self._clean_summary(raw) # type: ignore
+        return self._clean_summary(raw)  # type: ignore
 
     def _clean_summary(self, text: str) -> str:
         """Remove unwanted prefixes and enforce single-line output."""
