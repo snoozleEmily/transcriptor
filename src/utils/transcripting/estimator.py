@@ -1,4 +1,3 @@
-from scipy.stats import norm
 from typing import Tuple
 
 
@@ -95,6 +94,8 @@ class TimeEstimator:
             Uses the normal distribution's Z-score for the configured confidence level.
             For 95% confidence, this uses the 97.5th percentile (two-tailed test).
         """
+        from scipy.stats import norm  
+        
         # Calculate critical value for two-tailed test
         two_tailed_alpha = (1 + self.CONFIDENCE_LEVEL) / 2  
         z_score = norm.ppf(two_tailed_alpha)  # Get Z-score for confidence level
