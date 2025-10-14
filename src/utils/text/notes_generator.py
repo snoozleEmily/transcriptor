@@ -4,7 +4,6 @@ from typing import Dict, List, Any, Optional
 
 from src.logs.debug import debug
 from src.logs.exceptions import TranscriptionError
-from src.utils.pdf_maker import PDFExporter
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD
 from src.utils.text.llama import llama, Llama
@@ -15,7 +14,6 @@ class NotesGenerator:
     def __init__(self, language, config: Any):
         self.language = language
         self.config = config
-        self.pdf_exporter = PDFExporter()
         self.llama: Llama = llama
 
         debug.dprint(
@@ -41,8 +39,6 @@ class NotesGenerator:
         }
 
         return sections
-
-    # NOTE: Removed PDF Export section was here | WTL
 
     # ----------------- Helpers -----------------
     def _generate_summary(self, text: str, max_tokens: int) -> str:
