@@ -4,35 +4,25 @@ from typing import Dict, List, Optional, Union, Any
 
 
 from src.logs.debug import debug
-from src.logs.exceptions import ErrorCode, FileError
-from src.logs.func_printer import _log_error_flow_context
-from src.utils.text.language import language
 from src.utils.text.content_type import ContentType
-from src.utils.text.text_reviser import TextReviser
-from src.utils.transcripting.sanitize_prompt import SanitizePrompt
-from src.utils.transcripting.textify import Textify
-from src.utils.pdf_maker import PDFExporter
-from src.utils.file_handler import save_transcription
-from src.utils.audio_cleaner import clean_audio
-from src.utils.audio_processor import extract_audio
+from src.utils.text.language import language
 from src.utils.models import WHISPER_MODELS
-
 
 
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
     # Default model [will be medium as default | using a weaker for testing]
-    model_size = "base"
+    model_size = "base" # Will access WHISPER_MODELS
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
-        self.transcriber = Textify(EndFlow.model_size)
+        # Clear states
+        self.transcriber = None
+        self.sanitized = None
+
         self.language = language
-        self.reviser = TextReviser(language=self.language)
         self.content_config = ContentType(words=None, has_odd_names=True)
-        self.pdf_exporter = PDFExporter()
-        self.sanitized = SanitizePrompt()
 
         debug.dprint(
             f"EndFlow initialized | Model size={EndFlow.model_size} | Language={self.language}"
@@ -56,6 +46,8 @@ class EndFlow:
             self._update_dependencies()
 
         except Exception as e:
+            from src.logs.exceptions import ErrorCode, FileError
+
             raise FileError(
                 code=ErrorCode.UNEXPECTED_ERROR,
                 message="Invalid content configuration",
@@ -94,6 +86,10 @@ class EndFlow:
 
     def _update_dependencies(self) -> None:
         """Update dependent components with new config."""
+        from src.utils.text.text_reviser import TextReviser
+
+        self.reviser = TextReviser(language=self.language)
+
         if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.odd_words = self.content_config.words
 
@@ -106,10 +102,21 @@ class EndFlow:
         **kwargs,
     ) -> str:
         """Enhanced transcription pipeline with better error context."""
+
+        from src.utils.audio_processor import extract_audio
+        from src.utils.audio_cleaner import clean_audio
+        from src.utils.transcripting.sanitize_prompt import SanitizePrompt
+
+        if not config_params and not hasattr(self, "reviser"):
+            self._update_dependencies()
+
+        self.sanitized = SanitizePrompt()
         self.configure_content(config_params)
 
         debug.dprint(
-            f"Starting process_video: path={video_path}, quick_script={quick_script}, config={config_params}"
+            f"Starting process_video: path={video_path}\n"
+            f"quick_script={quick_script}\n"
+            f"config={config_params}\n"
         )
 
         try:
@@ -132,12 +139,16 @@ class EndFlow:
             # Post-processing
             revised_text = self.reviser.revise_text(result["text"])
             if not revised_text.strip():
+                from src.logs.exceptions import FileError
+
                 raise FileError.empty_text()
 
             return self._save_output(
                 result, revised_text, os.path.basename(video_path), quick_script
             )
         except Exception as e:
+            from src.logs.func_printer import _log_error_flow_context
+
             _log_error_flow_context(
                 self.process_video, video_path, config_params, e, kwargs
             )
@@ -147,6 +158,17 @@ class EndFlow:
         self, audio: Any, context_prompt: str, **kwargs
     ) -> Dict[str, Any]:
         """Execute transcription with proper error context."""
+        if (
+            self.transcriber
+            and getattr(self.transcriber, "model_size", None) == self.model_size
+        ):
+            debug.dprint("Reusing cached transcriber.")
+        else:
+            from src.utils.transcripting.textify import Textify
+            
+            print("Starting transcription...")  # For user feedback while loading
+            self.transcriber = Textify(self.model_size)
+
         return self.transcriber.transcribe(
             audio,
             initial_prompt=context_prompt,
@@ -164,13 +186,16 @@ class EndFlow:
     ) -> str:
         """Handle output saving with validation and debug logs."""
 
+        from src.utils.pdf_maker import PDFExporter
+        from src.utils.file_handler import save_transcription
+
+        self.pdf_exporter = PDFExporter()
+
         debug.dprint(f"quick_script received in EndFlow: {quick_script}")
 
         if quick_script:
             # For TXT, ask save path immediately
-            save_path = self._get_save_path(
-                os.path.splitext(source_name)[0], ".txt"
-            )
+            save_path = self._get_save_path(os.path.splitext(source_name)[0], ".txt")
             debug.dprint(f"Final save path determined for TXT: {save_path}")
 
             if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
@@ -198,9 +223,7 @@ class EndFlow:
         )
 
         debug.dprint("PDF generation complete. Prompting user for save location...")
-        save_path = self._get_save_path(
-            os.path.splitext(source_name)[0], ".pdf"
-        )
+        save_path = self._get_save_path(os.path.splitext(source_name)[0], ".pdf")
         debug.dprint(f"Final save path chosen by user: {save_path}")
 
         if not os.access(os.path.dirname(save_path) or ".", os.W_OK):
@@ -213,7 +236,6 @@ class EndFlow:
         )
 
         return os.path.abspath(save_path)
-
 
     # ----------------------- File Management ----------------------
     def _get_save_path(self, base_name: str, extension: str) -> str:
