@@ -176,11 +176,8 @@ class PDFExporter:
             lines.append("")
 
         return "\n".join(lines)
-    
 
-     # -------
-
-    # ----------------- PDF Export -----------------
+    # ----------------- Export -----------------
     def export_notes_to_pdf(
         self,
         sections: Dict[str, Any],
@@ -248,8 +245,7 @@ class PDFExporter:
         return self.render_pdf(" ", output_path, title)
 
 
-     # -------
-
+    # -----------------  Low-level PDF rendering -----------------
 
     def render_pdf(self, text: str, filename: str, title: str) -> bool:
         try:
