@@ -4,15 +4,17 @@ from typing import Dict, List, Any, Optional
 
 from src.logs.debug import debug
 from src.logs.exceptions import TranscriptionError
+from src.utils.text.language import Language
+from src.utils.text.llama import llama, Llama
 from src.utils.text.words.common import COMMON_WORDS
 from src.utils.text.words.question import QUESTION_WRD
-from src.utils.text.llama import llama, Llama
+
 
 
 
 class NotesGenerator:
     def __init__(self, language, config: Any):
-        self.language = language
+        self.language: Language = language
         self.config = config
         self.llama: Llama = llama
 
