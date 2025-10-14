@@ -2,12 +2,14 @@ import os
 import re
 import datetime
 from fpdf import FPDF
+from threading import Thread
 from typing import Optional, Dict, Any
 
 
 from src.logs.debug import debug
 from src.logs.exceptions import FileError, ErrorCode
 from src.frontend.constants import PDF_COLORS
+
 
 
 FONT_NAME = "DejaVu"  # Unicode safe
@@ -174,6 +176,80 @@ class PDFExporter:
             lines.append("")
 
         return "\n".join(lines)
+    
+
+     # -------
+
+    # ----------------- PDF Export -----------------
+    def export_notes_to_pdf(
+        self,
+        sections: Dict[str, Any],
+        output_path: str,
+        title: str = "Transcription Notes",
+        async_export: bool = False,
+    ):
+        """Export notes to PDF. Can run asynchronously to avoid GUI freeze."""
+        debug.dprint(f"Exporting notes to PDF: {output_path} (async={async_export})")
+        if async_export:
+            thread = Thread(
+                target=self._export_pdf, args=(sections, output_path, title)
+            )
+            thread.start()
+            return thread
+        else:
+            return self._export_pdf(sections, output_path, title)
+
+    def _export_pdf(self, sections: Dict[str, Any], output_path: str, title: str):
+        pdf = self.pdf
+        font = self.font_family
+        pdf.add_page()
+
+        # Title
+        pdf.set_font(font, style="B", size=18)
+        pdf.cell(0, 10, title, ln=True, align="C")
+        pdf.ln(8)
+
+        for section_name, content in sections.items():
+            debug.dprint(
+                f"Rendering section: {section_name} ({len(content) if isinstance(content, list) else 'str'})"
+            )
+
+            # Section header
+            pdf.set_font(font, style="B", size=16)
+            pdf.cell(0, 10, section_name.upper(), ln=True)
+            pdf.ln(2)
+
+            # Section content
+            pdf.set_font(font, style="", size=12)
+
+            if isinstance(content, list):
+                if not content:
+                    pdf.cell(0, 10, "None found", ln=True)
+                elif isinstance(content[0], dict):
+                    for item in content:
+                        ts = item.get("timestamp", "00:00:00")
+                        txt = item.get("text", "[missing]")
+                        pdf.set_font(font, style="B", size=12)
+                        pdf.cell(0, 10, f"{ts}:", ln=False)
+                        pdf.set_font(font, style="", size=12)
+                        pdf.cell(0, 10, f" {txt}", ln=True)
+                else:
+                    for term in content:
+                        pdf.cell(0, 10, f"- {term}", ln=True)
+            else:
+                pdf.multi_cell(0, 8, content.strip() if content else "None found")
+
+            pdf.ln(5)
+
+        self.pdf = pdf
+        debug.dprint(
+            f"PDF page content prepared, calling render_pdf for: {output_path}"
+        )
+        return self.render_pdf(" ", output_path, title)
+
+
+     # -------
+
 
     def render_pdf(self, text: str, filename: str, title: str) -> bool:
         try:
