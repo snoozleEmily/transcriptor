@@ -9,11 +9,12 @@ from src.utils.text.language import language
 from src.utils.models import WHISPER_MODELS
 
 
+
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
     # Default model [will be medium as default | using a weaker for testing]
-    model_size = "base" # Will access WHISPER_MODELS
+    model_size = WHISPER_MODELS["base"]["name"]
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
