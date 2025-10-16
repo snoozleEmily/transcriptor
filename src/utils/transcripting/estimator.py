@@ -80,19 +80,6 @@ class TimeEstimator:
     ) -> Tuple[float, float]:
         """
         Calculate 95% confidence interval bounds for word count estimation.
-        
-        Args:
-            mean_words: The mean (average) word count
-            std_words: The standard deviation of word counts
-            
-        Returns:
-            Tuple[float, float]: Lower and upper bounds of the confidence interval.
-                                The lower bound is clamped at 0.0 to prevent
-                                negative values.
-                                
-        Note:
-            Uses the normal distribution's Z-score for the configured confidence level.
-            For 95% confidence, this uses the 97.5th percentile (two-tailed test).
         """
         from scipy.stats import norm  
         
@@ -109,19 +96,6 @@ class TimeEstimator:
     def _get_adjusted_speed(self, custom_word_count: int) -> float:
         """
         Adjust transcription speed based on custom vocabulary size.
-        
-        The speed follows an inverse relationship with custom word count:
-        - More custom words → greater speed reduction
-        - Formula: base_speed / (1 + penalty_factor * word_count)
-        
-        Args:
-            custom_word_count: Number of custom vocabulary words
-            
-        Returns:
-            float: Adjusted words-per-minute transcription speed
-            
-        Raises:
-            KeyError: If model_size is not found in model_speeds
         """
         base_speed = self.model_speeds[self.model_size]  # Lookup base speed
         
