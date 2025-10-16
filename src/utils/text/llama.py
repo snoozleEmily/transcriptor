@@ -59,6 +59,7 @@ class Llama:
 
         self._initialized = True
         debug.dprint(f"Llama initialized for lazy loading, model_size={model_size}")
+        print("🛠️ Preparing the AI engine. This may take a moment…")
 
     @property
     def model(self):
@@ -82,6 +83,7 @@ class Llama:
             self._model_ctx = ctx_size
 
             debug.dprint(f"LLaMA model '{self.model_size}' loaded.")
+            print(f"✅ AI model '{self.model_size}' loaded successfully.")
 
         return self._model
 
@@ -101,6 +103,8 @@ class Llama:
         try:
             import tiktoken
 
+            print("📝 Processing your notes… Almost there!") 
+
             try:
                 enc = tiktoken.get_encoding("cl100k_base")
                 token_count = len(enc.encode(text))
@@ -116,14 +120,16 @@ class Llama:
             debug.dprint(
                 f"Token estimate using tiktoken: {token_count} tokens for {len(text)} chars."
             )
+            
             return token_count
 
         except Exception as e:
             token_count = max(1, int(len(text) / AVERAGE_CHARS_PER_TOKEN))
             print(
-                "Token count is using its fallback value. "
-                "Please OPEN AN ISSUE to report it."
-            )  # Signal problem in prod
+            "⚠️ Token estimation fallback is in use. "
+            "Results may be less accurate. Please OPEN AN ISSUE this if it persists."
+            "Exception: {e}"
+                )  # Signal problem in prod
             debug.dprint(
                 f"Token estimate using heuristic: {token_count} tokens "
                 f"(chars={len(text)}, avg_chars_per_token={AVERAGE_CHARS_PER_TOKEN}). "
