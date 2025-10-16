@@ -53,7 +53,6 @@ class Llama:
 
         self.model_size = model_size
         self._model = None
-        
 
         # Metadata
         self._model_path: Optional[str] = None
@@ -62,7 +61,6 @@ class Llama:
         self.loader = Loader()
         self._initialized = True
         debug.dprint(f"Llama initialized for lazy loading, model_size={model_size}")
-        print("🛠️ Preparing the AI engine. This may take a moment…")
 
     @property
     def model(self):
@@ -109,33 +107,38 @@ class Llama:
         try:
             import tiktoken
 
-            print("📝 Processing your notes… Almost there!") 
+            print("📝 Processing your notes… Almost there!")
+            self.loader.setup(transcribe_estimate=3.0, what="Loading AI")
+            self.loader.start_transcription_progress()
 
             try:
                 enc = tiktoken.get_encoding("cl100k_base")
                 token_count = len(enc.encode(text))
                 debug.dprint(f"tiktoken successfully used: {token_count} tokens")
-                
+
             except Exception as e:
                 debug.dprint(
                     f"tiktoken encoding lookup failed; falling back to gpt-3.5-turbo encoding. Error: {e}"
                 )
                 enc = tiktoken.encoding_for_model("gpt-3.5-turbo")
 
+            result = {"status": "success"}
+            self.loader.complete(result, duration=3.0)
+
             token_count = len(enc.encode(text))
             debug.dprint(
                 f"Token estimate using tiktoken: {token_count} tokens for {len(text)} chars."
             )
-            
+
             return token_count
 
         except Exception as e:
             token_count = max(1, int(len(text) / AVERAGE_CHARS_PER_TOKEN))
             print(
-            "⚠️ Token estimation fallback is in use. "
-            "Results may be less accurate. Please OPEN AN ISSUE this if it persists."
-            "Exception: {e}"
-                )  # Signal problem in prod
+                "⚠️ Token estimation fallback is in use. "
+                "Results may be less accurate. Please OPEN AN ISSUE this if it persists."
+                "Exception: {e}"
+            )  # Signal problem in prod
             debug.dprint(
                 f"Token estimate using heuristic: {token_count} tokens "
                 f"(chars={len(text)}, avg_chars_per_token={AVERAGE_CHARS_PER_TOKEN}). "
