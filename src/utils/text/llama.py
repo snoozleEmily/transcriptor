@@ -84,7 +84,7 @@ class Llama:
             self._model_ctx = ctx_size
 
             debug.dprint(f"LLaMA model '{self.model_size}' loaded.")
-            print(f"✅ AI model '{self.model_size}' loaded successfully.")
+            print(f"\n✅ AI model '{self.model_size}' loaded successfully.\n")
 
             self.loader.setup(transcribe_estimate=5.0, what="Generating Notes")
             self.loader.start_transcription_progress()
