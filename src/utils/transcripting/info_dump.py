@@ -56,10 +56,7 @@ class InfoDump:
             transcribe_time: Actual transcription time
             speed_factor: Real-time speed multiplier
         """
-        # Header
-        print("\n" + "✨" * self.emoji_width)
-        print("🎉 Transcription Complete! 🎉")
-        print("✨" * self.emoji_width)
+        print("Transcription Complete!")
 
         # Metrics
         print("\n" + "-" * 22)
@@ -73,7 +70,7 @@ class InfoDump:
 
         for metric in metrics:
             print(metric)
-        print("-" * 22)
+        print("-" * 22 + "\n\n")
 
     def log_delay_warning(self):
         """Display warning when transcription is delayed"""
