@@ -68,7 +68,7 @@ class Textify:
         )
 
         # Progress setup
-        pipeline_start = self.progress.setup(setup_time)
+        pipeline_start = self.progress.setup(setup_time, what="Transcripting")
         if pipeline_start is None:
             pipeline_start = time.time()
 

@@ -208,6 +208,7 @@ class EndFlow:
             debug.dprint(
                 f"TXT save operation complete. Verifying file exists: {os.path.exists(save_path)}"
             )
+            print("\n✏️ Results Ready! ✏️\n")
             return os.path.abspath(save_path)
 
         # For PDF, first generate to a temporary path
@@ -235,7 +236,7 @@ class EndFlow:
         debug.dprint(
             f"PDF save operation complete. Verifying file exists: {os.path.exists(save_path)}"
         )
-
+        print("\n✏️ Results Ready! ✏️\n")
         return os.path.abspath(save_path)
 
     # ----------------------- File Management ----------------------

@@ -15,6 +15,7 @@ class Loader:
         self.handler = None  # Optional progress callback function
         self.start_time = 0.0  # Process start timestamp
         self.current_progress = 0  # 0-100 scale
+        self.what = "" # Default
         self.info = InfoDump()  # For logging system messages
 
         # Timing configuration
@@ -22,7 +23,7 @@ class Loader:
         self._MIN_SLEEP = 0.05  # Minimum sleep interval (50ms)
         self._SAFETY_BUFFER = 1.0  # Extra time before watchdog triggers
 
-    def setup(self, transcribe_estimate: float) -> None:
+    def setup(self, transcribe_estimate: float, what) -> None:
         """Configure time estimates for accurate progress tracking.
 
         Args:
@@ -30,6 +31,7 @@ class Loader:
             transcribe_estimate: Expected transcription duration in seconds
         """
         self.estimated_total = max(0.1, transcribe_estimate)  # Prevent zero-division
+        self.what = what
 
     def start_transcription_progress(
         self, handler: Optional[Callable[[int], None]] = None
@@ -83,7 +85,7 @@ class Loader:
             # Show elapsed time since delay began
             while self.active:
                 elapsed = int(time.time() - delay_start)
-                print(f"Elapsed: {elapsed}ss || Still Transcripting\n", end="\r")
+                print(f"Elapsed: {elapsed}ss || Still Working\n", end="\r")
                 time.sleep(1)
 
     def _update_display(self, increment: float) -> None:
@@ -91,20 +93,13 @@ class Loader:
         new_value = min(100, self.current_progress + max(1, int(increment)))
         if new_value > self.current_progress:
             self.current_progress = new_value
-            print(f"Transcripting: {new_value}%\n", end="\r")
+            print(f"{self.what}: {new_value}%\n", end="\r")
 
             if self.handler:
                 self.handler(new_value)
 
     def complete(self, result: dict, duration: float) -> dict:
         """Finalize progress tracking and return processing metrics.
-
-        Args:
-            result: Dictionary to add metadata to
-            duration: Original audio duration
-
-        Returns:
-            Result dict with added processing metadata
         """
         self.active = False
         time.sleep(0.1)  # Allow final updates to complete

@@ -75,10 +75,7 @@ class InfoDump:
             print(metric)
         print("-" * 22)
 
-        # Footer
-        print("\n✏️ Results Ready! ✏️\n")
-
     def log_delay_warning(self):
         """Display warning when transcription is delayed"""
-        print("\n\n\n⚠️ Transcription is taking longer than usual")
+        print("\n\n\nTranscription is taking longer than usual")
         print("⏳ Please be patient and DO NOT close the app\n\n")

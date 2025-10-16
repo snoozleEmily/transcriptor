@@ -9,6 +9,7 @@ from llama_cpp import CreateChatCompletionResponse
 from src.logs.debug import debug
 from src.utils.models import LLAMA_MODELS
 from .llama_path import resolve_model_path
+from src.utils.transcripting.loader import Loader
 
 
 AVERAGE_CHARS_PER_TOKEN = 4.0
@@ -52,11 +53,13 @@ class Llama:
 
         self.model_size = model_size
         self._model = None
+        
 
         # Metadata
         self._model_path: Optional[str] = None
         self._model_ctx: Optional[int] = None
 
+        self.loader = Loader()
         self._initialized = True
         debug.dprint(f"Llama initialized for lazy loading, model_size={model_size}")
         print("🛠️ Preparing the AI engine. This may take a moment…")
@@ -84,6 +87,9 @@ class Llama:
 
             debug.dprint(f"LLaMA model '{self.model_size}' loaded.")
             print(f"✅ AI model '{self.model_size}' loaded successfully.")
+
+            self.loader.setup(transcribe_estimate=5.0, what="Generating Notes")
+            self.loader.start_transcription_progress()
 
         return self._model
 
@@ -209,6 +215,9 @@ class Llama:
             temperature=0,
             stream=False,
         )
+
+        result = {"status": "success"}
+        self.loader.complete(result, duration=5.0)
 
         raw: str | None = response["choices"][0]["message"].get("content")
         return self._clean_summary(raw)  # type: ignore
