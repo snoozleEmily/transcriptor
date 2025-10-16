@@ -9,6 +9,7 @@ def transcribe_audio(
     audio: Any, context_prompt: str, transcriber, model_size, content_config, **kwargs
 ) -> Dict[str, Any]:
     """Execute transcription with proper error context."""
+    print("Getting everything ready...")
 
     loader = Loader()
 
