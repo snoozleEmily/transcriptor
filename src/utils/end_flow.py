@@ -9,7 +9,6 @@ from src.utils.text.language import language
 from src.utils.models import WHISPER_MODELS
 
 
-
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
@@ -24,6 +23,8 @@ class EndFlow:
 
         self.language = language
         self.content_config = ContentType(words=None, has_odd_names=True)
+
+        self.model_sz = EndFlow.model_size
 
         debug.dprint(
             f"EndFlow initialized | Model size={EndFlow.model_size} | Language={self.language}"
@@ -121,6 +122,8 @@ class EndFlow:
         )
 
         try:
+            from src.utils.transcripting.transcribe_audio import transcribe_audio
+
             # Audio processing
             audio = extract_audio(video_path)
             debug.dprint(f"Audio extracted: length={len(audio) if audio else 0}")
@@ -132,7 +135,14 @@ class EndFlow:
 
             # Transcription
             context_prompt = self.sanitized.generate_content_prompt(self.content_config)
-            result = self._transcribe_audio(cleaned_audio, context_prompt, **kwargs)
+            result = transcribe_audio(
+                cleaned_audio,
+                context_prompt,
+                self.transcriber,
+                self.model_sz,
+                self.content_config,
+                **kwargs,
+            )
 
             # Update language detection
             self.language.process_whisper_output(result)
@@ -154,28 +164,6 @@ class EndFlow:
                 self.process_video, video_path, config_params, e, kwargs
             )
             raise
-
-    def _transcribe_audio(
-        self, audio: Any, context_prompt: str, **kwargs
-    ) -> Dict[str, Any]:
-        """Execute transcription with proper error context."""
-        if (
-            self.transcriber
-            and getattr(self.transcriber, "model_size", None) == self.model_size
-        ):
-            debug.dprint("Reusing cached transcriber.")
-        else:
-            from src.utils.transcripting.textify import Textify
-            
-            print("Starting transcription...")  # For user feedback while loading
-            self.transcriber = Textify(self.model_size)
-
-        return self.transcriber.transcribe(
-            audio,
-            initial_prompt=context_prompt,
-            temperature=0.2 if self.content_config.types else 0.5,
-            **kwargs,
-        )
 
     # ----------------------- Output Handling -----------------------
     def _save_output(
