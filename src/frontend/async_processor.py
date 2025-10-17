@@ -1,7 +1,7 @@
 import threading
 
 
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 

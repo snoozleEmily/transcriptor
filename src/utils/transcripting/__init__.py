@@ -5,6 +5,7 @@ from .convert_audio import ConvertAudio
 from .sanitize_prompt import SanitizePrompt
 from .set_model import SetModel
 from .estimator import TimeEstimator
+from .transcribe_audio import transcribe_audio
 
 __all__ = [
     "Textify",
@@ -13,5 +14,6 @@ __all__ = [
     "SetModel",
     "InfoDump",
     "TimeEstimator",
+    "transcribe_audio",
     "Loader"
 ]

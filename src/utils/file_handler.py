@@ -5,7 +5,7 @@ from typing import Optional
 from datetime import datetime
 
 
-from src.errors.exceptions import FileError
+from src.logs.exceptions import FileError
 
 
 

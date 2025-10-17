@@ -3,7 +3,7 @@ import noisereduce as nr
 from pydub import AudioSegment
 
 
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 

@@ -2,30 +2,41 @@ from typing import Optional, Dict, List, Any
 from dataclasses import dataclass, field
 
 
-from src.errors.debug import debug
-
+from src.logs.debug import debug
 
 
 @dataclass
 class LanguageConfig:
     """Configuration for language processing"""
+
     default_language: str = "portuguese"
     supported_languages: List[str] = field(
-        default_factory=lambda: ["english", "portuguese", "spanish", "italian", "romanian"]
+        default_factory=lambda: [
+            "english",
+            "portuguese",
+            "spanish",
+            "italian",
+            "romanian",
+        ]
     )
     fallback_patterns: str = "default"
 
 
 class Language:
     """Centralized language detection and processing from Whisper output"""
+
     def __init__(self, config: Optional[LanguageConfig] = None):
         self.config = config or LanguageConfig()
         self.detected_language: Optional[str] = None
-        debug.dprint(f"Language initialized | Default: {self.config.default_language} | Supported: {self.config.supported_languages}")
+        debug.dprint(
+            f"Language initialized | Default: {self.config.default_language} | Supported: {self.config.supported_languages}"
+        )
 
     def process_whisper_output(self, transcription_result: Dict[str, Any]) -> None:
         """Process Whisper's output to extract and validate language"""
-        debug.dprint(f"Processing transcription result of size: {len(transcription_result)}")
+        debug.dprint(
+            f"Processing transcription result of size: {len(transcription_result)}"
+        )
 
         if not transcription_result or not isinstance(transcription_result, dict):
             debug.dprint("Invalid transcription result; skipping language detection")
@@ -41,16 +52,18 @@ class Language:
         debug.dprint(f"Extracted base language code: {base_lang_code}")
 
         # Reset detected language for each run
-        self.detected_language = None 
-        
+        self.detected_language = None
+
         # Find a match in supported languages
         for supported_lang in self.config.supported_languages:
             if supported_lang.startswith(base_lang_code):
                 self.detected_language = supported_lang
                 debug.dprint(f"Detected language set: {self.detected_language}")
-                return 
+                return
 
-        debug.dprint(f"No matching supported language found for code '{base_lang_code}'; will fallback later")
+        debug.dprint(
+            f"No matching supported language found for code '{base_lang_code}'; will fallback later"
+        )
 
     def get_language(self) -> str:
         """Get the detected language or fallback to default"""
@@ -74,7 +87,9 @@ class Language:
     def get_question_words(self, question_words_map: Dict[str, List[str]]) -> List[str]:
         """Get question words for the current language"""
         lang = self.get_language()
-        words = question_words_map.get(lang, question_words_map[self.config.fallback_patterns])
+        words = question_words_map.get(
+            lang, question_words_map[self.config.fallback_patterns]
+        )
         debug.dprint(f"Question words for language '{lang}': {words}")
         return words
 
@@ -86,4 +101,4 @@ class Language:
         return patterns
 
 
-language = Language() 
+language = Language()

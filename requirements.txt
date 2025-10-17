@@ -55,6 +55,7 @@ defusedxml     # required by fpdf2
 
 # For Notes Generation
 llama-cpp-python==0.3.16
+tiktoken # for tokens estimation
 # Requirements for llama:
 #   Python 3.8–3.10 (it may work with newer versions, but 3.10 is recommended)
 #   CMake ≥ 3.18

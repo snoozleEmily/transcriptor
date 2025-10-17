@@ -29,7 +29,7 @@ class Header(ttk.Frame):
         self.pack_propagate(False)
         
         container = ttk.Frame(self)
-        container.pack(expand=True, fill="both", pady=10)
+        container.pack(expand=True, fill="both", pady=5)
         
         # Title label
         title = ttk.Label(
@@ -42,11 +42,11 @@ class Header(ttk.Frame):
         # Emoji label
         emoji = ttk.Label(
             container,
-            text="🎥",
+            text="🎥📝",
             style="HeaderEmoji.TLabel"
         )
         emoji.pack()
         
         # Set minimum size to prevent cutting
         self.update_idletasks()
-        self.config(height=title.winfo_reqheight() + emoji.winfo_reqheight() + 20)
+        self.config(height=title.winfo_reqheight() + emoji.winfo_reqheight() + 25)

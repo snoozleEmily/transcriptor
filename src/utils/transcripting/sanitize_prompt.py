@@ -2,7 +2,7 @@ from typing import Optional
 
 
 from src.utils.text.content_type import ContentType
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 

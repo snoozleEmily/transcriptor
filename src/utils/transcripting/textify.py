@@ -9,7 +9,7 @@ from .info_dump import InfoDump
 from .estimator import TimeEstimator
 from .convert_audio import ConvertAudio
 from src.utils.text.content_type import ContentType
-from src.errors.debug import debug
+from src.logs.debug import debug
 
 
 
@@ -68,7 +68,7 @@ class Textify:
         )
 
         # Progress setup
-        pipeline_start = self.progress.setup(setup_time)
+        pipeline_start = self.progress.setup(setup_time, what="Transcripting")
         if pipeline_start is None:
             pipeline_start = time.time()
 
