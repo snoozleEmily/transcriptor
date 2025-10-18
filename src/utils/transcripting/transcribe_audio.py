@@ -5,6 +5,7 @@ from src.logs.debug import debug
 from src.utils.transcripting.loader import Loader
 
 
+
 def transcribe_audio(
     audio: Any, context_prompt: str, transcriber, model_size, content_config, **kwargs
 ) -> Dict[str, Any]:
