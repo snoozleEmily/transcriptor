@@ -30,7 +30,7 @@ class TimeEstimator:
         self.setup_times = setup_times or SETUP_TIMES
 
         if model_size not in self.model_speeds:
-            raise TranscriptionError.invalid_model_size(model_size=model_size)
+            raise TranscriptionError.invalid_model_size(model=model_size)
 
 
     def estimate(
