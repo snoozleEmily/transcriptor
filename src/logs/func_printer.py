@@ -68,7 +68,7 @@ def get_func_call(func: Callable, args: tuple, kwargs: dict) -> str:
     output.append(f"{'='*50}\n")
     return "\n".join(output)
 
-def _log_error_flow_context(
+def _log_error_flow_context( # Called in end_flow
     func: Callable,
     video_path: str,
     config_params: Optional[Dict[str, Any]],
