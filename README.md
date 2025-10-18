@@ -2,7 +2,6 @@
 
 Do you need to turn a video into text or want to get organized notes from a lengthy video? This app does that for you — absolutely free!
 
-`NOTE: THIS APP IS STILL IN DEVELOPMENT.`
 
 ## Usage
 
@@ -10,7 +9,7 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 
 ### **Steps**
 1. Download the project files from GitHub.
-2. Open the folder and run the file that ends with `.exe`. [not available yet]
+2. Open the folder and run the file that ends with `.exe`. 
 3. Click the button `Select Video` and choose the one you'd like to transcribe.
 
 ---
