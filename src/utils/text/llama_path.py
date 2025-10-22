@@ -21,32 +21,32 @@ def resolve_model_path(config_path: str | Path) -> str:
             debug.dprint(f"Model found via LLAMA_MODEL_PATH: {p}")
             return str(p)
 
-    base_dir = Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent))
+    base_dir = Path(__file__).resolve()
+    for parent in base_dir.parents:
+        if (parent / "llm_models").exists():
+            base_dir = parent
+            break
+
     cfg = Path(config_path)
 
-    candidates = []
-    if cfg.is_absolute():
-        candidates.append(cfg)
+    candidates = [
+        cfg if cfg.is_absolute() else base_dir / cfg,
+        base_dir / "models" / cfg.name,
+        base_dir / "llm_models" / cfg.name,
+        Path.cwd() / cfg,
+        Path.home() / cfg.name,
+    ]
 
-    candidates.append(base_dir / cfg)                  # relative to package/exe
-    candidates.append(base_dir / "models" / cfg.name)  # models/ next to package/exe
-    candidates.append(Path.cwd() / cfg)                # current working dir
-    candidates.append(Path.home() / cfg.name)          # user's home
-
-    # additional local directories
-    candidates = [p.resolve() for p in candidates]
-
-    for p in candidates:
+    for p in [c.resolve() for c in candidates]:
         if p.exists():
             debug.dprint(f"Candidate model found at: {p}")
             return str(p)
 
-    # not found -> helpful error
     checked = "\n".join(str(p) for p in candidates)
-    raise FileNotFoundError( # TODO: Handle this err properly in exceptions module
+    raise FileNotFoundError(
         f"Model not found. looked for:\n{checked}\n\n"
         "Fix options:\n"
-        " • Put the model file at one of the listed paths (recommended: project/models/).\n"
+        " • Put the model file at one of the listed paths (recommended: root/llm_models/).\n"
         " • Set LLAMA_MODEL_PATH env var to the exact file path.\n"
         " • Use an absolute path in LLAMA_MODELS for model_path."
     )
