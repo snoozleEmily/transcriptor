@@ -1,11 +1,10 @@
 from __future__ import annotations
 from pathlib import Path
-import sys
 import os
 
 
 from src.logs.debug import debug
-
+from src.logs.exceptions import FileError
 
 
 
@@ -42,11 +41,4 @@ def resolve_model_path(config_path: str | Path) -> str:
             debug.dprint(f"Candidate model found at: {p}")
             return str(p)
 
-    checked = "\n".join(str(p) for p in candidates)
-    raise FileNotFoundError(
-        f"Model not found. looked for:\n{checked}\n\n"
-        "Fix options:\n"
-        " • Put the model file at one of the listed paths (recommended: root/llm_models/).\n"
-        " • Set LLAMA_MODEL_PATH env var to the exact file path.\n"
-        " • Use an absolute path in LLAMA_MODELS for model_path."
-    )
+    raise FileError.file_not_found([str(p) for p in candidates])

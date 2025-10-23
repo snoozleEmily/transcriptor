@@ -130,6 +130,27 @@ class FileError(AppError):
             message="No compatible system font found for PDF export",
             context={"tried_fonts": tried_fonts}
         )
+    
+    @classmethod
+    def file_not_found(cls, searched_paths: list[str]) -> "FileError":
+        """Raised when a required file cannot be found on disk."""
+        checked = "\n".join(searched_paths)
+        return cls(
+            code=ErrorCode.FILE_ERROR,
+            message=(
+                "Model file not found.\n\n"
+                "Searched locations:\n"
+                f"{checked}\n\n"
+                "Fix options:\n"
+                " • Place the model file in one of the listed paths "
+                "(recommended: `root/llm_models/`).\n"
+                " • Set `LLAMA_MODEL_PATH` environment variable to the correct file path.\n"
+                " • Use an absolute path for `model_path` in your config."
+            ),
+            context={"searched_paths": searched_paths},
+        )
+
+
 
 
 class FFmpegError(AppError):
