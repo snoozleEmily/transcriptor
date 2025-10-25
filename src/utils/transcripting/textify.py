@@ -12,16 +12,23 @@ from src.utils.text.content_type import ContentType
 from src.logs.debug import debug
 
 
-
 class Textify:
     """Main transcription controller coordinating all components"""
+
     def __init__(self, model_size: str):
+        from ..models import WHISPER_MODELS, validate_whisper_models
+        from src.utils.models import MODEL_SPEEDS, SETUP_TIMES
+
+        validate_whisper_models(WHISPER_MODELS)  # Raises error if model missing
+
         self.model_size = model_size
         self.progress = Loader()
         self.audio_processor = ConvertAudio()
         self.logger = InfoDump(model_size)
         self.model = SetModel().load(model_size)
-        self.estimator = TimeEstimator(model_size)
+        self.estimator = TimeEstimator(
+            model_size, model_speeds=MODEL_SPEEDS, setup_times=SETUP_TIMES
+        )
 
         # Detect Whisper version parameters
         self._detect_whisper_params()
@@ -31,7 +38,7 @@ class Textify:
             f"use_on_progress={self.use_on_progress}, "
             f"use_progress_callback={self.use_progress_callback}"
         )
-            
+
     def _detect_whisper_params(self) -> None:
         """Determine correct progress parameter name for Whisper version"""
         transcribe_params = inspect.signature(self.model.transcribe).parameters
@@ -42,7 +49,7 @@ class Textify:
         self,
         audio_input: Optional[Any] = None,
         progress_handler: Optional[Callable[[float], None]] = None,
-        **kwargs: Any
+        **kwargs: Any,
     ) -> Dict[str, Any]:
         """Main transcription pipeline"""
         start_time = time.time()
@@ -110,7 +117,9 @@ class Textify:
             filtered_kwargs = {k: v for k, v in kwargs.items() if k in supported_args}
             safe_args = {k: v for k, v in whisper_args.items() if k != "audio"}
 
-            debug.dprint(f"Calling transcribe with args={safe_args}, extra_kwargs={filtered_kwargs}")
+            debug.dprint(
+                f"Calling transcribe with args={safe_args}, extra_kwargs={filtered_kwargs}"
+            )
 
             result = self.model.transcribe(**whisper_args, **filtered_kwargs)
 
@@ -129,7 +138,5 @@ class Textify:
                 duration=duration,
                 total_time=time.time() - start_time,
                 transcribe_time=processing_time,
-                speed_factor=duration / processing_time 
-                if processing_time > 0 
-                else 0
+                speed_factor=duration / processing_time if processing_time > 0 else 0,
             )
