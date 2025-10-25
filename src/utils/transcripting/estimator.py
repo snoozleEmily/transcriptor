@@ -1,7 +1,6 @@
 from typing import Tuple
 
 
-from src.utils.models import MODEL_SPEEDS, SETUP_TIMES
 from src.logs.exceptions import TranscriptionError
 
 
@@ -12,26 +11,17 @@ class TimeEstimator:
     WORDS_PER_SECOND_MEAN = 2.5    # Average words per second
     WORDS_PER_SECOND_STD = 0.5     # Standard deviation
     CONFIDENCE_LEVEL = 0.95        # Confidence interval level 
-    CUSTOM_WORD_PENALTY = 0.005    # Slowdown factor per custom word
+    CUSTOM_WORD_PENALTY = 0.020    # Slowdown factor per custom word
 
     def __init__(
-        self, model_size: str, model_speeds: dict = None, setup_times: dict = None
+        self, model_size: str, model_speeds: dict, setup_times: dict
     ):
         """
         Initialize time estimator for a specific model.
-
-        Args:
-            model_size: Name of the Whisper model size
-            model_speeds: Optional custom speed dictionary
-            setup_times: Optional custom setup times dictionary
         """
         self.model_size = model_size
-        self.model_speeds = model_speeds or MODEL_SPEEDS
-        self.setup_times = setup_times or SETUP_TIMES
-
-        if model_size not in self.model_speeds:
-            raise TranscriptionError.invalid_model_size(model=model_size)
-
+        self.model_speeds = model_speeds
+        self.setup_times = setup_times
 
     def estimate(
         self, audio_duration: float, custom_word_count: int = 0
