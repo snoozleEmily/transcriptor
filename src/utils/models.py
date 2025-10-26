@@ -13,35 +13,35 @@ WHISPER_MODELS: Dict[str, Dict] = {
         "accuracy_rank": 0,
         "parameters": "~3M",
         "speed_wps": 40.0,
-        "setup_time": 1.0,  # Initialization time (seconds)
+        "setup_time": 2.5,  # Initialization time (seconds)
     },
-    "base": {  # 1 - Very fast, low accuracy (~40M parameters)
+    "base": {  # 1 - Very fast, low accuracy
         "name": "base",
         "accuracy_rank": 1,
         "parameters": "~40M",
         "speed_wps": 30.0,
-        "setup_time": 2.5,
+        "setup_time": 5,
     },
-    "small": {  # 2 - Moderate speed, medium accuracy (~74M parameters)
+    "small": {  # 2 - Moderate speed, medium accuracy
         "name": "small",
         "accuracy_rank": 2,
         "parameters": "~74M",
         "speed_wps": 18.0,
-        "setup_time": 5.0,
+        "setup_time": 10.0,
     },
-    "medium": {  # 3 - Slower, high accuracy (~155M parameters)
+    "medium": {  # 3 - Slower, high accuracy
         "name": "medium",
         "accuracy_rank": 3,
         "parameters": "~155M",
         "speed_wps": 10.0,
-        "setup_time": 12.0,
+        "setup_time": 20.0,
     },
-    "large": {  # 4 - Slowest, highest accuracy (~300M parameters)
+    "large": {  # 4 - Slowest, highest accuracy
         "name": "large",
         "accuracy_rank": 4,
         "parameters": "~300M",
         "speed_wps": 5.0,
-        "setup_time": 20.0,
+        "setup_time": 40.0,
     },
 }
 
