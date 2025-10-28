@@ -59,7 +59,7 @@ class AsyncTaskManager:
                     progress_callback=progress_handler,
                 )
 
-                debug.dprint(f"Processing completed for: {path}")
+                debug.dprint(f"Processing completed for: {path}") # Final dprint
 
                 # Schedule completion callback on the main GUI thread
                 self.gui_queue.put(lambda: self.completion_callback(result))
