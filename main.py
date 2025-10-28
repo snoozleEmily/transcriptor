@@ -2,7 +2,7 @@ from src.frontend.interface import Interface
 from src.utils.end_flow import EndFlow
 
 
-def main():
+def main() -> None:
     flow = EndFlow()
     app = Interface(flow)
     app.mainloop()
