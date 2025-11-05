@@ -88,7 +88,7 @@ This means you are free to build upon the current code to develop the app furthe
 
 ## Need help in another language?
 
-You can open an issue in your preferred language below 👇
+You can open an issue in your preferred language below:
 
 ---
 > 🇧🇷 Oieee! Precisa de suporte em pt-BR? Pode abrir uma issue em português!
