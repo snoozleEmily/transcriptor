@@ -1,6 +1,6 @@
 # Emily's Transcriptor
 
-Do you need to turn a video into text or want to get organized notes from a lengthy video? This app does that for you — absolutely free!
+Emily’s Transcriptor converts videos into clean, searchable text and summarized notes, completely free and offline!
 
 
 ## Usage
@@ -10,21 +10,14 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 ### **Steps**
 1. Download the project files from GitHub.
 2. Open the folder and run the file that ends with `.exe`. 
-3. Click the button `Select Video` and choose the one you'd like to transcribe.
+3. [TODO: Explain how to install]
+4. Click the button `Select Video` and choose the one you'd like to transcribe.
 
 ---
 
 ## Contributing [WIP]
 
 **Contributions are welcome!** Below are some guidelines to help you get started:
-
-#### **Windows Users**
-If you're on Windows, simply run `setup.bat`.  
-The script will handle all tools and setup configurations required.  
-[⚠ This script is a work in progress and not ready yet.]
-
-#### **Other Operating Systems**
-If you're working on a different operating system `or want to manually arrange your setup`, follow these steps:
 
 1. **Install Python and Git**:
    - For best compatibility, use Python 3.10: [Python 3.10](https://www.python.org/downloads/)
@@ -92,14 +85,21 @@ If you're working on a different operating system `or want to manually arrange y
 This project is licensed under the GNU General Public License.  
 This means you are free to build upon the current code to develop the app further, but you **must credit the original author** and distribute any modifications under the **same license**. For more details, see the [license file](LICENSE).
 
+
+## Need help in another language?
+
+You can open an issue in your preferred language below 👇
+
 ---
-> 🇧🇷 Oieee! Precisa dessas explicações em pt-BR? Me chama que te ajudo! 📚✨  
+> 🇧🇷 Oieee! Precisa de suporte em pt-BR? Pode abrir uma issue em português!
 
-> 🇪🇸 ¡Holaa! ¿Necesitas esta explicación en español? ¡Llámame! 🔥📖  
+> 🇪🇸 ¡Holaa! ¿Necesitas apoyo en español? ¡Abre una issue en español!
 
-> 🇮🇹 Ciao! Hai bisogno di questa spiegazione in ITA? Chiamami! 🍕📜  
+> 🇮🇹 Ciao! Hai bisogno di supporto in italiano? Puoi aprire una issue in italiano!
 
-> 🇫🇷 Coucou! Vous voulez cette explication en français? Appelez-moi! 🥖📚  
+> 🇫🇷 Coucou! Vous avez besoin d’assistance en français? Vous pouvez ouvrir une issue en français!
 
-> 🇷🇴 Hei! Ai nevoie de această explicație în română? Sună-mă! 🏛️📖  
+> 🇷🇴 Hei! Ai nevoie de suport în română? Poți deschide o issue în română!
+
+> 🇩🇪 Hallo! Brauchst du Unterstützung auf Deutsch? Du kannst ein Issue auf Deutsch eröffnen!
 ---
