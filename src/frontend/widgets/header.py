@@ -34,7 +34,7 @@ class Header(ttk.Frame):
         # Title label
         title = ttk.Label(
             container,
-            text="EMILY'S TRANSCRIPTOR",
+            text="TRANSCRIPTOR",
             style="HeaderTitle.TLabel"
         )
         title.pack()
