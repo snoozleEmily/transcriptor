@@ -1,6 +1,6 @@
-# Emily's Transcriptor
+# Transcriptor
 
-Emily’s Transcriptor converts videos into clean, searchable text and summarized notes, completely free and offline!
+Transcriptor converts your local videos into clean, searchable transcripts and summarized notes—100% offline, keeping your data private.
 
 
 ## Usage
