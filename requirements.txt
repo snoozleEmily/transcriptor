@@ -64,3 +64,6 @@ tiktoken # for tokens estimation
 #     CUDA (for NVIDIA GPU)
 #     Metal (for Apple M1/M2)
 #   OpenBLAS (optional, for faster CPU inference)
+
+# For .exe
+pyinstaller
