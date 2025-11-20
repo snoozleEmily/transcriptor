@@ -15,7 +15,6 @@ from src.utils.text.content_type import ContentType
 from src.logs.debug import debug
 
 
-
 class Interface(tk.Tk):
     # --------------------- Console Log Set Up ---------------------
     class LogRedirector:
@@ -43,13 +42,25 @@ class Interface(tk.Tk):
         self._alive = True
         self.current_theme = "default"
         self.gui_queue = Queue()
-        self.async_mgr = AsyncTaskManager(self.gui_queue, self, self._complete_processing)
-        
+        self.async_mgr = AsyncTaskManager(
+            self.gui_queue, self, self._complete_processing
+        )
+
         debug.dprint(f"AsyncTaskManager initialized: {self.async_mgr}")
 
         # Message for Custom Words
         self.C_WORDS_EX = f"Enter words here!\n\nTell transcriptor which custom words to look out for in the video.\n"
 
+
+        # FOR TESTING ONLY, WILL DELETE
+        self.initialize()
+
+
+    def initialize(self):
+        """
+        Heavy initialization: configure window, theme, layout, redirect streams, etc.
+        Wrap this in run_app() for exception handling.
+        """
         # Initialization sequence
         self._configure_window()
         self._setup_theme()
@@ -108,13 +119,16 @@ class Interface(tk.Tk):
             background=THEMES[self.current_theme]["bg"],
         )
         self.copy_label.config(
-            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
+            bg=THEMES[self.current_theme]["console_bg"],
+            fg=THEMES[self.current_theme]["console_fg"],
         )
         self.custom_words_raw.config(
-            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
+            bg=THEMES[self.current_theme]["console_bg"],
+            fg=THEMES[self.current_theme]["console_fg"],
         )
         self.log_text.config(
-            bg=THEMES[self.current_theme]["console_bg"], fg=THEMES[self.current_theme]["console_fg"]
+            bg=THEMES[self.current_theme]["console_bg"],
+            fg=THEMES[self.current_theme]["console_fg"],
         )
         configure_theme(self, self.current_theme)
         self._update_root_theme()
@@ -352,7 +366,9 @@ class Interface(tk.Tk):
                 custom_words = {word: [] for word in filtered_words}
                 has_odd = bool(custom_words)
 
-                debug.dprint(f"has_odd: {has_odd}. Filtered custom words: {custom_words}.")
+                debug.dprint(
+                    f"has_odd: {has_odd}. Filtered custom words: {custom_words}."
+                )
 
             else:
                 custom_words = None
