@@ -1,61 +1,104 @@
 # -*- mode: python ; coding: utf-8 -*-
-# Robust PyInstaller spec: explicitly collects llama_cpp DLLs and llm_models files
-# Avoids using Tree import (not stable across PyInstaller versions).
+# PyInstaller spec: includes llama_cpp DLLs, llm_models, whisper assets.
 
 import os
+import whisper
 import llama_cpp
 from PyInstaller.utils.hooks import collect_dynamic_libs, collect_data_files
+from PyInstaller.building.build_main import COLLECT
 
+
+# -------------------------------------------------------------------
+# Paths
+# -------------------------------------------------------------------
 project_dir = os.path.abspath(os.getcwd())
 
-# Where llama_cpp is installed
+# llama_cpp package dir
 llama_pkg_dir = os.path.dirname(llama_cpp.__file__)
 
-# Collect dynamic libs from the package (this finds many DLLs automatically)
-llama_binaries = collect_dynamic_libs('llama_cpp')  # list of (src, dest, type) tuples
+# whisper package dir
+whisper_pkg_dir = os.path.dirname(whisper.__file__)
 
 
-# Manually include every file from llama_cpp/lib into datas so it exists at runtime
+# -------------------------------------------------------------------
+# Llama: dynamic libs
+# -------------------------------------------------------------------
+llama_binaries = collect_dynamic_libs('llama_cpp')  # auto DLL discovery
+
+
+# -------------------------------------------------------------------
+# Llama: manual DLL/lib folder include (fallback)
+# -------------------------------------------------------------------
 llama_lib_src = os.path.join(llama_pkg_dir, 'lib')
 llama_lib_datas = []
+
 if os.path.isdir(llama_lib_src):
     for root, _, files in os.walk(llama_lib_src):
         for fname in files:
             src_path = os.path.join(root, fname)
-            # destination path inside the package in the bundle
-            rel_dir = os.path.relpath(root, llama_pkg_dir)  # typically 'lib' or 'lib\\sub'
+            rel_dir = os.path.relpath(root, llama_pkg_dir)   # "lib"
             dest_dir = os.path.join('llama_cpp', rel_dir)
             llama_lib_datas.append((src_path, dest_dir))
-# else: no lib folder found; we still proceed
 
 
-# Include your llm_models folder (so your gguf is available inside the bundle)
+# -------------------------------------------------------------------
+# Llama model folder ("llm_models")
+# -------------------------------------------------------------------
 models_src = os.path.join(project_dir, 'llm_models')
 models_datas = []
+
 if os.path.isdir(models_src):
     for root, _, files in os.walk(models_src):
         for fname in files:
             src_path = os.path.join(root, fname)
-            # preserve the models directory structure under llm_models/ in the bundle
-            rel_path = os.path.relpath(src_path, project_dir)  # e.g. 'llm_models/...'
+            rel_path = os.path.relpath(src_path, project_dir)  # "llm_models/…"
             dest_dir = os.path.dirname(rel_path)
             models_datas.append((src_path, dest_dir))
 
-# 4) Also collect standard package data for llama_cpp (python files, etc.)
-llama_datas = collect_data_files('llama_cpp')  # list of (src, dest)
 
+# -------------------------------------------------------------------
+# Whisper: auto collect
+# -------------------------------------------------------------------
+whisper_datas = collect_data_files('whisper')
+
+# -------------------------------------------------------------------
+# Whisper: manual (fallback) 
+# -------------------------------------------------------------------
+if not whisper_datas:
+    whisper_pkg_dir = os.path.dirname(whisper.__file__)
+    assets_dir = os.path.join(whisper_pkg_dir, "assets")
+
+    if os.path.isdir(assets_dir):
+        for root, _, files in os.walk(assets_dir):
+            for fname in files:
+                src_path = os.path.join(root, fname)
+                rel_dir = os.path.relpath(root, whisper_pkg_dir)  # "assets/"
+                dest_dir = os.path.join('whisper', rel_dir)
+                whisper_datas.append((src_path, dest_dir))
+
+
+# -------------------------------------------------------------------
 # Combine all datas
-all_datas = list(llama_datas) + list(llama_lib_datas) + list(models_datas)
+# -------------------------------------------------------------------
+all_datas = (
+    list(collect_data_files('llama_cpp')) +
+    llama_lib_datas +
+    models_datas +
+    whisper_datas
+)
 
-# Analysis: include binaries and datas
+
+# -------------------------------------------------------------------
+# Analysis
+# -------------------------------------------------------------------
 a = Analysis(
     ['main.py'],
     pathex=[project_dir],
     binaries=llama_binaries,
     datas=all_datas,
-    hiddenimports=[],                         # add module names here if you know them
+    hiddenimports=[],
     hookspath=[],
-    runtime_hooks=['pyinstaller_hooks/add_llama_dll.py'],  # ensure DLL dir registered
+    runtime_hooks=['pyinstaller_hooks/add_llama_dll.py'],
     hooksconfig={},
     excludes=[],
     noarchive=False,
@@ -71,18 +114,16 @@ exe = EXE(
     a.datas,
     [],
     name='main',
-    debug=True,            # verbose bootloader output for easier debugging
-    bootloader_ignore_signals=False,
+    debug=True,      # DEV: True for testing 
     strip=False,
-    upx=False,             # avoid UPX compression
-    runtime_tmpdir=None,
-    console=True,          # keep console to see errors during debug
+    upx=False,
+    console=True,    # DEV: True for testing 
 )
 
 
-# verify files
-from PyInstaller.building.build_main import COLLECT
-
+# -------------------------------------------------------------------
+# Final bundle (one-folder)
+# -------------------------------------------------------------------
 coll = COLLECT(
     exe,
     a.binaries,
