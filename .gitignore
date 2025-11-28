@@ -1,6 +1,13 @@
+.venv/
+dist/
+build/
+llm_models/
+__pycache__/
 *.pyc
+*.log
+*.tmp
+*.cache/
+*.egg-info/
 *.gguf
 *.exe
-/venv
-/venv
 test*
