@@ -1,5 +1,6 @@
 *.pyc
 *.gguf
+*.exe
 /venv
 /venv
 test*
