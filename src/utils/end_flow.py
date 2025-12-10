@@ -14,7 +14,7 @@ class EndFlow:
     """Pipeline: audio → text → PDF"""
 
     # Default model [will be medium as default | using a weaker for testing]
-    model_size = WHISPER_MODELS["base"]["name"]
+    model_size = WHISPER_MODELS["medium"]["name"]
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -35,8 +35,11 @@ class EndFlow:
     def configure_content(
         self, config_params: Optional[Union[Dict[str, Any], ContentType]] = None
     ) -> None:
-        """Enhanced content configuration with validation."""
+        """Content configuration with validation."""
         if not config_params:
+            debug.dprint(
+            f"config_params is empty, type: {config_params}"
+        )
             return
 
         try:
@@ -47,6 +50,9 @@ class EndFlow:
                 self.content_config = self._process_config_dict(config_params)
 
             self._update_dependencies()
+            debug.dprint(
+                f"Content configuration updated: {self.content_config}"
+            )
 
         except Exception as e:
             from src.logs.exceptions import ErrorCode, FileError
@@ -95,6 +101,7 @@ class EndFlow:
 
         if self.content_config.words and isinstance(self.content_config.words, dict):
             self.reviser.odd_words = self.content_config.words
+            
 
     # ----------------------- Core Processing -----------------------
     def process_video(
@@ -104,7 +111,7 @@ class EndFlow:
         quick_script: bool = False,
         **kwargs,
     ) -> str:
-        """Enhanced transcription pipeline with better error context."""
+        """Transcription pipeline with error context."""
 
         from src.utils.audio_processor import extract_audio
         from src.utils.audio_cleaner import clean_audio
@@ -174,7 +181,7 @@ class EndFlow:
         source_name: str,
         quick_script: bool,
     ) -> str:
-        """Handle output saving with validation and debug logs."""
+        """Handles output saving with validation and debug logs."""
 
         from src.utils.pdf_maker import PDFExporter
         from src.utils.file_handler import save_transcription
