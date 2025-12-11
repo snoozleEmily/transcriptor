@@ -42,7 +42,7 @@ class Header(ttk.Frame):
         # Emoji label
         emoji = ttk.Label(
             container,
-            text="🎥📝",
+            text="🎬📝",
             style="HeaderEmoji.TLabel"
         )
         emoji.pack()
