@@ -93,7 +93,7 @@ class Loader:
         new_value = min(100, self.current_progress + max(1, int(increment)))
         if new_value > self.current_progress:
             self.current_progress = new_value
-            print(f"{self.what}: {new_value}%\n", end="\r")
+            print(f"\n{self.what}: {new_value}%\n", end="\r")
 
             if self.handler:
                 self.handler(new_value)
