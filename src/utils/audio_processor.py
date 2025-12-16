@@ -63,10 +63,13 @@ def extract_audio(video_path: str) -> AudioSegment:
         FFmpegError: If extraction fails
         TranscriptionError: If audio decoding fails
     """
+    loglevel = "warning" if debug.is_dev_logs_enabled() else "error"
+
     try:
         cmd = [
             "ffmpeg",  # FFmpeg executable
-            "-y",  # Auto-overwrite output files without asking
+            "-loglevel", loglevel,
+            "-y",  # Auto-overwrite outpsut files without asking
             "-i",
             video_path,  # Input file path
 
