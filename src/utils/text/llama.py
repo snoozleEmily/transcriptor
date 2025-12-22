@@ -2,9 +2,6 @@ from __future__ import annotations
 from threading import Lock
 from typing import Optional
 
-from llama_cpp import Llama as Llm
-from llama_cpp import CreateChatCompletionResponse
-
 
 from src.logs.debug import debug
 from src.utils.models import LLAMA_MODELS
@@ -65,6 +62,8 @@ class Llama:
     @property
     def model(self):
         """Lazy-load and return the LLaMA model instance."""
+        from llama_cpp import Llama as Llm
+        
         if self._model is None:
             debug.dprint(f"Loading LLaMA model '{self.model_size}' now...")
             model_config = LLAMA_MODELS.get(self.model_size, LLAMA_MODELS["3b"])
@@ -136,7 +135,7 @@ class Llama:
             token_count = max(1, int(len(text) / AVERAGE_CHARS_PER_TOKEN))
             print(
                 "⚠️ Token estimation fallback is in use. "
-                "Results may be less accurate. Please OPEN AN ISSUE this if it persists."
+                "Results may be less accurate. Please OPEN AN ISSUE if it persists."
                 "Exception: {e}"
             )  # Signal problem in prod
             debug.dprint(
@@ -195,6 +194,8 @@ class Llama:
     # ---------------------------
     def summarize_text(self, text: str, max_tokens: Optional[int] = None) -> str:
         """Generate a concise summary of the given text."""
+        from llama_cpp import CreateChatCompletionResponse
+
         if not text:
             return ""
 
@@ -217,7 +218,7 @@ class Llama:
             max_tokens=computed_max,
             temperature=0,
             stream=False,
-        )
+        ) 
 
         result = {"status": "success"}
         self.loader.complete(result, duration=5.0)
