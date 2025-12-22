@@ -1,5 +1,4 @@
 import os
-from tkinter import filedialog
 from typing import Dict, List, Optional, Union, Any
 
 
@@ -13,8 +12,7 @@ from src.utils.models import WHISPER_MODELS
 class EndFlow:
     """Pipeline: audio → text → PDF"""
 
-    # Default model [will be medium as default | using a weaker for testing]
-    model_size = WHISPER_MODELS["medium"]["name"]
+    model_size = WHISPER_MODELS["small"]["name"]
 
     def __init__(self) -> None:
         """Initialize with dependency injection-ready components."""
@@ -239,6 +237,8 @@ class EndFlow:
     def _get_save_path(self, base_name: str, extension: str) -> str:
         """Improved path handling with better fallbacks."""
         try:
+            from tkinter import filedialog
+            
             file_types = (
                 [("PDF Files", "*.pdf")]
                 if extension == ".pdf"
