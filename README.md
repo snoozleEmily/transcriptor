@@ -43,36 +43,27 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
      python -m venv venv
      ```
    - Activate it:
-     ```bash
-     source venv/bin/activate   # macOS/Linux
-     ```
+
      ```bash
      venv\Scripts\activate      # Windows
      ```
 
-5. **Install CMake** *(required for Llama)*:
-   - Download [CMake](https://cmake.org/download/) and follow the installation instructions for your OS.
-
-6. **Install a C++ Compiler / Build Tools** *(required for Llama and C++ extensions)*:
+5. **Install a C++ Compiler / Build Tools** *(required for Llama and C++ extensions)*:
    - On Windows, install [Visual Studio Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/).  
    - On Linux/macOS, install `gcc` / `clang` via your package manager.
 
-7. **Setup Required Corpora**:
-    Download NLTK data for TextBlob:
-   ```bash
-   python -m textblob.download_corpora
    ```
 
-8. **Install Dependencies**:
+6. **Install Dependencies**:
    Install all required dependencies:
    ```bash
    pip install -r requirements.txt
    ```
 
-9. **Download Llama Model** 
+7. **Download Llama Model** 
    [Llama-3.2-3B-Instruct-Q4_K_M](https://huggingface.co/hugging-quants/Llama-3.2-3B-Instruct-Q4_K_M-GGUF/tree/main)
 
-10. **Run the Script**:
+8. **Run the Script**:
    You're ready to go! Run the app with:
    ```bash
    python main.py
