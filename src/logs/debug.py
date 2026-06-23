@@ -2,7 +2,7 @@ class Debug:
     """Singleton-like flag manager for enabling/disabling developer debug logs."""
 
     def __init__(self):
-        self.dev_logs_fl = False
+        self.dev_logs_fl: bool = False
 
     def enable_dev_logs(self) -> None:
         """Turn on developer debug logs."""
@@ -12,7 +12,7 @@ class Debug:
         """Turn off developer debug logs."""
         self.dev_logs_fl = False
 
-    def is_dev_logs_enabled(self) -> bool:
+    def is_dev_logs_enabled(self) -> bool: # TODO: add @property here and make the changes needed
         """Check if developer debug logs are enabled."""
         return self.dev_logs_fl
 
