@@ -75,22 +75,3 @@ The goal of this app is to make it easy and fun for everyone to use, even if you
 
 This project is licensed under the GNU General Public License.  
 This means you are free to build upon the current code to develop the app further, but you **must credit the original author** and distribute any modifications under the **same license**. For more details, see the [license file](LICENSE).
-
-
-## Need help in another language?
-
-You can open an issue in your preferred language below:
-
----
-> 🇧🇷 Oieee! Precisa de suporte em pt-BR? Pode abrir uma issue em português!
-
-> 🇪🇸 ¡Holaa! ¿Necesitas apoyo en español? ¡Abre una issue en español!
-
-> 🇮🇹 Ciao! Hai bisogno di supporto in italiano? Puoi aprire una issue in italiano!
-
-> 🇫🇷 Coucou! Vous avez besoin d’assistance en français? Vous pouvez ouvrir une issue en français!
-
-> 🇷🇴 Hei! Ai nevoie de suport în română? Poți deschide o issue în română!
-
-> 🇩🇪 Hallo! Brauchst du Unterstützung auf Deutsch? Du kannst ein Issue auf Deutsch eröffnen!
----
